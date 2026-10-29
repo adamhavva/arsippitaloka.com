@@ -1,16 +1,14 @@
 import Link from "next/link";
 import AuthShell from "@/components/auth/AuthShell";
+import LoginForm from "@/components/auth/LoginForm";
+import { isGoogleAuthEnabled } from "@/lib/auth-config";
 import {
   AMBER,
-  CheckBox,
-  Field,
   Heading,
   LogoMark,
   OrDivider,
-  PasswordField,
   SocialButtons,
   SubText,
-  SubmitButton,
 } from "@/components/auth/fields";
 
 export const metadata = { title: "Login — Pitaloka" };
@@ -35,33 +33,13 @@ export default function LoginPage() {
       </div>
 
       <div className="mt-[37px]">
-        <SocialButtons />
+        <SocialButtons googleEnabled={isGoogleAuthEnabled()} />
       </div>
       <div className="mt-[29px]">
         <OrDivider />
       </div>
 
-      <form className="mt-[39px]">
-        <Field type="email" placeholder="Email address" />
-        <div className="mt-[24px]">
-          <PasswordField placeholder="Password" />
-        </div>
-
-        <div className="mt-[29px] flex items-center justify-between">
-          <CheckBox label="Remember me" />
-          <Link
-            href="/forgot-password"
-            className="text-[15px]"
-            style={{ color: AMBER }}
-          >
-            Fotget password
-          </Link>
-        </div>
-
-        <div className="mt-[20px]">
-          <SubmitButton>Login</SubmitButton>
-        </div>
-      </form>
+      <LoginForm />
 
       <p className="mt-[24px] text-center text-[15px] text-[#606261]">
         Not registered yet?{" "}

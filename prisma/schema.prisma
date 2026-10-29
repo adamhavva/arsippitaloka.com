@@ -17,44 +17,6 @@ enum DeliveryMethod {
   DOWNLOAD
 }
 
-model User {
-  id             String         @id @default(cuid())
-  name           String
-  email          String         @unique
-  passwordHash   String
-  role           Role           @default(CUSTOMER)
-  deliveryMethod DeliveryMethod @default(DOWNLOAD)
-  address        Address?
-  orders         Order[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-}
-
-model Address {
-  id         String  @id @default(cuid())
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String  @unique
-  fullName   String
-  phone      String
-  street     String
-  city       String
-  province   String
-  postalCode String
-  notes      String?
-}
-
-model Order {
-  id        String      @id @default(cuid())
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  status    OrderStatus @default(PENDING)
-  items     OrderItem[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-
-  @@index([userId])
-}
-
 enum OrderStatus {
   PENDING
   PAID
@@ -63,15 +25,60 @@ enum OrderStatus {
   CANCELLED
 }
 
-model OrderItem {
-  id      String @id @default(cuid())
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId String
-  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId  String
-  qty     Int    @default(1)
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  emailVerified  DateTime?
+  passwordHash   String? // null = akun hanya lewat Google
+  image          String?
+  googleId       String? @unique
+  role           Role      @default(CUSTOMER)
+  isActive       Boolean   @default(true)
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  lastLoginAt    DateTime?
+  orders         Order[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
 
-  @@index([orderId])
+model Order {
+  id              String         @id @default(cuid())
+  user            User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+  userId          String
+  status          OrderStatus    @default(PENDING)
+  deliveryMethod  DeliveryMethod @default(DOWNLOAD)
+  deliveryAddress String?
+  subtotal        Decimal        @db.Decimal(12, 2) // IDR, sebelum pajak
+  taxType         String? // "PERCENTAGE" | "FIXED" (snapshot)
+  taxAmount       Decimal        @db.Decimal(12, 2) @default(0)
+  total           Decimal        @db.Decimal(12, 2) // IDR, yang ditagih
+  usdToIdrRate    Decimal        @db.Decimal(10, 2) // kurs saat transaksi
+  paymentProvider String? // "midtrans" | "manual"
+  paymentMethod   String? // "QRIS" | "VA" | "EWALLET" | "FREE"
+  paymentRef      String?        @unique
+  paidAt          DateTime?
+  items           OrderItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id      String  @id @default(cuid())
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
+  book    Book    @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  bookId  String
+  title   String // snapshot judul saat dibeli
+  priceUsd Decimal @db.Decimal(10, 2) // snapshot harga (USD)
+  qty     Int     @default(1)
+
+  @@unique([orderId, bookId])
+  @@index([bookId])
 }
 
 model Category {
@@ -92,25 +99,41 @@ model ContentTab {
 }
 
 model Book {
-  id             String      @id @default(cuid())
-  title          String
-  author         String
-  coverUrl       String?
-  language       String      @default("Indonesia")
-  pages          Int
-  readCount      Int
-  rating         Decimal     @db.Decimal(2, 1)
-  priceUsd       Decimal     @db.Decimal(10, 2)
-  isNew          Boolean     @default(false)
-  order          Int         @default(0)
-  tabSlug        String
-  tab            ContentTab  @relation(fields: [tabSlug], references: [slug], onDelete: Cascade)
-  fileUrl        String? // path/URL PDF e-book untuk akses download
-  isDownloadable Boolean     @default(false)
-  orderItems     OrderItem[]
-  createdAt      DateTime    @default(now())
+  id              String     @id @default(cuid())
+  slug            String     @unique
+  title           String
+  description     String?
+  author          String
+  translator      String?
+  editor          String?
+  illustrator     String?
+  publisher       String?
+  publishedYear   Int?
+  edition         String?
+  isbn            String?
+  language        String     @default("Indonesia")
+  pages           Int
+  wordCount       Int?
+  readCount       Int
+  rating          Decimal    @db.Decimal(2, 1)
+  priceUsd        Decimal    @db.Decimal(10, 2)
+  isFree          Boolean    @default(false)
+  isNew           Boolean    @default(false)
+  archived        Boolean    @default(false)
+  coverUrl        String?
+  fileUrl         String?
+  fileFormat      String?
+  fileSize        Int?
+  isDownloadable  Boolean    @default(false)
+  copyrightHolder String?
+  order           Int        @default(0)
+  tabId           String
+  tab             ContentTab @relation(fields: [tabId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  orderItems      OrderItem[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
-  @@index([tabSlug])
+  @@index([tabId])
 }
 
 model Documentation {
@@ -121,4 +144,23 @@ model Documentation {
   eventDate DateTime
   checklist String[]
   published Boolean  @default(true)
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model TiktokPost {
+  id        String   @id @default(cuid())
+  videoId   String   @unique
+  title     String
+  caption   String?
+  author    String?
+  highlight Boolean  @default(false)
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

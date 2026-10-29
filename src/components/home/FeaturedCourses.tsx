@@ -7,7 +7,7 @@ export default async function FeaturedCourses() {
   const [tabs, books] = await Promise.all([
     prisma.contentTab.findMany({ orderBy: { order: "asc" } }),
     prisma.book.findMany({
-      where: { tabSlug: "e-book" },
+      where: { tab: { slug: "e-book" } },
       orderBy: { order: "asc" },
     }),
   ]);

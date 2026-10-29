@@ -57,7 +57,10 @@ Selalu lakukan ini setelah mengganti gambar, sebelum verifikasi visual.
 - `url` **tidak boleh** ada di `schema.prisma` — letakkan di `prisma.config.ts` pada `datasource.url`, dan `import "dotenv/config"` di atas file itu.
 - Perintah seed harus `npx tsx prisma/seed.ts`; tanpa `npx` gagal `spawn tsx ENOENT`.
 - Client digenerate ke `prisma/generated/prisma`, bukan `node_modules`. Import via `src/lib/prisma.ts`.
-- `DATABASE_URL` memakai `sslmode=verify-full` secara sengaja; jangan turunkan ke `require`.
+- `prisma/generated/` **di-gitignore** dan di-generate ulang otomatis oleh `postinstall` (`prisma generate`). Kalau `prisma.user` / enum undefined saat runtime → jalankan `./node_modules/.bin/prisma generate`.
+- Nama delegate Prisma hanya menurunkan huruf pertama model: `TiktokPost` → `prisma.tiktokPost`, `TikTokPost` → `prisma.tikTokPost` (jangan-Jangan). Karena itu model ditulis `TiktokPost`.
+- `DATABASE_URL` lokal memakai `sslmode=disable` (Postgres di Docker tidak punya TLS). Untuk DB remote (Prisma Postgres) tetap `sslmode=verify-full` — jangan turunkan ke `require`.
+- Seed **idempotent**: pakai `upsert` dengan id deterministik (`seed-book-0`, dst). Jangan `deleteMany` Book — `OrderItem.book` memakai `onDelete: Restrict`.
 
 ## Cache Components (Next.js 16)
 
@@ -97,9 +100,22 @@ Patokan: tinggi halaman beranda **4234 px**. Kalau berubah tanpa alasan jelas, a
 3. Restart dev bersih, screenshot, bandingkan dengan PDF
 4. Cek log dev server bersih dari warning (`sizes` pada `<Image fill>`, dll.)
 
-## Perintah yang menyentuh database
+## Database
 
-`prisma migrate dev`, `prisma db seed`, dan `prisma db push` mengubah **database remote bersama**. Minta izin pengguna dulu sebelum menjalankannya.
+DB dev = PostgreSQL 16 di Docker, container `postgres-local`, **host port 5433** →
+container 5432. Database: `riekeu_dyah_pitaloka_dev`, user `postgres`, password `postgres`.
+
+```bash
+docker ps                       # pastikan postgres-local jalan
+./node_modules/.bin/prisma migrate dev   # apply migration
+./node_modules/.bin/prisma db seed       # isi data + admin
+```
+
+Kredensial di `.env` (gitignored). Salinan tanpa nilai rahasia di `.env.example` (di-commit).
+
+`prisma migrate dev`, `prisma db seed`, dan `prisma db push` menghapus/menulis data.
+DB ini **milik sendiri** (bukan shared), jadi boleh dijalankan tanpa izin — tapi kalau
+nanti `DATABASE_URL` diarahkan ke DB remote/shared, izin pengguna dulu.
 
 ## Bahasa
 

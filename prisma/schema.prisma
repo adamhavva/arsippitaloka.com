@@ -7,6 +7,73 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum DeliveryMethod {
+  DELIVERY
+  DOWNLOAD
+}
+
+model User {
+  id             String         @id @default(cuid())
+  name           String
+  email          String         @unique
+  passwordHash   String
+  role           Role           @default(CUSTOMER)
+  deliveryMethod DeliveryMethod @default(DOWNLOAD)
+  address        Address?
+  orders         Order[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String  @unique
+  fullName   String
+  phone      String
+  street     String
+  city       String
+  province   String
+  postalCode String
+  notes      String?
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  status    OrderStatus @default(PENDING)
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
+  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId  String
+  qty     Int    @default(1)
+
+  @@index([orderId])
+}
+
 model Category {
   id        String  @id @default(cuid())
   name      String
@@ -25,20 +92,23 @@ model ContentTab {
 }
 
 model Book {
-  id        String   @id @default(cuid())
-  title     String
-  author    String
-  coverUrl  String?
-  language  String   @default("Indonesia")
-  pages     Int
-  readCount Int
-  rating    Decimal  @db.Decimal(2, 1)
-  priceUsd  Decimal  @db.Decimal(10, 2)
-  isNew     Boolean  @default(false)
-  order     Int      @default(0)
-  tabSlug   String
-  tab       ContentTab @relation(fields: [tabSlug], references: [slug], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id             String      @id @default(cuid())
+  title          String
+  author         String
+  coverUrl       String?
+  language       String      @default("Indonesia")
+  pages          Int
+  readCount      Int
+  rating         Decimal     @db.Decimal(2, 1)
+  priceUsd       Decimal     @db.Decimal(10, 2)
+  isNew          Boolean     @default(false)
+  order          Int         @default(0)
+  tabSlug        String
+  tab            ContentTab  @relation(fields: [tabSlug], references: [slug], onDelete: Cascade)
+  fileUrl        String? // path/URL PDF e-book untuk akses download
+  isDownloadable Boolean     @default(false)
+  orderItems     OrderItem[]
+  createdAt      DateTime    @default(now())
 
   @@index([tabSlug])
 }

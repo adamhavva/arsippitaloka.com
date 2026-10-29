@@ -1,0 +1,7 @@
+{
+  "servers": {
+    "Prisma": {
+      "url": "https://mcp.prisma.io/mcp"
+    }
+  }
+}

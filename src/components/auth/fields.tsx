@@ -70,13 +70,6 @@ export function SocialButtons() {
         <GoogleIcon />
         Signup with Google
       </button>
-      <button
-        type="button"
-        className="flex h-[43px] flex-1 items-center justify-center gap-2.5 rounded-lg bg-[#f8f8f8] text-[15px] text-black"
-      >
-        <FacebookIcon />
-        Signup with facebook
-      </button>
     </div>
   );
 }

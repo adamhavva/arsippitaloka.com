@@ -8,6 +8,8 @@ type Props = {
   imagePercent: number;
   /** Jarak konten dari tepi kiri panel, dalam px desain. */
   contentLeft: number;
+  /** Jarak konten dari tepi kanan panel, dalam px desain. */
+  contentRight: number;
   /** Jarak elemen pertama dari atas panel, dalam px desain. */
   contentTop: number;
   children: ReactNode;
@@ -20,6 +22,7 @@ export default function AuthShell({
   alt,
   imagePercent,
   contentLeft,
+  contentRight,
   contentTop,
   children,
   topSlot,
@@ -40,17 +43,16 @@ export default function AuthShell({
         />
       </div>
 
-      <div className="relative min-h-screen flex-1 px-6 pb-16 lg:px-0">
+      <div
+        className="relative min-h-screen flex-1 pb-16"
+        style={{
+          paddingTop: `min(${contentTop}px, 34vh)`,
+          paddingLeft: `min(${contentLeft}px, 6vw)`,
+          paddingRight: `min(${contentRight}px, 6vw)`,
+        }}
+      >
         {topSlot}
-        <div
-          className="mx-auto w-full max-w-[704px] lg:mx-0"
-          style={{
-            paddingTop: `${contentTop}px`,
-            marginLeft: `max(0px, min(${contentLeft}px, calc(100% - 704px)))`,
-          }}
-        >
-          {children}
-        </div>
+        <div className="w-full max-w-[704px]">{children}</div>
       </div>
     </div>
   );

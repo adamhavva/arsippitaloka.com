@@ -22,6 +22,7 @@ export default function LoginPage() {
       alt="Perbukitan dan sawah terasering"
       imagePercent={54.9}
       contentLeft={75.5}
+      contentRight={85.9}
       contentTop={218.9}
     >
       <LogoMark />

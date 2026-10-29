@@ -23,6 +23,7 @@ export default function RegisterPage() {
       alt="Interior perpustakaan klasik"
       imagePercent={54.9}
       contentLeft={77}
+      contentRight={85.9}
       contentTop={119.5}
     >
       <LogoMark ring />

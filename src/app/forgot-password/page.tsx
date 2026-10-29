@@ -17,8 +17,8 @@ export default function ForgotPasswordPage() {
       alt="Gunung dan persawahan"
       imagePercent={53.2}
       contentLeft={95}
+      contentRight={99.1}
       contentTop={362.9}
-      topSlot={<Steps current={1} total={4} />}
     >
       <LogoMark ring />
 
@@ -40,27 +40,5 @@ export default function ForgotPasswordPage() {
         <Link href="/login">&larr; Back to login</Link>
       </p>
     </AuthShell>
-  );
-}
-
-function Steps({ current, total }: { current: number; total: number }) {
-  return (
-    <div className="absolute top-[42px] left-1/2 flex -translate-x-1/2 gap-[18px]">
-      {Array.from({ length: total }, (_, i) => i + 1).map((n) => {
-        const active = n === current;
-        return (
-          <span
-            key={n}
-            className={`flex h-[41px] w-[41px] items-center justify-center rounded-full text-[15px] ${
-              active
-                ? "border-[1.5px] border-[#202124] font-medium text-[#202124]"
-                : "bg-[#f8f8f8] text-[#c2c4c8]"
-            }`}
-          >
-            {n}
-          </span>
-        );
-      })}
-    </div>
   );
 }

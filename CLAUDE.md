@@ -32,6 +32,16 @@ Kalau butuh ubah teks hero/CTA, ubah di sumber desain lalu render ulang gambarny
 - Jangan memasukkan elemen UI yang juga dirender HTML (badge, kartu caption), nanti dobel.
 - Logo: ekstrak alpha dari latar maroon footer (`min(RGB) > 120` → alpha), bukan dari navbar yang latarnya foto.
 
+## Halaman auth (login / register / forgot) dan 404
+
+Berbeda dari hero beranda, panel form **dibangun sebagai HTML sungguhan** (harus bisa diisi), dan hanya **foto kolom kiri** yang diambil dari PDF. Halaman 404 mengikuti pola hero: gambar PDF utuh + overlay transparan, dengan `Footer` yang sudah ada.
+
+Desain auth memakai kanvas 1920x1080; 1 px desain = 2.0833 px render pada 150 DPI. Posisi diambil dari PDF lalu dikunci lewat prop `contentLeft`/`contentTop` di `AuthShell`, bukan dengan rata tengah — rata tengah menimbulkan drift kumulatif.
+
+Verifikasi posisi pakai `getBoundingClientRect` lewat Playwright, bukan pemindaian piksel: bandingkan `top`/`left` tiap elemen dengan angka PDF (toleransi ~1px). Pemindaian piksel mengukur batas tinta, bukan batas kotak, jadi menyesatkan untuk mengatur margin.
+
+Teks mengikuti desain apa adanya, termasuk yang terlihat seperti salah tik: **"Fotget password"**, **"Forget password"**, dan spasi ganda pada **"Reset  password"**. Jangan "diperbaiki" tanpa persetujuan pengguna.
+
 ## Cache gambar Next.js
 
 Menimpa file di `public/images/` **tidak cukup** — optimizer tetap menyajikan versi lama, bahkan setelah `rm -rf .next/cache/images`. Yang berhasil:
@@ -76,7 +86,9 @@ rm -f "$PW/shot.mjs"
 
 Script `shot.mjs` (viewport 1440×900, `fullPage: true`) menulis hasil ke `/tmp/pitaloka-assets/fullpage.png`. Kalau browser-nya belum ada, install versi yang cocok dari dalam direktori itu: `node node_modules/playwright-core/cli.js install chromium-headless-shell`.
 
-Patokan: tinggi halaman penuh **4234 px**. Kalau berubah tanpa alasan jelas, ada regresi layout.
+Build bisa gagal dengan `Module not found: @vercel/turbopack-next/internal/font/google/font` setelah banyak rebuild beruntun — itu rate-limit unduhan Google Fonts, bukan bug kode. Tunggu sebentar lalu build ulang.
+
+Patokan: tinggi halaman beranda **4234 px**. Kalau berubah tanpa alasan jelas, ada regresi layout.
 
 ## Setelah mengubah UI
 

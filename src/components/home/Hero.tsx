@@ -1,12 +1,13 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const navZones = [
-  { label: "Home", href: "#", left: "36%", width: "4.5%" },
+  { label: "Home", href: "/", left: "36%", width: "4.5%" },
   { label: "Books", href: "#", left: "41.5%", width: "4.5%" },
   { label: "About", href: "#", left: "47%", width: "4.5%" },
   { label: "News & Views", href: "#", left: "52%", width: "8%" },
-  { label: "Sign In", href: "#", left: "79%", width: "5.5%" },
-  { label: "Join Us", href: "#", left: "85%", width: "5.5%" },
+  { label: "Sign In", href: "/login", left: "79%", width: "5.5%" },
+  { label: "Join Us", href: "/register", left: "85%", width: "5.5%" },
 ];
 
 export default function Hero() {
@@ -24,7 +25,7 @@ export default function Hero() {
       {/* Overlay interaktif transparan di atas desain PDF */}
       <div className="absolute inset-0">
         {navZones.map((z) => (
-          <a
+          <Link
             key={z.label}
             href={z.href}
             aria-label={z.label}

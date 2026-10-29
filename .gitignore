@@ -42,3 +42,9 @@ next-env.d.ts
 AGENTS.md
 references/layouts/*.pdf
 _secrets
+
+.agents/
+.claude/
+.cursor/
+.devin/
+references/*

@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.10.1",
   "engineVersion": "d1b3f377ca835d73fd50954a5e22128b9ebdd6b8",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Category {\n  id        String  @id @default(cuid())\n  name      String\n  slug      String  @unique\n  icon      String\n  highlight Boolean @default(false)\n  order     Int\n}\n\nmodel ContentTab {\n  id    String @id @default(cuid())\n  label String\n  slug  String @unique\n  order Int\n  books Book[]\n}\n\nmodel Book {\n  id        String     @id @default(cuid())\n  title     String\n  author    String\n  coverUrl  String?\n  language  String     @default(\"Indonesia\")\n  pages     Int\n  readCount Int\n  rating    Decimal    @db.Decimal(2, 1)\n  priceUsd  Decimal    @db.Decimal(10, 2)\n  isNew     Boolean    @default(false)\n  order     Int        @default(0)\n  tabSlug   String\n  tab       ContentTab @relation(fields: [tabSlug], references: [slug], onDelete: Cascade)\n  createdAt DateTime   @default(now())\n\n  @@index([tabSlug])\n}\n\nmodel Documentation {\n  id        String   @id @default(cuid())\n  title     String\n  lead      String\n  photoUrl  String\n  eventDate DateTime\n  checklist String[]\n  published Boolean  @default(true)\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -32,10 +32,10 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Category\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"slug\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"icon\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"highlight\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null,\"schema\":null},\"ContentTab\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"label\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"slug\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"books\",\"kind\":\"object\",\"type\":\"Book\",\"relationName\":\"BookToContentTab\"}],\"dbName\":null,\"schema\":null},\"Book\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"author\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"coverUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"language\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"pages\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"readCount\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"rating\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"priceUsd\",\"kind\":\"scalar\",\"type\":\"Decimal\"},{\"name\":\"isNew\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"order\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"tabSlug\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tab\",\"kind\":\"object\",\"type\":\"ContentTab\",\"relationName\":\"BookToContentTab\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null,\"schema\":null},\"Documentation\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"lead\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"photoUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"eventDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"checklist\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"published\",\"kind\":\"scalar\",\"type\":\"Boolean\"}],\"dbName\":null,\"schema\":null}},\"enums\":{},\"types\":{}}")
 config.parameterizationSchema = {
-  strings: JSON.parse("[]"),
-  graph: "AAAA"
+  strings: JSON.parse("[\"where\",\"Category.findUnique\",\"Category.findUniqueOrThrow\",\"orderBy\",\"cursor\",\"Category.findFirst\",\"Category.findFirstOrThrow\",\"Category.findMany\",\"data\",\"Category.createOne\",\"Category.createMany\",\"Category.createManyAndReturn\",\"Category.updateOne\",\"Category.updateMany\",\"Category.updateManyAndReturn\",\"create\",\"update\",\"Category.upsertOne\",\"Category.deleteOne\",\"Category.deleteMany\",\"having\",\"_count\",\"_avg\",\"_sum\",\"_min\",\"_max\",\"Category.groupBy\",\"Category.aggregate\",\"tab\",\"books\",\"ContentTab.findUnique\",\"ContentTab.findUniqueOrThrow\",\"ContentTab.findFirst\",\"ContentTab.findFirstOrThrow\",\"ContentTab.findMany\",\"ContentTab.createOne\",\"ContentTab.createMany\",\"ContentTab.createManyAndReturn\",\"ContentTab.updateOne\",\"ContentTab.updateMany\",\"ContentTab.updateManyAndReturn\",\"ContentTab.upsertOne\",\"ContentTab.deleteOne\",\"ContentTab.deleteMany\",\"ContentTab.groupBy\",\"ContentTab.aggregate\",\"Book.findUnique\",\"Book.findUniqueOrThrow\",\"Book.findFirst\",\"Book.findFirstOrThrow\",\"Book.findMany\",\"Book.createOne\",\"Book.createMany\",\"Book.createManyAndReturn\",\"Book.updateOne\",\"Book.updateMany\",\"Book.updateManyAndReturn\",\"Book.upsertOne\",\"Book.deleteOne\",\"Book.deleteMany\",\"Book.groupBy\",\"Book.aggregate\",\"Documentation.findUnique\",\"Documentation.findUniqueOrThrow\",\"Documentation.findFirst\",\"Documentation.findFirstOrThrow\",\"Documentation.findMany\",\"Documentation.createOne\",\"Documentation.createMany\",\"Documentation.createManyAndReturn\",\"Documentation.updateOne\",\"Documentation.updateMany\",\"Documentation.updateManyAndReturn\",\"Documentation.upsertOne\",\"Documentation.deleteOne\",\"Documentation.deleteMany\",\"Documentation.groupBy\",\"Documentation.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"title\",\"lead\",\"photoUrl\",\"eventDate\",\"checklist\",\"published\",\"equals\",\"not\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"has\",\"hasEvery\",\"hasSome\",\"contains\",\"startsWith\",\"endsWith\",\"author\",\"coverUrl\",\"language\",\"pages\",\"readCount\",\"rating\",\"priceUsd\",\"isNew\",\"order\",\"tabSlug\",\"createdAt\",\"label\",\"slug\",\"every\",\"some\",\"none\",\"name\",\"icon\",\"highlight\",\"is\",\"isNot\",\"connectOrCreate\",\"upsert\",\"createMany\",\"set\",\"disconnect\",\"delete\",\"connect\",\"updateMany\",\"deleteMany\",\"increment\",\"decrement\",\"multiply\",\"divide\",\"push\"]"),
+  graph: "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_ADABCAAAPwAwDhwAAJ0BACBRAQCPAQAhUgEAjwEAIWYBAI8BACFnAQCaAQAhaAEAjwEAIWkCAJsBACFqAgCbAQAhaxAAnAEAIWwQAJwBACFtIACSAQAhbgIAmwEAIW8BAI8BACFwQACQAQAhAgAAAB4AIAgAAEIAIA1RAQCPAQAhUgEAjwEAIWYBAI8BACFnAQCaAQAhaAEAjwEAIWkCAJsBACFqAgCbAQAhaxAAnAEAIWwQAJwBACFtIACSAQAhbgIAmwEAIW8BAI8BACFwQACQAQAhAgAAABwAIAgAAEQAIAIAAAAcACAIAABEACADAAAAHgAgDwAAPQAgEAAAQgAgAQAAAB4AIAEAAAAcACAGFQAAlQEAIBYAAJYBACAXAACZAQAgGAAAmAEAIBkAAJcBACBnAACUAQAgEE4AAHcAME8AAEsAEFAAAHcAMFEBAGgAIVIBAGgAIWYBAGgAIWcBAHgAIWgBAGgAIWkCAHkAIWoCAHkAIWsQAHoAIWwQAHoAIW0gAGsAIW4CAHkAIW8BAGgAIXBAAGkAIQMAAAAcACADAABKADAUAABLACADAAAAHAAgAwAAHQAwBAAAHgAgCk4AAHMAME8AAFEAEFAAAHMAMFEBAAAAAVIBAHQAIVMBAHQAIVQBAHQAIVVAAHUAIVYAAGoAIFcgAHYAIQEAAABOACABAAAATgAgCk4AAHMAME8AAFEAEFAAAHMAMFEBAHQAIVIBAHQAIVMBAHQAIVQBAHQAIVVAAHUAIVYAAGoAIFcgAHYAIQADAAAAUQAgAwAAUgAwBAAATgAgAwAAAFEAIAMAAFIAMAQAAE4AIAMAAABRACADAABSADAEAABOACAHUQEAAAABUgEAAAABUwEAAAABVAEAAAABVUAAAAABVgAAkwEAIFcgAAAAAQEIAABWACAHUQEAAAABUgEAAAABUwEAAAABVAEAAAABVUAAAAABVgAAkwEAIFcgAAAAAQEIAABYADABCAAAWAAwB1EBAI8BACFSAQCPAQAhUwEAjwEAIVQBAI8BACFVQACQAQAhVgAAkQEAIFcgAJIBACECAAAATgAgCAAAWwAgB1EBAI8BACFSAQCPAQAhUwEAjwEAIVQBAI8BACFVQACQAQAhVgAAkQEAIFcgAJIBACECAAAAUQAgCAAAXQAgAgAAAFEAIAgAAF0AIAMAAABOACAPAABWACAQAABbACABAAAATgAgAQAAAFEAIAMVAACMAQAgGAAAjgEAIBkAAI0BACAKTgAAZwAwTwAAZAAQUAAAZwAwUQEAaAAhUgEAaAAhUwEAaAAhVAEAaAAhVUAAaQAhVgAAagAgVyAAawAhAwAAAFEAIAMAAGMAMBQAAGQAIAMAAABRACADAABSADAEAABOACAKTgAAZwAwTwAAZAAQUAAAZwAwUQEAaAAhUgEAaAAhUwEAaAAhVAEAaAAhVUAAaQAhVgAAagAgVyAAawAhDhUAAG0AIBgAAHIAIBkAAHIAIFgBAAAAAVkBAHEAIVoBAAAABFsBAAAABFwBAAAAAV0BAAAAAV4BAAAAAV8BAAAAAWMBAAAAAWQBAAAAAWUBAAAAAQsVAABtACAYAABwACAZAABwACBYQAAAAAFZQABvACFaQAAAAARbQAAAAARcQAAAAAFdQAAAAAFeQAAAAAFfQAAAAAEEWAEAAAAFYAEAAAABYQEAAAAEYgEAAAAEBRUAAG0AIBgAAG4AIBkAAG4AIFggAAAAAVkgAGwAIQUVAABtACAYAABuACAZAABuACBYIAAAAAFZIABsACEIWAIAAAABWQIAbQAhWgIAAAAEWwIAAAAEXAIAAAABXQIAAAABXgIAAAABXwIAAAABAlggAAAAAVkgAG4AIQsVAABtACAYAABwACAZAABwACBYQAAAAAFZQABvACFaQAAAAARbQAAAAARcQAAAAAFdQAAAAAFeQAAAAAFfQAAAAAEIWEAAAAABWUAAcAAhWkAAAAAEW0AAAAAEXEAAAAABXUAAAAABXkAAAAABX0AAAAABDhUAAG0AIBgAAHIAIBkAAHIAIFgBAAAAAVkBAHEAIVoBAAAABFsBAAAABFwBAAAAAV0BAAAAAV4BAAAAAV8BAAAAAWMBAAAAAWQBAAAAAWUBAAAAAQtYAQAAAAFZAQByACFaAQAAAARbAQAAAARcAQAAAAFdAQAAAAFeAQAAAAFfAQAAAAFjAQAAAAFkAQAAAAFlAQAAAAEKTgAAcwAwTwAAUQAQUAAAcwAwUQEAdAAhUgEAdAAhUwEAdAAhVAEAdAAhVUAAdQAhVgAAagAgVyAAdgAhC1gBAAAAAVkBAHIAIVoBAAAABFsBAAAABFwBAAAAAV0BAAAAAV4BAAAAAV8BAAAAAWMBAAAAAWQBAAAAAWUBAAAAAQhYQAAAAAFZQABwACFaQAAAAARbQAAAAARcQAAAAAFdQAAAAAFeQAAAAAFfQAAAAAECWCAAAAABWSAAbgAhEE4AAHcAME8AAEsAEFAAAHcAMFEBAGgAIVIBAGgAIWYBAGgAIWcBAHgAIWgBAGgAIWkCAHkAIWoCAHkAIWsQAHoAIWwQAHoAIW0gAGsAIW4CAHkAIW8BAGgAIXBAAGkAIQ4VAACAAQAgGAAAgQEAIBkAAIEBACBYAQAAAAFZAQB_ACFaAQAAAAVbAQAAAAVcAQAAAAFdAQAAAAFeAQAAAAFfAQAAAAFjAQAAAAFkAQAAAAFlAQAAAAENFQAAbQAgFgAAfgAgFwAAbQAgGAAAbQAgGQAAbQAgWAIAAAABWQIAfQAhWgIAAAAEWwIAAAAEXAIAAAABXQIAAAABXgIAAAABXwIAAAABDRUAAG0AIBYAAHwAIBcAAHwAIBgAAHwAIBkAAHwAIFgQAAAAAVkQAHsAIVoQAAAABFsQAAAABFwQAAAAAV0QAAAAAV4QAAAAAV8QAAAAAQ0VAABtACAWAAB8ACAXAAB8ACAYAAB8ACAZAAB8ACBYEAAAAAFZEAB7ACFaEAAAAARbEAAAAARcEAAAAAFdEAAAAAFeEAAAAAFfEAAAAAEIWBAAAAABWRAAfAAhWhAAAAAEWxAAAAAEXBAAAAABXRAAAAABXhAAAAABXxAAAAABDRUAAG0AIBYAAH4AIBcAAG0AIBgAAG0AIBkAAG0AIFgCAAAAAVkCAH0AIVoCAAAABFsCAAAABFwCAAAAAV0CAAAAAV4CAAAAAV8CAAAAAQhYCAAAAAFZCAB-ACFaCAAAAARbCAAAAARcCAAAAAFdCAAAAAFeCAAAAAFfCAAAAAEOFQAAgAEAIBgAAIEBACAZAACBAQAgWAEAAAABWQEAfwAhWgEAAAAFWwEAAAAFXAEAAAABXQEAAAABXgEAAAABXwEAAAABYwEAAAABZAEAAAABZQEAAAABCFgCAAAAAVkCAIABACFaAgAAAAVbAgAAAAVcAgAAAAFdAgAAAAFeAgAAAAFfAgAAAAELWAEAAAABWQEAgQEAIVoBAAAABVsBAAAABVwBAAAAAV0BAAAAAV4BAAAAAV8BAAAAAWMBAAAAAWQBAAAAAWUBAAAAAQdOAACCAQAwTwAANQAQUAAAggEAMFEBAGgAIW4CAHkAIXEBAGgAIXIBAGgAIQgdAACFAQAgTgAAgwEAME8AACIAEFAAAIMBADBRAQB0ACFuAgCEAQAhcQEAdAAhcgEAdAAhCFgCAAAAAVkCAG0AIVoCAAAABFsCAAAABFwCAAAAAV0CAAAAAV4CAAAAAV8CAAAAAQNzAAAcACB0AAAcACB1AAAcACARHAAAiQEAIE4AAIYBADBPAAAcABBQAACGAQAwUQEAdAAhUgEAdAAhZgEAdAAhZwEAhwEAIWgBAHQAIWkCAIQBACFqAgCEAQAhaxAAiAEAIWwQAIgBACFtIAB2ACFuAgCEAQAhbwEAdAAhcEAAdQAhC1gBAAAAAVkBAIEBACFaAQAAAAVbAQAAAAVcAQAAAAFdAQAAAAFeAQAAAAFfAQAAAAFjAQAAAAFkAQAAAAFlAQAAAAEIWBAAAAABWRAAfAAhWhAAAAAEWxAAAAAEXBAAAAABXRAAAAABXhAAAAABXxAAAAABCh0AAIUBACBOAACDAQAwTwAAIgAQUAAAgwEAMFEBAHQAIW4CAIQBACFxAQB0ACFyAQB0ACF5AAAiACB6AAAiACAJTgAAigEAME8AABcAEFAAAIoBADBRAQBoACFuAgB5ACFyAQBoACF2AQBoACF3AQBoACF4IABrACEJTgAAiwEAME8AAAQAEFAAAIsBADBRAQB0ACFuAgCEAQAhcgEAdAAhdgEAdAAhdwEAdAAheCAAdgAhAAAAAX4BAAAAAQF-QAAAAAECfgEAAAAEiAEBAAAABQF-IAAAAAEBfgEAAAAEAAAAAAAAAX4BAAAAAQV-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"
 }
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
@@ -70,8 +70,8 @@ export interface PrismaClientConstructor {
    * const prisma = new PrismaClient({
    *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
    * })
-   * // Fetch zero or more Users
-   * const users = await prisma.user.findMany()
+   * // Fetch zero or more Categories
+   * const categories = await prisma.category.findMany()
    * ```
    * 
    * Read more in our [docs](https://pris.ly/d/client).
@@ -94,8 +94,8 @@ export interface PrismaClientConstructor {
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Categories
+ * const categories = await prisma.category.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -188,7 +188,45 @@ export interface PrismaClient<
     extArgs: ExtArgs
   }>>
 
-    
+      /**
+   * `prisma.category`: Exposes CRUD operations for the **Category** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Categories
+    * const categories = await prisma.category.findMany()
+    * ```
+    */
+  get category(): Prisma.CategoryDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.contentTab`: Exposes CRUD operations for the **ContentTab** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ContentTabs
+    * const contentTabs = await prisma.contentTab.findMany()
+    * ```
+    */
+  get contentTab(): Prisma.ContentTabDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.book`: Exposes CRUD operations for the **Book** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Books
+    * const books = await prisma.book.findMany()
+    * ```
+    */
+  get book(): Prisma.BookDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.documentation`: Exposes CRUD operations for the **Documentation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Documentations
+    * const documentations = await prisma.documentation.findMany()
+    * ```
+    */
+  get documentation(): Prisma.DocumentationDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
 export function getPrismaClientClass(): PrismaClientConstructor {

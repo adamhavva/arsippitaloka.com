@@ -38,6 +38,7 @@ export default function ViralForJustice() {
               src="/images/viral-justice-poster.jpg"
               alt="#ViralForJustice"
               fill
+              sizes="(max-width: 768px) 70vw, 320px"
               className="object-cover"
             />
           </div>
@@ -46,6 +47,7 @@ export default function ViralForJustice() {
               src="/images/viral-justice-poster.jpg"
               alt="#ViralForJustice"
               fill
+              sizes="(max-width: 768px) 70vw, 320px"
               className="object-cover"
             />
           </div>
@@ -54,6 +56,7 @@ export default function ViralForJustice() {
               src="/images/viral-justice-poster.jpg"
               alt="#ViralForJustice"
               fill
+              sizes="(max-width: 768px) 70vw, 320px"
               className="object-cover"
             />
           </div>

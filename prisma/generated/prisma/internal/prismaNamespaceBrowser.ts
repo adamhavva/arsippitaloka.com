@@ -51,7 +51,10 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-
+  Category: 'Category',
+  ContentTab: 'ContentTab',
+  Book: 'Book',
+  Documentation: 'Documentation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -68,4 +71,82 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  icon: 'icon',
+  highlight: 'highlight',
+  order: 'order'
+} as const
+
+export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+
+
+export const ContentTabScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  slug: 'slug',
+  order: 'order'
+} as const
+
+export type ContentTabScalarFieldEnum = (typeof ContentTabScalarFieldEnum)[keyof typeof ContentTabScalarFieldEnum]
+
+
+export const BookScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  author: 'author',
+  coverUrl: 'coverUrl',
+  language: 'language',
+  pages: 'pages',
+  readCount: 'readCount',
+  rating: 'rating',
+  priceUsd: 'priceUsd',
+  isNew: 'isNew',
+  order: 'order',
+  tabSlug: 'tabSlug',
+  createdAt: 'createdAt'
+} as const
+
+export type BookScalarFieldEnum = (typeof BookScalarFieldEnum)[keyof typeof BookScalarFieldEnum]
+
+
+export const DocumentationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  lead: 'lead',
+  photoUrl: 'photoUrl',
+  eventDate: 'eventDate',
+  checklist: 'checklist',
+  published: 'published'
+} as const
+
+export type DocumentationScalarFieldEnum = (typeof DocumentationScalarFieldEnum)[keyof typeof DocumentationScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

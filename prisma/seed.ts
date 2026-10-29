@@ -1,20 +1,11 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { randomBytes, scrypt } from "node:crypto";
-import { promisify } from "node:util";
 import { PrismaClient } from "./generated/prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string) {
-  const salt = randomBytes(16);
-  const key = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `scrypt$16384$8$1$${salt.toString("base64")}$${key.toString("base64")}`;
-}
 
 const categories = [
   { name: "E-Book", slug: "e-book", icon: "BookOpen", highlight: false, order: 1 },
@@ -126,7 +117,12 @@ async function main() {
   if (adminEmail && adminPassword) {
     await prisma.user.upsert({
       where: { email: adminEmail },
-      update: { role: "ADMIN" },
+      update: {
+        role: "ADMIN",
+        isActive: true,
+        failedAttempts: 0,
+        lockedUntil: null,
+      },
       create: {
         name: "Admin Pitaloka",
         email: adminEmail,

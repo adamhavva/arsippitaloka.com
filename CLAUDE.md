@@ -109,7 +109,13 @@ container 5432. Database: `riekeu_dyah_pitaloka_dev`, user `postgres`, password 
 docker ps                       # pastikan postgres-local jalan
 ./node_modules/.bin/prisma migrate dev   # apply migration
 ./node_modules/.bin/prisma db seed       # isi data + admin
+npm run db:seed:admin           # seed/reset akun admin saja (idempotent)
 ```
+
+`prisma/seed-admin.ts` membuat atau memperbarui satu akun ADMIN tanpa menyentuh
+data lain. Urutan nilai: argumen CLI (`--email`, `--password`, `--name`,
+`--keep-password`) → env `ADMIN_EMAIL`/`ADMIN_PASSWORD`. Password di-reset hashed
+baru (format `scrypt$N$r$p$salt$hash`) kecuali `--keep-password` dipakai.
 
 Kredensial di `.env` (gitignored). Salinan tanpa nilai rahasia di `.env.example` (di-commit).
 

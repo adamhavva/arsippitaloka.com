@@ -2,19 +2,31 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 /**
- * Gerbang /admin — lapisan pertama, cepat.
+ * Gerbang area admin + area pembeli — lapisan pertama, cepat.
  *
- * Role dicek DUA kali:
- * 1. `proxy.ts` (di sini) → tolak cepat berdasarkan JWT, tanpa query DB.
- * 2. `requireAdmin()` → cek role ke DB lagi sebelum merender data sensitif,
- *    supaya role yang diubah admin langsung berlaku (JWT bisa basi 7 hari).
+ * `/admin` dan `/api/admin`:
+ *   1. `proxy.ts` (di sini) → tolak cepat berdasarkan JWT, tanpa query DB.
+ *   2. `requireAdmin()` → cek role ke DB lagi sebelum merender data sensitif,
+ *      supaya role yang diubah admin langsung berlaku (JWT bisa basi 7 hari).
+ *
+ * `/akun` (pustaka pembeli): wajib login, role apa pun boleh masuk.
  */
 export default auth((req) => {
-  if (req.auth?.user?.role === "ADMIN") {
+  const { pathname } = req.nextUrl;
+  const session = req.auth?.user;
+
+  const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
+  const isAccountArea = pathname.startsWith("/akun");
+
+  if (isAdminArea) {
+    if (session?.role === "ADMIN") return NextResponse.next();
+  } else if (isAccountArea) {
+    // Area pembeli: cukup punya sesi, tidak boleh kehilangan akses
+    // hanya karena role-nya bukan ADMIN.
+    if (session?.id) return NextResponse.next();
+  } else {
     return NextResponse.next();
   }
-
-  const { pathname } = req.nextUrl;
 
   // Endpoint API dibalas 401 JSON, bukan redirect ke halaman login —
   // supaya fetch() dari client tidak menerima HTML.
@@ -28,5 +40,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/akun/:path*"],
 };

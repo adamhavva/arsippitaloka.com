@@ -68,6 +68,19 @@ Selalu lakukan ini setelah mengganti gambar, sebelum verifikasi visual.
 
 Jangan pakai `export const instant = false` — itu membuat route jadi blocking. Dengan `"use cache"`, route `/` tetap statis dengan revalidate 15 menit.
 
+Halaman yang membaca cookie/params (area admin & area pembeli) **tidak** bisa memakai `"use cache"`. Polanya: komponen default synchronously membungkus isi dinamis dengan `<Suspense>`, lalu komponen async di dalamnya memanggil `await connection()`. Tanpa boundary itu build gagal dengan "uncached data during prerendering". `await connection()` di dalam boundary tetap wajib — `connection()` tidak bisa di-cache.
+
+## Dua area terpisah: admin vs pembeli
+
+- **Area admin (`/admin`)** — back-office untuk mengelola konten: buku, kategori, tab konten, dokumentasi, TikTok, order, user, dan profil perusahaan. Guard: `src/proxy.ts` (lapis 1, JWT) + `requireAdmin()` (lapis 2, cek role ke DB).
+- **Area pembeli (`/akun`)** — untuk user yang login biasa: Pustaka Saya (buku yang sudah dibeli), Riwayat Order, dan Profil. Guard: `src/proxy.ts` mensyaratkan sesi (role apa pun), `requireUser()` memverifikasi user masih aktif.
+
+CRUD admin generik: konfigurasi entitas ada di `src/lib/admin/entities.ts` (satu sumber kebenaran untuk label, kolom tabel, field form). Server action generik di `src/lib/admin/actions.ts` — nama model wajib ada di allowlist `ENTITY_MODELS`, jangan pakai string model dari URL.
+
+Prisma `orderBy` menerima `{ field, dir }`, bukan `{ [field]: dir }` — ubah dulu sebelum meneruskan ke Prisma.
+
+Hak akses file e-book (`/api/download/[bookId]`, `/api/read/[bookId]`): user harus punya order berstatus **PAID atau COMPLETED** untuk buku tersebut, atau buku itu `isFree` dan belum diarsipkan. File e-book hasil upload disimpan di `storage/private/` (di luar `public/`) supaya tidak bisa diakses langsung lewat URL — hanya lewat route di atas.
+
 ## Tailwind v4
 
 Token tema didefinisikan di `src/app/globals.css` (`:root` + `@theme inline`). Hati-hati tabrakan nama dengan utilitas bawaan — token bernama `cover` menghasilkan `bg-cover` yang bentrok dengan `background-size: cover`. Itu sebabnya token warna sampul bernama `bookcover`, dan kartu buku memakai nilai literal `bg-[#3d2b2e]`.

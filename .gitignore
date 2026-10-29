@@ -52,3 +52,6 @@ references/*
 
 # prisma generated client — di-generate ulang via `prisma generate` (postinstall)
 prisma/generated/
+
+# file privat e-book (jangan di-commit)
+/storage/

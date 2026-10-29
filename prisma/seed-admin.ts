@@ -23,7 +23,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
-import { hashPassword } from "../src/lib/password";
+import { hashPassword, verifyPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -126,6 +126,14 @@ async function main() {
       ? "Password di-reset dengan hash baru."
       : "Password lama dipertahankan.",
   );
+
+  // Sanity check: hash yang disimpan harus cocok dengan password yang diberikan.
+  if (passwordHash) {
+    const cocok = await verifyPassword(password, user.passwordHash!);
+    console.log(`Verifikasi password: ${cocok ? "OK" : "GAGAL"}`);
+    if (!cocok) process.exitCode = 1;
+  }
+
   console.log(`ID: ${user.id}`);
 }
 

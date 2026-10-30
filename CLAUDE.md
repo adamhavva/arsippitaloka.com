@@ -123,7 +123,16 @@ docker ps                       # pastikan postgres-local jalan
 ./node_modules/.bin/prisma migrate dev   # apply migration
 ./node_modules/.bin/prisma db seed       # isi data + admin
 npm run db:seed:admin           # seed/reset akun admin saja (idempotent)
+npm run db:check                # tampilkan user + verifikasi hash password admin
+npm run db:sample-book          # pasang file contoh ke seed-book-0 (unduh/baca)
+npm run test:login-admin        # uji login admin lewat HTTP (csrf → callback → /admin)
 ```
+
+Penting: **password admin harus selalu sinkron dengan `ADMIN_PASSWORD` di `.env`**.
+Kalau hash di DB tidak cocok dengan `.env`, login gagal dengan `CredentialsSignin`
+(lihat `scripts/check-db.ts` → bagian "UJI LOGIN ADMIN"). Perbaikan:
+`npm run db:seed:admin` (membaca `.env`) — atau `npm run db:seed:admin -- --password=...`
+kalau ingin password lain (perintah ini menimpa isi `.env`, jadi samakan keduanya).
 
 `prisma/seed-admin.ts` membuat atau memperbarui satu akun ADMIN tanpa menyentuh
 data lain. Urutan nilai: argumen CLI (`--email`, `--password`, `--name`,

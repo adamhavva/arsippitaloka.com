@@ -8,7 +8,10 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "db:seed": "npx tsx prisma/seed.ts",
-    "db:seed:admin": "npx tsx prisma/seed-admin.ts"
+    "db:seed:admin": "npx tsx prisma/seed-admin.ts",
+    "db:check": "npx tsx scripts/check-db.ts",
+    "db:sample-book": "npx tsx scripts/attach-sample-book.ts",
+    "test:login-admin": "npx tsx scripts/test-admin-login.mts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

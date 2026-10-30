@@ -37,7 +37,7 @@ export default function CoursesBrowser({
           </h2>
         </div>
         <Link
-          href={active ? `/buku?tab=${active.slug}` : "/buku"}
+          href={active ? `/buku/${active.slug}` : "/buku"}
           className="shrink-0 rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
         >
           {buttonLabel}

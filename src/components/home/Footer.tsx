@@ -63,7 +63,7 @@ export default async function Footer() {
                 l.toLowerCase().replace(/[^a-z0-9]/g, ""),
               );
               return slug ? (
-                <Link key={l} href={`/buku?tab=${slug}`} className="hover:text-white">
+                <Link key={l} href={`/buku/${slug}`} className="hover:text-white">
                   {l}
                 </Link>
               ) : (

@@ -15,6 +15,28 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const session = req.auth?.user;
 
+  // Katalog sekarang memakai path: /buku/<tab> dan /buku/kategori/<kategori>.
+  // URL lama (?tab= / ?kategori=) diarahkan ke path barunya supaya tautan
+  // lama tidak mati.
+  if (pathname === "/buku") {
+    const tab = req.nextUrl.searchParams.get("tab");
+    const kategori = req.nextUrl.searchParams.get("kategori");
+    const target = tab
+      ? `/buku/${tab}`
+      : kategori
+        ? `/buku/kategori/${kategori}`
+        : null;
+
+    if (target) {
+      const url = new URL(target, req.nextUrl);
+      for (const key of ["page", "per"]) {
+        const value = req.nextUrl.searchParams.get(key);
+        if (value) url.searchParams.set(key, value);
+      }
+      return NextResponse.redirect(url);
+    }
+  }
+
   const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
   const isAccountArea = pathname.startsWith("/akun");
 
@@ -40,5 +62,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*", "/akun/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/akun/:path*", "/buku"],
 };

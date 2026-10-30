@@ -37,7 +37,7 @@ export default async function FeatureCategories() {
             return (
               <Link
                 key={category.id}
-                href={`/buku?kategori=${category.slug}`}
+                href={`/buku/kategori/${category.slug}`}
                 className="flex flex-col items-center justify-center gap-3 rounded-xl bg-maroon-dark py-8 text-center transition hover:opacity-90"
               >
                 <span className="text-lg font-black leading-none text-yellow-400">
@@ -57,7 +57,7 @@ export default async function FeatureCategories() {
           return (
             <Link
               key={category.id}
-              href={`/buku?kategori=${category.slug}`}
+              href={`/buku/kategori/${category.slug}`}
               className="flex flex-col items-center justify-center gap-3 rounded-xl bg-neutral-50 py-8 transition hover:bg-neutral-100"
             >
               {category.icon ? (

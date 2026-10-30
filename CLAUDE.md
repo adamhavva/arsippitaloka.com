@@ -93,9 +93,27 @@ aturan ini; `canAccessBook()` memakainya untuk `/api/read` dan `/api/download`.
 
 ### Katalog publik & tab yang bisa diklik
 
-- `/buku` — katalog publik: filter tab (`?tab=`) dan kategori (`?kategori=`),
-  dipaginasi. `/buku/[slug]` — detail buku (metadata lengkap, tombol
-  Baca/Unduh bila pemili, CTA Beli bila belum login).
+URL katalog memakai **path**, bukan query string:
+
+| URL | Isi |
+| --- | --- |
+| `/buku` | katalog semua buku |
+| `/buku/<slug-tab>` | katalog per tab (mis. `/buku/berita-terkini`) |
+| `/buku/kategori/<slug>` | katalog per kategori (mis. `/buku/kategori/biografi`) |
+| `/buku/<slug-buku>` | detail buku (metadata lengkap, tombol Baca/Unduh bila pemili, CTA Beli bila belum login) |
+
+`/buku/[slug]` menerima dua jenis slug: kalau slug-nya cocok **tab** → katalog
+tab; kalau cocok **buku** → detail buku (tab menang kalau slug-nya sama).
+Kategori memakai prefiks `/buku/kategori/` karena ada tab dan kategori yang
+namanya sama ("blog", "e-book").
+
+Tampilan katalog dipakai bersama oleh ketiga route lewat
+`src/components/books/CatalogView.tsx` (server component) dan detail buku
+dipindah ke `src/components/books/BookDetailView.tsx`. Paginasi tetap memakai
+query `?page=` & `?per=` (aturan pagination proyek). URL lama
+(`/buku?tab=…` / `/buku?kategori=…`) otomatis di-redirect ke path baru oleh
+`src/proxy.ts`.
+
 - Baris tab di beranda **bisa diklik**: `CoursesBrowser` (client) menyaring
   buku sesuai tab yang dipilih, dan menampilkan empty state kalau tabnya belum
   ada buku. Tab & kategori dikelola di admin → **Tab Konten** (`/admin/tab`) dan

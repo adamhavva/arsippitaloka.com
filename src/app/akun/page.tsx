@@ -101,7 +101,7 @@ async function AccountLibraryPageContent({
         </p>
       </header>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
         <Stat label="Total koleksi" value={String(summary.total)} />
         <Stat label="Dibeli" value={String(summary.dibeli)} />
         <Stat label="Gratis" value={String(summary.gratis)} />
@@ -116,6 +116,10 @@ async function AccountLibraryPageContent({
           tone={summary.dibatalkan > 0 ? "red" : undefined}
         />
         <Stat label="Total halaman" value={summary.halaman.toLocaleString("id-ID")} />
+        <Stat
+          label="Total dibayar"
+          value={`$${summary.totalBayar.toFixed(2)}`}
+        />
       </section>
 
       <nav className="flex flex-wrap items-center gap-2">

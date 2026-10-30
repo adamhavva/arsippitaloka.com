@@ -202,11 +202,9 @@ async function AccountOrdersPageContent({
 
                 <ul className="mt-4 space-y-2 border-t border-neutral-100 pt-3 text-sm text-neutral-700">
                   {order.items.map((item) => {
-                    const bolehAkses =
-                      akses &&
-                      (item.book.isFree ||
-                        Boolean(item.book.fileUrl)) &&
-                      !item.book.archived;
+                    // Akses mengikuti status order; buku yang diarsipkan tetap
+                    // bisa dibaca kalau sudah pernah dibeli.
+                    const bolehAkses = akses && Boolean(item.book.fileUrl);
 
                     return (
                       <li

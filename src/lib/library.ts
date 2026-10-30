@@ -288,8 +288,9 @@ export async function canAccessBook(
     select: { id: true, isFree: true, archived: true },
   });
   if (!book) return false;
-  if (book.isFree && !book.archived) return true;
 
+  // Kalau sudah pernah dibeli (lunas/dikirim/selesai) → akses tetap ada,
+  // walau bukunya sekarang diarsipkan.
   const item = await prisma.orderItem.findFirst({
     where: {
       bookId,
@@ -297,7 +298,10 @@ export async function canAccessBook(
     },
     select: { id: true },
   });
-  return item !== null;
+  if (item) return true;
+
+  // Belum dibeli: buku gratis yang aktif boleh diakses semua orang.
+  return book.isFree && !book.archived;
 }
 
 const MIME: Record<string, string> = {

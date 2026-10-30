@@ -8,11 +8,19 @@ export const metadata = {
   title: "Katalog Buku — Arsip Pitaloka",
 };
 
-/** `/buku` — katalog semua buku. Filter tab/kategori memakai path. */
+type CatalogSearchParams = Record<string, string | string[] | undefined>;
+
+/**
+ * `/buku` — katalog semua buku.
+ *
+ * Tab & kategori memakai path (`/buku/<tab>`, `/buku/kategori/<slug>`);
+ * pencarian, urutan, dan filter lain memakai query string (`?q=`, `?sort=`,
+ * `?bahasa=`, `?hargaMin=`, `?hargaMax=`, `?rating=`, `?gratis=1`).
+ */
 export default function CatalogPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<CatalogSearchParams>;
 }) {
   return (
     <>
@@ -28,10 +36,17 @@ export default function CatalogPage({
 async function CatalogContent({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<CatalogSearchParams>;
 }) {
   await connection();
   const sp = await searchParams;
 
-  return <CatalogView page={sp.page} per={sp.per} showHeading={false} />;
+  return (
+    <CatalogView
+      page={typeof sp.page === "string" ? sp.page : undefined}
+      per={typeof sp.per === "string" ? sp.per : undefined}
+      showHeading={false}
+      searchParams={sp}
+    />
+  );
 }

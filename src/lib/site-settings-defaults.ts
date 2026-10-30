@@ -1,5 +1,5 @@
 /**
- * Nilai bawaan pengaturan situs.
+ * Nilai bawaan pengaturan situs + konstanta yang dipakai form admin.
  *
  * File ini SENGAJA tidak meng-import `next/cache` atau Prisma supaya bisa
  * dipakai juga oleh `prisma/seed.ts` (script Node) selain aplikasi.
@@ -7,6 +7,13 @@
  * Kalau nilai di DB kosong, halaman publik memakai nilai di sini — jadi
  * beranda tidak pernah tampil dengan teks kosong.
  */
+
+/**
+ * Nilai dummy untuk field pengaturan bertipe secret (Server Key Midtrans).
+ * Modul ini bebas import server-only supaya komponen client bisa memakainya.
+ */
+export const SECRET_MASK = "********";
+
 export const DEFAULT_SETTINGS: Record<string, string> = {
   // Profil
   "company.name": "Pitaloka",
@@ -63,6 +70,12 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   "company.social.tiktok": "",
   "company.social.youtube": "",
   "company.social.instagram": "",
+
+  // Midtrans
+  "payment.midtrans.enabled": "false",
+  "payment.midtrans.mode": "sandbox",
+  "payment.midtrans.serverKey": "",
+  "payment.midtrans.clientKey": "",
 
   // Pembayaran & pajak
   "payment.usdToIdr": "16000",

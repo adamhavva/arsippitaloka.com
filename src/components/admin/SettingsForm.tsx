@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { saveSettings } from "@/app/admin/profile/actions";
 import type { SettingField } from "@/lib/site-settings";
+import { SECRET_MASK } from "@/lib/site-settings-defaults";
 
 export default function SettingsForm({
   fields,
@@ -64,6 +65,20 @@ export default function SettingsForm({
                         rows={field.type === "lines" ? 5 : 3}
                         className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"
                       />
+                    ) : field.type === "select" ? (
+                      <select
+                        name={field.key}
+                        defaultValue={value}
+                        className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-maroon focus:outline-none"
+                      >
+                        {(field.options ?? []).map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : field.type === "secret" ? (
+                      <SecretInput name={field.key} defaultValue={value} />
                     ) : (
                       <input
                         type="text"
@@ -97,5 +112,35 @@ export default function SettingsForm({
         ) : null}
       </div>
     </form>
+  );
+}
+
+function SecretInput({
+  name,
+  defaultValue,
+}: {
+  name: string;
+  defaultValue: string;
+}) {
+  const [revealed, setRevealed] = useState(false);
+  const masked = defaultValue === SECRET_MASK;
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type={revealed ? "text" : "password"}
+        name={name}
+        defaultValue={defaultValue}
+        placeholder={masked ? "Tersimpan — biarkan saja untuk mempertahankan nilai" : ""}
+        className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"
+      />
+      <button
+        type="button"
+        onClick={() => setRevealed((r) => !r)}
+        className="shrink-0 rounded-lg border border-neutral-300 px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50"
+      >
+        {revealed ? "Sembunyikan" : "Lihat"}
+      </button>
+    </div>
   );
 }

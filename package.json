@@ -13,7 +13,9 @@
     "db:sample-book": "npx tsx scripts/attach-sample-book.ts",
     "test:login-admin": "npx tsx scripts/test-admin-login.mts",
     "test:pagination": "npx tsx scripts/test-pagination.mts",
-    "db:fixture-buyer": "npx tsx scripts/buyer-library-fixture.ts"
+    "db:fixture-buyer": "npx tsx scripts/buyer-library-fixture.ts",
+    "db:check:midtrans": "npx tsx scripts/check-midtrans-settings.ts",
+    "test:midtrans": "npx tsx scripts/midtrans-smoke.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

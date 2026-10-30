@@ -8,6 +8,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { canAccessBook } from "@/lib/library";
 import { getSettings } from "@/lib/site-settings";
+import { getMidtransConfig, isMidtransConfigured } from "@/lib/midtrans";
+import BuyButton from "@/components/books/BuyButton";
 
 export const metadata = {
   title: "Detail Buku — Arsip Pitaloka",
@@ -50,6 +52,9 @@ async function BookDetailContent({
   const userId = session?.user?.id ?? null;
   const sudahPunya = userId ? await canAccessBook(userId, book.id) : false;
   const settings = await getSettings();
+  const midtrans = await getMidtransConfig();
+  const midtransAktif = midtrans.enabled && isMidtransConfigured(midtrans);
+  const midtransMode = midtrans.mode;
 
   const meta: { label: string; value: string }[] = [
     { label: "Bahasa", value: book.language },
@@ -168,13 +173,27 @@ async function BookDetailContent({
                 </Link>
               </>
             ) : userId ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <p className="font-medium">Buku ini belum ada di pustaka Anda.</p>
-                <p className="mt-1 text-xs">
-                  Checkout sedang disiapkan. Untuk sekarang hubungi kami di{" "}
-                  {settings["company.email"] || "halo@arsippitaloka.com"}.
-                </p>
-              </div>
+              midtransAktif ? (
+                <div className="space-y-2">
+                  <BuyButton
+                    bookId={book.id}
+                    loginUrl={`/login?callbackUrl=/buku/${book.slug}`}
+                    label={book.isFree ? "Ambil Gratis" : "Beli Sekarang"}
+                  />
+                  <p className="text-xs text-neutral-500">
+                    Pembayaran aman lewat Midtrans{" "}
+                    {midtransMode === "sandbox" ? "(mode sandbox — uji coba)" : ""}.
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  <p className="font-medium">Buku ini belum ada di pustaka Anda.</p>
+                  <p className="mt-1 text-xs">
+                    Checkout sedang disiapkan. Untuk sekarang hubungi kami di{" "}
+                    {settings["company.email"] || "halo@arsippitaloka.com"}.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="flex flex-wrap items-center gap-3">
                 <Link

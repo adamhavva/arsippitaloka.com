@@ -7,9 +7,10 @@ export { DEFAULT_SETTINGS };
 export type SettingField = {
   key: string;
   label: string;
-  type: "text" | "textarea" | "boolean" | "lines";
+  type: "text" | "textarea" | "boolean" | "lines" | "secret" | "select";
   group: string;
   help?: string;
+  options?: string[];
 };
 
 /**
@@ -62,6 +63,36 @@ export const SETTINGS_SCHEMA: SettingField[] = [
 
   { key: "payment.usdToIdr", label: "Kurs USD → IDR", type: "text", group: "Pembayaran", help: "Dipakai saat membuat order." },
 
+  {
+    key: "payment.midtrans.enabled",
+    label: "Aktifkan pembayaran Midtrans",
+    type: "boolean",
+    group: "Midtrans",
+    help: "Kalau mati, tombol beli akan memakai mode manual.",
+  },
+  {
+    key: "payment.midtrans.mode",
+    label: "Mode Midtrans",
+    type: "select",
+    group: "Midtrans",
+    options: ["sandbox", "production"],
+    help: "sandbox = uji coba (kredit virtual), production = uang asli.",
+  },
+  {
+    key: "payment.midtrans.serverKey",
+    label: "Server Key",
+    type: "secret",
+    group: "Midtrans",
+    help: "Rahasia — disimpan di server saja. Kosongkan untuk kembali ke nilai .env.",
+  },
+  {
+    key: "payment.midtrans.clientKey",
+    label: "Client Key",
+    type: "secret",
+    group: "Midtrans",
+    help: "Boleh tampil di browser. Kosongkan untuk kembali ke nilai .env.",
+  },
+
   { key: "tax.enabled", label: "Aktifkan pajak", type: "boolean", group: "Pajak" },
   { key: "tax.type", label: "Jenis pajak", type: "text", group: "Pajak", help: "percentage atau fixed" },
   { key: "tax.percentage", label: "Pajak persen", type: "text", group: "Pajak" },
@@ -74,6 +105,7 @@ export const SETTING_GROUPS = [
   "Footer",
   "Copy Landing Page",
   "Pembayaran",
+  "Midtrans",
   "Pajak",
 ];
 

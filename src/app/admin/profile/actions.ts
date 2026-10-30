@@ -5,6 +5,7 @@ import { updateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { SETTINGS_SCHEMA } from "@/lib/site-settings";
+import { SECRET_MASK } from "@/lib/site-settings-defaults";
 import type { ActionState } from "@/lib/admin/action-state";
 
 /** Simpan pengaturan situs (company profile, copy landing page, pajak). */
@@ -21,10 +22,17 @@ export async function saveSettings(
       let value = "";
 
       if (field.type === "boolean") {
-        value = raw === "1" || raw === "on" || raw === "true" ? "true" : "false";
+        // Form mengirim hidden "0" + checkbox "1" — ambil nilai yang true.
+        const values = formData.getAll(field.key).map((v) => String(v));
+        value = values.some((v) => v === "1" || v === "on" || v === "true")
+          ? "true"
+          : "false";
       } else {
         value = typeof raw === "string" ? raw : "";
       }
+
+      // Field secret yang tidak diubah (masih berupa mask) tidak ditimpa.
+      if (field.type === "secret" && value === SECRET_MASK) continue;
 
       await prisma.siteSetting.upsert({
         where: { key: field.key },

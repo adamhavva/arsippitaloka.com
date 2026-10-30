@@ -113,6 +113,58 @@ kelengkapan pustaka. Bersihkan dengan `... cleanup`.
 
 CRUD admin generik: konfigurasi entitas ada di `src/lib/admin/entities.ts` (satu sumber kebenaran untuk label, kolom tabel, field form). Server action generik di `src/lib/admin/actions.ts` — nama model wajib ada di allowlist `ENTITY_MODELS`, jangan pakai string model dari URL.
 
+## Pembayaran (Midtrans Snap)
+
+Pembayaran e-book memakai **Midtrans Snap** (REST, tanpa SDK — `fetch` langsung
+ke `app.sandbox.midtrans.com` / `app.midtrans.com`). Helper: `src/lib/midtrans.ts`.
+
+Konfigurasi ada di tabel `SiteSetting` grup **"Midtrans"**, dikelola dari
+`/admin/profile`:
+
+| Key | Arti |
+| --- | --- |
+| `payment.midtrans.enabled` | Aktif/nonaktifkan pembayaran online |
+| `payment.midtrans.mode` | `sandbox` atau `production` |
+| `payment.midtrans.serverKey` | Rahasia (field bertipe `secret`) |
+| `payment.midtrans.clientKey` | Boleh tampil di browser (tetap `secret`) |
+
+- Nilai di **DB (diubah admin) menang**; kalau dikosongkan, dipakai fallback
+  environment variable `MIDTRANS_SERVER_KEY` / `MIDTRANS_CLIENT_KEY` /
+  `MIDTRANS_MODE` / `MIDTRANS_ENABLED` dari `.env` (tidak pernah di-commit).
+- **Server key tidak pernah dikirim ke browser**: sebelum dirender, nilainya
+  diganti `SECRET_MASK` (`src/lib/site-settings-defaults.ts`). Field secret
+  yang tidak diubah (masih berupa mask) **tidak ditimpa** saat disimpan.
+- Setting bertipe boolean mengirim hidden `0` + checkbox `1` — di server harus
+  pakai `formData.getAll()`, bukan `get()` (kalau `get()`, nilainya selalu
+  `"0"` sehingga checkbox tidak pernah tersimpan).
+
+Route terkait:
+
+- `POST /api/checkout` — body `{ bookId }`. Membuat order `PENDING` (harga
+  IDR = `priceUsd × payment.usdToIdr`, pajak ikut sebagai item terpisah
+  karena Midtrans mensyaratkan jumlah `item_details` = `gross_amount`), lalu
+  membuat transaksi Snap dan mengembalikan `redirectUrl`. Buku gratis →
+  order langsung `PAID` tanpa gateway. Sudah punya akses → `alreadyOwned`.
+- `POST /api/webhook/midtrans` — notifikasi status; signature
+  `sha512(order_id + status_code + gross_amount + serverKey)` diverifikasi
+  dulu (dari body `signature` atau header `x-signature`), signature salah → 403.
+- `GET /api/payment/status/[orderId]` — cek status ke Midtrans (dipakai
+  polling di `/akun/orders/[id]`; sandbox lokal tidak punya webhook publik).
+  Order hanya boleh dicek pemiliknya atau admin.
+
+Uji coba end-to-end (butuh dev server jalan):
+
+```bash
+npm run test:midtrans       # transaksi sandbox sungguhan + webhook + cek pustaka
+npm run db:check:midtrans   # status isi pengaturan Midtrans di DB
+```
+
+`scripts/midtrans-smoke.ts` membuat pembeli sementara, login, checkout ke
+sandbox sungguhan, memastikan halaman Snap terbuka, mengesampingkan signature
+(payload settlement buatan sendiri dari server key milik sendiri), lalu
+memastikan order jadi lunas dan bukunya masuk Pustaka Saya. Data uji
+dibersihkan di akhir.
+
 ## Pagination
 
 Setiap tabel/list di area admin dan area pembeli wajib memakai komponen

@@ -139,6 +139,13 @@ async function AccountOrdersPageContent({
                       {formatDate(order.createdAt)}
                       {" · "}
                       {order.items.length} item
+                      {" · "}
+                      <Link
+                        href={`/akun/orders/${order.id}`}
+                        className="font-medium text-maroon hover:underline"
+                      >
+                        Lihat detail
+                      </Link>
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

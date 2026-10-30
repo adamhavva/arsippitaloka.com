@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DynamicIcon } from "lucide-react/dynamic";
-import { resolveIconName } from "@/lib/icon";
+import CatalogIcon, { resolveIconName } from "@/components/icons/CatalogIcon";
 
 export type CategoryOption = {
   value: string;
@@ -59,7 +58,7 @@ export default function CategoryPicker({
                 }`}
               >
                 {kebab ? (
-                  <DynamicIcon name={kebab as never} size={14} />
+                  <CatalogIcon name={kebab} size={14} />
                 ) : (
                   <span className="h-3.5 w-3.5 rounded-full bg-neutral-200" />
                 )}

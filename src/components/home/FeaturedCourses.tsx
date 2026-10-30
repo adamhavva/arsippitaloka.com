@@ -1,28 +1,32 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/site-settings";
 
 export default async function FeaturedCourses() {
   "use cache";
-  const [tabs, books] = await Promise.all([
+  const [tabs, books, settings] = await Promise.all([
     prisma.contentTab.findMany({ orderBy: { order: "asc" } }),
     prisma.book.findMany({
       where: { tab: { slug: "e-book" } },
       orderBy: { order: "asc" },
     }),
+    getSettings(),
   ]);
 
   return (
     <section className="mx-auto max-w-6xl px-6 pb-20 md:px-10">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-maroon">Featured Courses</p>
+          <p className="text-sm font-medium text-maroon">
+            {settings["home.courses.eyebrow"]}
+          </p>
           <h2 className="font-heading mt-1 text-2xl font-bold text-black md:text-3xl">
-            Berkembang dan Update bersama Pitaloka
+            {settings["home.courses.title"]}
           </h2>
         </div>
         <button className="shrink-0 rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white">
-          View More
+          {settings["home.courses.button"]}
         </button>
       </div>
 
@@ -91,10 +95,12 @@ export default async function FeaturedCourses() {
               <div className="mt-4 flex items-center justify-between">
                 <span className="text-sm font-semibold text-black">
                   ${String(book.priceUsd)}{" "}
-                  <span className="font-normal text-neutral-500">/lifetime</span>
+                  <span className="font-normal text-neutral-500">
+                    {settings["home.courses.priceSuffix"]}
+                  </span>
                 </span>
                 <button className="rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white">
-                  Read Now
+                  {settings["home.courses.readButton"]}
                 </button>
               </div>
             </div>

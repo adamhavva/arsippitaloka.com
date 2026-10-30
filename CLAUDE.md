@@ -118,6 +118,24 @@ dan `pruneEmpty` membuang nilai `null` supaya kolom wajib tidak gagal
 disimpan. Contoh: `Category.order`, `ContentTab.order`, `Book.readCount`
 wajib `defaultValue: 0`.
 
+## Konten halaman utama dari konfigurasi admin
+
+Teks/konten beranda (judul section, tombol, paragraf #ViralForJustice, isi
+footer, dan lain-lain) **bukan hardcoded** — diambil dari tabel `SiteSetting`
+lewat `getSettings()` di `src/lib/site-settings.ts`.
+
+- Nilai bawaan ada di `src/lib/site-settings-defaults.ts` (sengaja tanpa
+  import `next/cache`/Prisma supaya bisa dipakai `prisma/seed.ts` juga).
+  Kalau nilai di DB kosong, halaman publik memakai nilai bawaan.
+- Tambah key baru → tambahkan **di `DEFAULT_SETTINGS` sekaligus di
+  `SETTINGS_SCHEMA`** (form admin membaca `SETTINGS_SCHEMA`).
+- Setelah simpan di admin, `updateTag("content")` meng-invalidate cache →
+  beranda langsung ikut berubah.
+- Katalog ikon lucide hanya boleh dimuat di client. Resolusi nama ikon
+  (`Building2` → `building-2`) ada di `src/components/icons/CatalogIcon.tsx`
+  (komponen client). `src/lib/icon.ts` hanya berisi helper string, aman
+  dipakai di Server Component.
+
 ## Tailwind v4
 
 Token tema didefinisikan di `src/app/globals.css` (`:root` + `@theme inline`). Hati-hati tabrakan nama dengan utilitas bawaan — token bernama `cover` menghasilkan `bg-cover` yang bentrok dengan `background-size: cover`. Itu sebabnya token warna sampul bernama `bookcover`, dan kartu buku memakai nilai literal `bg-[#3d2b2e]`.

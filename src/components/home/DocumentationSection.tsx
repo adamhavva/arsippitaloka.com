@@ -1,13 +1,17 @@
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSettings } from "@/lib/site-settings";
 
 export default async function DocumentationSection() {
   "use cache";
-  const doc = await prisma.documentation.findFirst({
-    where: { published: true },
-    orderBy: { eventDate: "desc" },
-  });
+  const [doc, settings] = await Promise.all([
+    prisma.documentation.findFirst({
+      where: { published: true },
+      orderBy: { eventDate: "desc" },
+    }),
+    getSettings(),
+  ]);
 
   if (!doc) return null;
 
@@ -26,14 +30,14 @@ export default async function DocumentationSection() {
 
         <div>
           <p className="text-sm font-medium text-maroon">
-            Dokumentasi &amp; Arsip Digital
+            {settings["home.documentation.eyebrow"]}
           </p>
           <h2 className="font-heading mt-2 text-2xl font-bold text-black md:text-3xl">
             {doc.title}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-neutral-600">
             <span className="font-semibold text-black">
-              Rieke Diah Pitaloka,
+              {settings["home.documentation.signature"]}
             </span>{" "}
             {doc.lead}
           </p>

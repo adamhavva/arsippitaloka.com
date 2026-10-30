@@ -1,10 +1,13 @@
 import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_SETTINGS } from "@/lib/site-settings-defaults";
+
+export { DEFAULT_SETTINGS };
 
 export type SettingField = {
   key: string;
   label: string;
-  type: "text" | "textarea" | "boolean";
+  type: "text" | "textarea" | "boolean" | "lines";
   group: string;
   help?: string;
 };
@@ -12,7 +15,7 @@ export type SettingField = {
 /**
  * Skema pengaturan situs. Kunci WAJIB sama dengan yang dipakai seed dan
  * landing page — kalau menambah key baru, tambahkan juga default-nya di
- * `prisma/seed.ts`.
+ * `DEFAULT_SETTINGS`.
  */
 export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "company.name", label: "Nama perusahaan", type: "text", group: "Profil" },
@@ -23,6 +26,33 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "company.email", label: "Email", type: "text", group: "Profil" },
   { key: "company.logoUrl", label: "URL logo", type: "text", group: "Profil" },
   { key: "company.copyright", label: "Teks copyright", type: "text", group: "Profil" },
+
+  { key: "home.categories.eyebrow", label: "Judul kecil kategori", type: "text", group: "Halaman Utama" },
+  { key: "home.categories.title", label: "Judul kategori", type: "text", group: "Halaman Utama" },
+  { key: "home.categories.button", label: "Tombol kategori", type: "text", group: "Halaman Utama" },
+  { key: "home.courses.eyebrow", label: "Judul kecil buku", type: "text", group: "Halaman Utama" },
+  { key: "home.courses.title", label: "Judul buku", type: "text", group: "Halaman Utama" },
+  { key: "home.courses.button", label: "Tombol buku", type: "text", group: "Halaman Utama" },
+  { key: "home.courses.readButton", label: "Tombol baca buku", type: "text", group: "Halaman Utama" },
+  { key: "home.courses.priceSuffix", label: "Akufiks harga", type: "text", group: "Halaman Utama" },
+  { key: "home.viral.eyebrow", label: "Judul kecil #ViralForJustice", type: "text", group: "Halaman Utama" },
+  { key: "home.viral.title", label: "Judul #ViralForJustice", type: "text", group: "Halaman Utama" },
+  { key: "home.viral.subtitle", label: "Nama di #ViralForJustice", type: "text", group: "Halaman Utama" },
+  { key: "home.viral.body", label: "Paragraf #ViralForJustice", type: "textarea", group: "Halaman Utama" },
+  { key: "home.viral.image", label: "Gambar #ViralForJustice", type: "text", group: "Halaman Utama" },
+  { key: "home.documentation.eyebrow", label: "Judul kecil dokumentasi", type: "text", group: "Halaman Utama" },
+  { key: "home.documentation.signature", label: "Nama penanda dokumentasi", type: "text", group: "Halaman Utama" },
+
+  { key: "footer.browse.title", label: "Judul kolom Browse", type: "text", group: "Footer" },
+  { key: "footer.browse.links", label: "Tautan Browse (satu per baris)", type: "lines", group: "Footer" },
+  { key: "footer.platform.title", label: "Judul kolom Platform", type: "text", group: "Footer" },
+  { key: "footer.platform.links", label: "Tautan Platform (satu per baris)", type: "lines", group: "Footer" },
+  { key: "footer.subscribe.placeholder", label: "Placeholder email", type: "text", group: "Footer" },
+  { key: "footer.subscribe.button", label: "Tombol langganan", type: "text", group: "Footer" },
+  { key: "footer.subscribe.text", label: "Teks langganan", type: "textarea", group: "Footer" },
+  { key: "footer.legal.privacy", label: "Tautan Privacy Policy", type: "text", group: "Footer" },
+  { key: "footer.legal.terms", label: "Tautan Terms of Service", type: "text", group: "Footer" },
+  { key: "footer.legal.cookies", label: "Tautan Cookies Settings", type: "text", group: "Footer" },
 
   { key: "company.vision", label: "Visi", type: "textarea", group: "Copy Landing Page" },
   { key: "company.mission", label: "Misi", type: "textarea", group: "Copy Landing Page" },
@@ -40,6 +70,8 @@ export const SETTINGS_SCHEMA: SettingField[] = [
 
 export const SETTING_GROUPS = [
   "Profil",
+  "Halaman Utama",
+  "Footer",
   "Copy Landing Page",
   "Pembayaran",
   "Pajak",
@@ -48,11 +80,19 @@ export const SETTING_GROUPS = [
 /**
  * Baca semua pengaturan situs. Di-cache supaya landing page tidak query
  * DB tiap request; tag "content" di-invalidate dari server action admin.
+ * Nilai kosong di DB otomatis memakai nilai bawaan.
  */
 export async function getSettings(): Promise<Record<string, string>> {
   "use cache";
   cacheTag("content");
 
   const rows = await prisma.siteSetting.findMany();
-  return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+  const merged: Record<string, string> = { ...DEFAULT_SETTINGS };
+
+  for (const row of rows) {
+    const value = row.value?.trim() ? row.value : DEFAULT_SETTINGS[row.key] ?? "";
+    merged[row.key] = value;
+  }
+
+  return merged;
 }

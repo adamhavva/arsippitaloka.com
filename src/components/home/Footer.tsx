@@ -1,25 +1,27 @@
 import Image from "next/image";
+import { getSettings } from "@/lib/site-settings";
 
-const browseLinks = [
-  "E- Book",
-  "Social Media",
-  "Dokumentasi",
-  "Biografi",
-  "Berita Terkini",
-  "Perpustakaan Digital",
-  "Subscription",
-];
+function toList(value: string): string[] {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
-const platformLinks = ["Contact", "Help", "About"];
+export default async function Footer() {
+  "use cache";
+  const settings = await getSettings();
 
-export default function Footer() {
+  const browseLinks = toList(settings["footer.browse.links"]);
+  const platformLinks = toList(settings["footer.platform.links"]);
+
   return (
     <footer className="bg-maroon-dark px-6 pt-16 pb-6 text-white md:px-10">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 md:grid-cols-3">
         <div>
           <Image
-            src="/images/logo-pitaloka.png"
-            alt="Pitaloka"
+            src={settings["company.logoUrl"] || "/images/logo-pitaloka.png"}
+            alt={settings["company.name"] || "Pitaloka"}
             width={160}
             height={60}
             className="h-9 w-auto"
@@ -27,21 +29,22 @@ export default function Footer() {
           <div className="mt-6 flex max-w-sm overflow-hidden rounded-full bg-white p-1.5">
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder={settings["footer.subscribe.placeholder"]}
               className="flex-1 bg-transparent px-4 text-sm text-black outline-none placeholder:text-neutral-400"
             />
             <button className="rounded-full bg-black px-5 py-2 text-sm font-medium text-white">
-              Search
+              {settings["footer.subscribe.button"]}
             </button>
           </div>
           <p className="mt-3 max-w-sm text-xs text-white/60">
-            By subscribing, you agree to our Privacy Policy and consent to
-            receive updates from our company.
+            {settings["footer.subscribe.text"]}
           </p>
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-white/90">Browse</p>
+          <p className="text-sm font-semibold text-white/90">
+            {settings["footer.browse.title"]}
+          </p>
           <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-white/70">
             {browseLinks.map((l) => (
               <span key={l}>{l}</span>
@@ -50,7 +53,9 @@ export default function Footer() {
         </div>
 
         <div>
-          <p className="text-sm font-semibold text-white/90">Platform</p>
+          <p className="text-sm font-semibold text-white/90">
+            {settings["footer.platform.title"]}
+          </p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-white/70">
             {platformLinks.map((l) => (
               <span key={l}>{l}</span>
@@ -61,11 +66,11 @@ export default function Footer() {
 
       <div className="mx-auto mt-14 max-w-6xl border-t border-white/15 pt-6">
         <div className="flex flex-col items-center justify-between gap-3 text-xs text-white/70 md:flex-row">
-          <span>@2026 Pitaloka. All Rights Reserved.</span>
+          <span>{settings["company.copyright"]}</span>
           <div className="flex gap-6">
-            <span className="underline">Privacy Policy</span>
-            <span className="underline">Terms of Service</span>
-            <span className="underline">Cookies Settings</span>
+            <span className="underline">{settings["footer.legal.privacy"]}</span>
+            <span className="underline">{settings["footer.legal.terms"]}</span>
+            <span className="underline">{settings["footer.legal.cookies"]}</span>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
 import { hashPassword } from "../src/lib/password";
+import { DEFAULT_SETTINGS } from "../src/lib/site-settings-defaults";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -36,25 +37,9 @@ const books = [
 ];
 
 const settings: Record<string, string> = {
-  "company.name": "Pitaloka",
-  "company.tagline": "Pustaka digital & e-book",
-  "company.description":
-    "Arsip Pitaloka adalah pustaka digital yang membuat akses pengetahuan lebih mudah.",
-  "company.vision": "Menjadikan ilmu dan karya Rieke Diah Pitaloka tersedia untuk semua.",
-  "company.mission": "Menyimpan dan lestarkan karya melalui media digital.",
-  "company.address": "Jakarta, Indonesia",
-  "company.phone": "",
-  "company.email": "halo@arsippitaloka.com",
-  "company.social.tiktok": "",
-  "company.social.youtube": "",
-  "company.social.instagram": "",
-  "company.copyright": "©2026 Pitaloka. All Rights Reserved.",
-  "company.logoUrl": "/images/logo-pitaloka.png",
-  "payment.usdToIdr": "16000",
-  "tax.enabled": "false",
-  "tax.type": "percentage",
-  "tax.percentage": "11",
-  "tax.fixedAmount": "5000",
+  ...DEFAULT_SETTINGS,
+  // Nilai ini sama dengan default; ditulis eksplisit agar mudah diubah.
+  "company.copyright": "@2026 Pitaloka. All Rights Reserved.",
 };
 
 const tiktokPosts = [

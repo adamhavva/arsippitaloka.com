@@ -57,11 +57,11 @@ export default function SettingsForm({
                     <label className="mb-1 block text-sm font-medium text-neutral-700">
                       {field.label}
                     </label>
-                    {field.type === "textarea" ? (
+                    {field.type === "textarea" || field.type === "lines" ? (
                       <textarea
                         name={field.key}
                         defaultValue={value}
-                        rows={3}
+                        rows={field.type === "lines" ? 5 : 3}
                         className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"
                       />
                     ) : (

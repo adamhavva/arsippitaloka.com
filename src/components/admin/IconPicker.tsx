@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { DynamicIcon, iconNames } from "lucide-react/dynamic";
-import { resolveIconName } from "@/lib/icon";
+import { iconPascal } from "@/lib/icon";
+import { resolveIconName } from "@/components/icons/CatalogIcon";
 
 /**
  * Pemilih ikon lucide-react: klik kolom ikon → galeri semua ikon terbuka,
@@ -10,14 +11,7 @@ import { resolveIconName } from "@/lib/icon";
  * (mis. "BookOpen") supaya konsisten dengan data yang sudah ada.
  */
 
-/** "book-open" → "BookOpen". */
-function toPascal(kebab: string): string {
-  return kebab
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
-}
+const toPascal = iconPascal;
 
 export default function IconPicker({
   name,

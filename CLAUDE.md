@@ -91,6 +91,20 @@ Hanya PENDING (belum dibayar) dan CANCELLED yang belum memberi akses.
 `ACCESS_STATUSES` di `src/lib/library.ts` adalah satu sumber kebenaran untuk
 aturan ini; `canAccessBook()` memakainya untuk `/api/read` dan `/api/download`.
 
+### Katalog publik & tab yang bisa diklik
+
+- `/buku` — katalog publik: filter tab (`?tab=`) dan kategori (`?kategori=`),
+  dipaginasi. `/buku/[slug]` — detail buku (metadata lengkap, tombol
+  Baca/Unduh bila pemili, CTA Beli bila belum login).
+- Baris tab di beranda **bisa diklik**: `CoursesBrowser` (client) menyaring
+  buku sesuai tab yang dipilih, dan menampilkan empty state kalau tabnya belum
+  ada buku. Tab & kategori dikelola di admin → **Tab Konten** (`/admin/tab`) dan
+  **Kategori** (`/admin/category`); buku diberi tab lewat field "Tab Konten"
+  di `/admin/book`.
+- Kartu kategori di beranda dan tautan "Browse" di footer menuju katalog
+  (`/buku?kategori=…` / `/buku?tab=…`). `Hero.tsx` tidak diubah, jadi overlay
+  nav "Books" masih menuju `#`.
+
 ### Fixture pembeli
 
 `npx tsx scripts/buyer-library-fixture.ts create` membuat pembeli sementara

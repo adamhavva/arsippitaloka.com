@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 
 function toList(value: string): string[] {
@@ -10,7 +12,15 @@ function toList(value: string): string[] {
 
 export default async function Footer() {
   "use cache";
-  const settings = await getSettings();
+  const [settings, tabs] = await Promise.all([
+    getSettings(),
+    prisma.contentTab.findMany({ select: { id: true, label: true, slug: true } }),
+  ]);
+
+  // Tautan "Browse" diarahkan ke tab katalog yang namanya cocok.
+  const slugByLabel = new Map(
+    tabs.map((tab) => [tab.label.toLowerCase().replace(/[^a-z0-9]/g, ""), tab.slug]),
+  );
 
   const browseLinks = toList(settings["footer.browse.links"]);
   const platformLinks = toList(settings["footer.platform.links"]);
@@ -46,9 +56,18 @@ export default async function Footer() {
             {settings["footer.browse.title"]}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-white/70">
-            {browseLinks.map((l) => (
-              <span key={l}>{l}</span>
-            ))}
+            {browseLinks.map((l) => {
+              const slug = slugByLabel.get(
+                l.toLowerCase().replace(/[^a-z0-9]/g, ""),
+              );
+              return slug ? (
+                <Link key={l} href={`/buku?tab=${slug}`} className="hover:text-white">
+                  {l}
+                </Link>
+              ) : (
+                <span key={l}>{l}</span>
+              );
+            })}
           </div>
         </div>
 

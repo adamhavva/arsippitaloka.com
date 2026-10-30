@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import CatalogIcon from "@/components/icons/CatalogIcon";
@@ -20,18 +21,22 @@ export default async function FeatureCategories() {
             {settings["home.categories.title"]}
           </h2>
         </div>
-        <button className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white">
+        <Link
+          href="/buku"
+          className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+        >
           {settings["home.categories.button"]}
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
         {categories.map((category) => {
           if (category.highlight) {
             return (
-              <div
+              <Link
                 key={category.id}
-                className="flex flex-col items-center justify-center gap-3 rounded-xl bg-maroon-dark py-8 text-center"
+                href={`/buku?kategori=${category.slug}`}
+                className="flex flex-col items-center justify-center gap-3 rounded-xl bg-maroon-dark py-8 text-center transition hover:opacity-90"
               >
                 <span className="text-lg font-black leading-none text-yellow-400">
                   #VIRAL
@@ -43,14 +48,15 @@ export default async function FeatureCategories() {
                 <span className="text-sm font-medium text-white">
                   {category.name}
                 </span>
-              </div>
+              </Link>
             );
           }
 
           return (
-            <div
+            <Link
               key={category.id}
-              className="flex flex-col items-center justify-center gap-3 rounded-xl bg-neutral-50 py-8"
+              href={`/buku?kategori=${category.slug}`}
+              className="flex flex-col items-center justify-center gap-3 rounded-xl bg-neutral-50 py-8 transition hover:bg-neutral-100"
             >
               {category.icon ? (
                 <CatalogIcon
@@ -65,7 +71,7 @@ export default async function FeatureCategories() {
               <span className="text-sm font-medium text-black">
                 {category.name}
               </span>
-            </div>
+            </Link>
           );
         })}
       </div>

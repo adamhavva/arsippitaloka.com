@@ -95,6 +95,29 @@ Prisma `orderBy` menerima `{ field, dir }`, bukan `{ [field]: dir }` — ubah du
 
 Hak akses file e-book (`/api/download/[bookId]`, `/api/read/[bookId]`): user harus punya order berstatus **PAID atau COMPLETED** untuk buku tersebut, atau buku itu `isFree` dan belum diarsipkan. File e-book hasil upload disimpan di `storage/private/` (di luar `public/`) supaya tidak bisa diakses langsung lewat URL — hanya lewat route di atas.
 
+## CRUD admin generik
+
+Definisi entitas ada di `src/lib/admin/entities.ts` — satu sumber kebenaran
+label, kolom tabel, dan field form. Field bertipe khusus:
+
+- `icon` — picker lucide-react (`src/components/admin/IconPicker.tsx`). Nilai
+  disimpan PascalCase (mis. `BookOpen`). Resolusi nama ikon pakai
+  `resolveIconName` di `src/lib/icon.ts`; nama kanonik lucide memakai
+  kebab-case dan **bisa mengandung angka** (`building-2`), jadi konversi
+  Pascal→kebab wajib memecah angka (`Building2` → `building-2`).
+- `category` — kartu kategori + ikon (`src/components/admin/CategoryPicker.tsx`).
+- `tiktok` — textarea + preview iframe (`src/components/admin/TikTokField.tsx`).
+
+Field `slugFrom` diisi otomatis dari field sumber (live saat mengetik) dan
+dibuat unik di server (`src/lib/admin/actions.ts` → `slugTaken`, suffix `-2`,
+`-3`). Field `auto`/`autoFrom` terisi dari file yang diunggah: `format`,
+`size`, `words`, `pages` (parser PDF tanpa dependency: `src/lib/pdf-meta.ts`).
+
+Kolom yang **wajib di DB** harus punya `defaultValue` di definisi field,
+dan `pruneEmpty` membuang nilai `null` supaya kolom wajib tidak gagal
+disimpan. Contoh: `Category.order`, `ContentTab.order`, `Book.readCount`
+wajib `defaultValue: 0`.
+
 ## Tailwind v4
 
 Token tema didefinisikan di `src/app/globals.css` (`:root` + `@theme inline`). Hati-hati tabrakan nama dengan utilitas bawaan — token bernama `cover` menghasilkan `bg-cover` yang bentrok dengan `background-size: cover`. Itu sebabnya token warna sampul bernama `bookcover`, dan kartu buku memakai nilai literal `bg-[#3d2b2e]`.

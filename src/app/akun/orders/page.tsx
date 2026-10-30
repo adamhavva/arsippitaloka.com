@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/library";
+import Pagination from "@/components/Pagination";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 export const metadata = {
   title: "Riwayat Order — Arsip Pitaloka",
@@ -24,22 +26,37 @@ function rupiah(value: unknown): string {
   }).format(Number(value ?? 0));
 }
 
-export default function AccountOrdersPage() {
+export default function AccountOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
-      <AccountOrdersPageContent />
+      <AccountOrdersPageContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function AccountOrdersPageContent() {
+async function AccountOrdersPageContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   await connection();
 
   const user = await requireUser();
 
+  const sp = await searchParams;
+  const perPage = parsePerPage(sp.per);
+  const total = await prisma.order.count({ where: { userId: user.id } });
+  const page = clampPage(parsePage(sp.page), total, perPage);
+
   const orders = await prisma.order.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
+    skip: (page - 1) * perPage,
+    take: perPage,
     include: { items: { select: { id: true, title: true, qty: true, priceUsd: true } } },
   });
 
@@ -50,7 +67,7 @@ async function AccountOrdersPageContent() {
           Riwayat Order
         </h1>
         <p className="text-sm text-neutral-500">
-          {orders.length} order tercatat.
+          {total} order tercatat.
         </p>
       </header>
 
@@ -123,6 +140,14 @@ async function AccountOrdersPageContent() {
           ))}
         </div>
       )}
+
+      <Pagination
+        basePath="/akun/orders"
+        page={page}
+        perPage={perPage}
+        total={total}
+        label="order"
+      />
     </div>
   );
 }

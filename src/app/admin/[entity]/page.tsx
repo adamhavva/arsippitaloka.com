@@ -6,6 +6,8 @@ import { getEntity } from "@/lib/admin/entities";
 import { getDelegate } from "@/lib/admin/delegates";
 import EntityTable from "@/lib/admin/table";
 import EntityForm from "@/components/admin/EntityForm";
+import Pagination from "@/components/Pagination";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import type { FieldDef } from "@/lib/admin/entities";
 
 export default function AdminEntityPage({
@@ -13,7 +15,7 @@ export default function AdminEntityPage({
   searchParams,
 }: {
   params: Promise<{ entity: string }>;
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; page?: string; per?: string }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
@@ -27,7 +29,7 @@ async function AdminEntityPageContent({
   searchParams,
 }: {
   params: Promise<{ entity: string }>;
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; page?: string; per?: string }>;
 }) {
   await connection();
 
@@ -49,8 +51,15 @@ async function AdminEntityPageContent({
     ? { [def.orderBy.field]: def.orderBy.dir }
     : undefined;
 
+  // Pagination: minimal 5 baris per halaman.
+  const perPage = parsePerPage(sp.per);
+  const total = await delegate.count();
+  const page = clampPage(parsePage(sp.page), total, perPage);
+
   const rows: Record<string, unknown>[] = await delegate.findMany({
     orderBy,
+    skip: (page - 1) * perPage,
+    take: perPage,
   });
 
   // Isi opsi select yang sumbernya entitas lain (mis. tab konten untuk buku).
@@ -79,7 +88,13 @@ async function AdminEntityPageContent({
     });
   }
 
-  const editing = editId ? rows.find((row) => String(row.id) === editId) : null;
+  // Baris yang sedang diedit boleh berada di halaman lain → ambil terpisah.
+  const editing = editId
+    ? ((await delegate.findUnique({ where: { id: editId } })) as Record<
+        string,
+        unknown
+      > | null)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -102,6 +117,14 @@ async function AdminEntityPageContent({
       )}
 
       <EntityTable def={def} fields={fields} rows={rows} />
+
+      <Pagination
+        basePath={`/admin/${def.key}`}
+        page={page}
+        perPage={perPage}
+        total={total}
+        label={def.label.toLowerCase()}
+      />
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import Image from "next/image";
 import { Download, BookOpen } from "lucide-react";
 import { requireUser, getPurchasedItems } from "@/lib/library";
+import Pagination from "@/components/Pagination";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 export const metadata = {
   title: "Pustaka Saya — Arsip Pitaloka",
@@ -14,15 +16,23 @@ function formatBytes(bytes: number | null): string {
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
 }
 
-export default function AccountLibraryPage() {
+export default function AccountLibraryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
-      <AccountLibraryPageContent />
+      <AccountLibraryPageContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function AccountLibraryPageContent() {
+async function AccountLibraryPageContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   await connection();
 
   const user = await requireUser();
@@ -42,6 +52,13 @@ async function AccountLibraryPageContent() {
       });
     }
   }
+
+  const sp = await searchParams;
+  const perPage = parsePerPage(sp.per);
+  const allBooks = [...books.values()];
+  const total = allBooks.length;
+  const page = clampPage(parsePage(sp.page), total, perPage);
+  const visibleBooks = allBooks.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="space-y-6">
@@ -64,7 +81,7 @@ async function AccountLibraryPageContent() {
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {[...books.values()].map(({ book, createdAt }) => {
+          {visibleBooks.map(({ book, createdAt }) => {
             const adaFile = Boolean(book.fileUrl);
             const bolehUnduh = adaFile && (book.isDownloadable || book.isFree);
 
@@ -155,6 +172,14 @@ async function AccountLibraryPageContent() {
           })}
         </div>
       )}
+
+      <Pagination
+        basePath="/akun"
+        page={page}
+        perPage={perPage}
+        total={total}
+        label="buku"
+      />
     </div>
   );
 }

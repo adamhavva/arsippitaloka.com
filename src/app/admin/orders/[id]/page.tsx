@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import OrderStatusControl from "@/components/admin/OrderStatusControl";
+import Pagination from "@/components/Pagination";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 export const metadata = {
   title: "Detail Order — Admin",
@@ -19,20 +21,24 @@ function rupiah(value: unknown): string {
 
 export default function AdminOrderDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
-      <AdminOrderDetailPageContent params={params} />
+      <AdminOrderDetailPageContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
 async function AdminOrderDetailPageContent({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   await connection();
 
@@ -52,6 +58,15 @@ async function AdminOrderDetailPageContent({
     },
   });
   if (!order) notFound();
+
+  const sp = await searchParams;
+  const perPage = parsePerPage(sp.per);
+  const itemTotal = order.items.length;
+  const page = clampPage(parsePage(sp.page), itemTotal, perPage);
+  const visibleItems = order.items.slice(
+    (page - 1) * perPage,
+    page * perPage,
+  );
 
   const dateFmt = new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
@@ -136,7 +151,7 @@ async function AdminOrderDetailPageContent({
             </tr>
           </thead>
           <tbody>
-            {order.items.map((item) => (
+            {visibleItems.map((item) => (
               <tr
                 key={item.id}
                 className="border-b border-neutral-100 last:border-0"
@@ -154,6 +169,14 @@ async function AdminOrderDetailPageContent({
           </tbody>
         </table>
       </section>
+
+      <Pagination
+        basePath={`/admin/orders/${order.id}`}
+        page={page}
+        perPage={perPage}
+        total={itemTotal}
+        label="item"
+      />
 
       <section className="rounded-xl border border-neutral-200 bg-white p-5">
         <h2 className="font-heading text-lg font-bold text-black">Ringkasan</h2>

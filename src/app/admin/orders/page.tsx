@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import Pagination from "@/components/Pagination";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 export const metadata = {
   title: "Order — Admin",
@@ -29,7 +31,7 @@ function rupiah(value: unknown): string {
 export default function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; per?: string }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
@@ -41,7 +43,7 @@ export default function AdminOrdersPage({
 async function AdminOrdersPageContent({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; per?: string }>;
 }) {
   await connection();
 
@@ -53,21 +55,29 @@ async function AdminOrdersPageContent({
     sp.status && STATUSES.includes(sp.status as never) ? sp.status : undefined;
   const q = sp.q?.trim();
 
+  const where = {
+    ...(status ? { status: status as never } : {}),
+    ...(q
+      ? {
+          user: {
+            OR: [
+              { email: { contains: q, mode: "insensitive" as const } },
+              { name: { contains: q, mode: "insensitive" as const } },
+            ],
+          },
+        }
+      : {}),
+  };
+
+  const perPage = parsePerPage(sp.per);
+  const total = await prisma.order.count({ where });
+  const page = clampPage(parsePage(sp.page), total, perPage);
+
   const orders = await prisma.order.findMany({
-    where: {
-      ...(status ? { status: status as never } : {}),
-      ...(q
-        ? {
-            user: {
-              OR: [
-                { email: { contains: q, mode: "insensitive" } },
-                { name: { contains: q, mode: "insensitive" } },
-              ],
-            },
-          }
-        : {}),
-    },
+    where,
     orderBy: { createdAt: "desc" },
+    skip: (page - 1) * perPage,
+    take: perPage,
     include: {
       user: { select: { name: true, email: true } },
       _count: { select: { items: true } },
@@ -85,7 +95,7 @@ async function AdminOrdersPageContent({
       <header>
         <h1 className="font-heading text-2xl font-bold text-black">Order</h1>
         <p className="text-sm text-neutral-500">
-          {orders.length} order. Ubah status manual di halaman detail.
+          {total} order. Ubah status manual di halaman detail.
         </p>
       </header>
 
@@ -186,6 +196,15 @@ async function AdminOrdersPageContent({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        basePath="/admin/orders"
+        page={page}
+        perPage={perPage}
+        total={total}
+        label="order"
+        params={{ status, q }}
+      />
     </div>
   );
 }

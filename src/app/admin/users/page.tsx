@@ -3,27 +3,44 @@ import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import UserRowActions from "@/components/admin/UserRowActions";
+import Pagination from "@/components/Pagination";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 export const metadata = {
   title: "User — Admin",
 };
 
-export default function AdminUsersPage() {
+export default function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
-      <AdminUsersPageContent />
+      <AdminUsersPageContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function AdminUsersPageContent() {
+async function AdminUsersPageContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; per?: string }>;
+}) {
   await connection();
 
   const admin = await requireAdmin();
   if (!admin) return null;
 
+  const sp = await searchParams;
+  const perPage = parsePerPage(sp.per);
+  const total = await prisma.user.count();
+  const page = clampPage(parsePage(sp.page), total, perPage);
+
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
+    skip: (page - 1) * perPage,
+    take: perPage,
     select: {
       id: true,
       name: true,
@@ -48,8 +65,8 @@ async function AdminUsersPageContent() {
       <header>
         <h1 className="font-heading text-2xl font-bold text-black">User</h1>
         <p className="text-sm text-neutral-500">
-          {users.length} akun terdaftar. Ubah role, reset password, atau
-          nonaktifkan user.
+          {total} akun terdaftar. Ubah role, reset password, atau nonaktifkan
+          user.
         </p>
       </header>
 
@@ -111,6 +128,14 @@ async function AdminUsersPageContent() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        basePath="/admin/users"
+        page={page}
+        perPage={perPage}
+        total={total}
+        label="akun"
+      />
     </div>
   );
 }

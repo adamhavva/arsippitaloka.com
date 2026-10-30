@@ -77,6 +77,20 @@ Halaman yang membaca cookie/params (area admin & area pembeli) **tidak** bisa me
 
 CRUD admin generik: konfigurasi entitas ada di `src/lib/admin/entities.ts` (satu sumber kebenaran untuk label, kolom tabel, field form). Server action generik di `src/lib/admin/actions.ts` — nama model wajib ada di allowlist `ENTITY_MODELS`, jangan pakai string model dari URL.
 
+## Pagination
+
+Setiap tabel/list di area admin dan area pembeli wajib memakai komponen
+`src/components/Pagination.tsx` (query `?page=` dan `?per=`). Ukuran baris per
+halaman: **5, 10, 25, 50** (default 10, minimal 5 — nilai lain diabaikan).
+Helper parsing ada di `src/lib/pagination.ts` (`parsePage`, `parsePerPage`,
+`clampPage`).
+
+Paginasi dilakukan di server (Prisma `skip`/`take` + `count`), bukan di client.
+Halaman yang sudah punya filter harus meneruskan filter itu ke `Pagination`
+lewat prop `params` supaya tidak hilang saat pindah halaman. Baris yang sedang
+diedit diambil terpisah dengan `findUnique` — bukan dari daftar baris halaman
+sekarang — supaya edit tetap jalan walau barisnya ada di halaman lain.
+
 Prisma `orderBy` menerima `{ field, dir }`, bukan `{ [field]: dir }` — ubah dulu sebelum meneruskan ke Prisma.
 
 Hak akses file e-book (`/api/download/[bookId]`, `/api/read/[bookId]`): user harus punya order berstatus **PAID atau COMPLETED** untuk buku tersebut, atau buku itu `isFree` dan belum diarsipkan. File e-book hasil upload disimpan di `storage/private/` (di luar `public/`) supaya tidak bisa diakses langsung lewat URL — hanya lewat route di atas.

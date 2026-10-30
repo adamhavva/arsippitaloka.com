@@ -33,9 +33,15 @@ async function cleanup() {
     await prisma.order.deleteMany({ where: { userId: user.id } });
     await prisma.user.delete({ where: { id: user.id } });
   }
+  // Sampul ebook tidak dihapus — file contohnya tetap menempel di seed-book-0
+  // supaya fitur unduh/baca di area pembeli tetap bisa dicoba.
   await prisma.book.update({
     where: { id: "seed-book-0" },
-    data: { fileUrl: null, isDownloadable: false },
+    data: {
+      fileUrl: "/files/2026/11/contoh-ebook.pdf",
+      isDownloadable: true,
+      fileSize: 398,
+    },
   });
   unlinkSync(OUT);
   console.log("akun sementara dihapus");

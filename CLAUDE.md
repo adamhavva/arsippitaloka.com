@@ -74,6 +74,28 @@ Halaman yang membaca cookie/params (area admin & area pembeli) **tidak** bisa me
 
 - **Area admin (`/admin`)** — back-office untuk mengelola konten: buku, kategori, tab konten, dokumentasi, TikTok, order, user, dan profil perusahaan. Guard: `src/proxy.ts` (lapis 1, JWT) + `requireAdmin()` (lapis 2, cek role ke DB).
 - **Area pembeli (`/akun`)** — untuk user yang login biasa: Pustaka Saya (buku yang sudah dibeli), Riwayat Order, dan Profil. Guard: `src/proxy.ts` mensyaratkan sesi (role apa pun), `requireUser()` memverifikasi user masih aktif.
+- Setelah sign-in, pembeli diarahkan ke `/akun` dan admin ke `/admin`
+  (`src/components/auth/LoginForm.tsx`), kecuali ada `?callbackUrl=` eksplisit.
+
+### Pustaka pembeli harus lengkap
+
+`getLibrary()` (`src/lib/library.ts`) mengembalikan **semua** buku yang
+relevan dengan user — tidak ada yang disembunyikan:
+
+- semua item order apa pun statusnya (PAID/SHIPPED/PENDING/CANCELLED), digabung
+  per buku jadi satu kartu + riwayat pembelanjaannya;
+- buku gratis yang belum pernah dibeli (dan belum diarsipkan).
+
+Status `SHIPPED` **memberi hak akses** — artinya sudah dibayar lalu dikirim.
+Hanya PENDING (belum dibayar) dan CANCELLED yang belum memberi akses.
+`ACCESS_STATUSES` di `src/lib/library.ts` adalah satu sumber kebenaran untuk
+aturan ini; `canAccessBook()` memakainya untuk `/api/read` dan `/api/download`.
+
+### Fixture pembeli
+
+`npx tsx scripts/buyer-library-fixture.ts create` membuat pembeli sementara
+dengan order PAID/SHIPPED/PENDING/CANCELLED + buku gratis, untuk menguji
+kelengkapan pustaka. Bersihkan dengan `... cleanup`.
 
 CRUD admin generik: konfigurasi entitas ada di `src/lib/admin/entities.ts` (satu sumber kebenaran untuk label, kolom tabel, field form). Server action generik di `src/lib/admin/actions.ts` — nama model wajib ada di allowlist `ENTITY_MODELS`, jangan pakai string model dari URL.
 

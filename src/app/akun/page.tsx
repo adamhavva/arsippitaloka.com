@@ -1,13 +1,37 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import Image from "next/image";
-import { Download, BookOpen } from "lucide-react";
-import { requireUser, getPurchasedItems } from "@/lib/library";
+import { Download, BookOpen, Clock, Ban } from "lucide-react";
+import { requireUser, getLibrary, summarizeLibrary } from "@/lib/library";
+import type { LibraryEntry } from "@/lib/library";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 export const metadata = {
   title: "Pustaka Saya — Arsip Pitaloka",
+};
+
+const FILTERS = [
+  { key: "semua", label: "Semua" },
+  { key: "dibeli", label: "Dibeli" },
+  { key: "gratis", label: "Gratis" },
+  { key: "menunggu", label: "Menunggu Pembayaran" },
+] as const;
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "Menunggu pembayaran",
+  PAID: "Lunas",
+  SHIPPED: "Dikirim",
+  COMPLETED: "Selesai",
+  CANCELLED: "Dibatalkan",
+};
+
+const STATUS_STYLE: Record<string, string> = {
+  PENDING: "bg-amber-100 text-amber-800",
+  PAID: "bg-green-100 text-green-700",
+  SHIPPED: "bg-blue-100 text-blue-700",
+  COMPLETED: "bg-neutral-200 text-neutral-700",
+  CANCELLED: "bg-red-100 text-red-700",
 };
 
 function formatBytes(bytes: number | null): string {
@@ -16,10 +40,19 @@ function formatBytes(bytes: number | null): string {
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
 }
 
+function formatDate(date: Date | null): string {
+  if (!date) return "-";
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export default function AccountLibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; filter?: string }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
@@ -31,34 +64,30 @@ export default function AccountLibraryPage({
 async function AccountLibraryPageContent({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; filter?: string }>;
 }) {
   await connection();
 
   const user = await requireUser();
-  const items = await getPurchasedItems(user.id);
-
-  // Satu buku bisa muncul di beberapa order — ambil satu entri terbaru.
-  const books = new Map<
-    string,
-    { book: (typeof items)[number]["book"]; orderId: string; createdAt: Date }
-  >();
-  for (const item of items) {
-    if (!books.has(item.book.id)) {
-      books.set(item.book.id, {
-        book: item.book,
-        orderId: item.order.id,
-        createdAt: item.order.createdAt,
-      });
-    }
-  }
+  const entries = await getLibrary(user.id);
+  const summary = summarizeLibrary(entries);
 
   const sp = await searchParams;
   const perPage = parsePerPage(sp.per);
-  const allBooks = [...books.values()];
-  const total = allBooks.length;
+  const filter = FILTERS.some((f) => f.key === sp.filter) ? sp.filter! : "semua";
+
+  const filtered = entries.filter((entry) => {
+    if (filter === "dibeli") return entry.source === "purchase";
+    if (filter === "gratis") return entry.source === "free";
+    if (filter === "menunggu") {
+      return entry.latestStatus === "PENDING" && !entry.canAccess;
+    }
+    return true;
+  });
+
+  const total = filtered.length;
   const page = clampPage(parsePage(sp.page), total, perPage);
-  const visibleBooks = allBooks.slice((page - 1) * perPage, page * perPage);
+  const visible = filtered.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="space-y-6">
@@ -67,109 +96,62 @@ async function AccountLibraryPageContent({
           Pustaka Saya
         </h1>
         <p className="text-sm text-neutral-500">
-          Buku yang sudah Anda beli. Bisa dibaca online dan diunduh.
+          Semua buku yang Anda miliki — yang sudah dibeli, buku gratis, dan yang
+          masih menunggu pembayaran. Tidak ada yang disembunyikan.
         </p>
       </header>
 
-      {books.size === 0 ? (
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <Stat label="Total koleksi" value={String(summary.total)} />
+        <Stat label="Dibeli" value={String(summary.dibeli)} />
+        <Stat label="Gratis" value={String(summary.gratis)} />
+        <Stat
+          label="Menunggu bayar"
+          value={String(summary.menunggu)}
+          tone={summary.menunggu > 0 ? "amber" : undefined}
+        />
+        <Stat
+          label="Dibatalkan"
+          value={String(summary.dibatalkan)}
+          tone={summary.dibatalkan > 0 ? "red" : undefined}
+        />
+        <Stat label="Total halaman" value={summary.halaman.toLocaleString("id-ID")} />
+      </section>
+
+      <nav className="flex flex-wrap items-center gap-2">
+        {FILTERS.map((item) => (
+          <a
+            key={item.key}
+            href={`/akun?filter=${item.key}`}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+              filter === item.key
+                ? "bg-maroon-dark text-white"
+                : "bg-white text-neutral-700 hover:bg-neutral-200"
+            }`}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      {total === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center">
-          <p className="font-medium text-black">Belum ada buku di pustaka Anda</p>
+          <p className="font-medium text-black">
+            {entries.length === 0
+              ? "Belum ada buku di pustaka Anda"
+              : "Tidak ada buku pada filter ini"}
+          </p>
           <p className="mt-1 text-sm text-neutral-500">
-            Buku yang Anda beli akan muncul di sini beserta tombol baca dan
-            unduh.
+            {entries.length === 0
+              ? "Buku yang Anda beli akan muncul di sini beserta tombol baca dan unduh."
+              : "Coba pilih filter lain, misalnya Semua."}
           </p>
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleBooks.map(({ book, createdAt }) => {
-            const adaFile = Boolean(book.fileUrl);
-            const bolehUnduh = adaFile && (book.isDownloadable || book.isFree);
-
-            return (
-              <article
-                key={book.id}
-                className="flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white"
-              >
-                <div className="relative flex h-40 items-end bg-[#3d2b2e] p-3">
-                  {book.coverUrl ? (
-                    <Image
-                      src={book.coverUrl}
-                      alt={book.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover"
-                    />
-                  ) : null}
-                  <div className="relative z-10 flex gap-2">
-                    {book.isFree ? (
-                      <span className="rounded-full bg-green-500/80 px-2.5 py-1 text-[11px] font-medium text-white">
-                        GRATIS
-                      </span>
-                    ) : null}
-                    {book.archived ? (
-                      <span className="rounded-full bg-black/50 px-2.5 py-1 text-[11px] text-white">
-                        Diarsipkan
-                      </span>
-                    ) : null}
-                    <span className="rounded-full bg-black/40 px-2.5 py-1 text-[11px] text-white backdrop-blur-sm">
-                      {book.pages} Halaman
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-1 flex-col p-4">
-                  <h2 className="font-semibold text-black">{book.title}</h2>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    by {book.author}
-                  </p>
-                  <p className="mt-2 text-[11px] text-neutral-400">
-                    Diperoleh {createdAt.toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-
-                  <div className="mt-auto flex flex-wrap gap-2 pt-4">
-                    {adaFile ? (
-                      <a
-                        href={`/api/read/${book.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white"
-                      >
-                        <BookOpen size={14} /> Baca
-                      </a>
-                    ) : null}
-
-                    {bolehUnduh ? (
-                      <a
-                        href={`/api/download/${book.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-4 py-1.5 text-xs font-medium text-neutral-700"
-                      >
-                        <Download size={14} /> Unduh
-                        {book.fileSize ? (
-                          <span className="text-neutral-400">
-                            {formatBytes(book.fileSize)}
-                          </span>
-                        ) : null}
-                      </a>
-                    ) : null}
-
-                    {!adaFile ? (
-                      <p className="text-xs text-neutral-500">
-                        File e-book belum tersedia.
-                      </p>
-                    ) : !bolehUnduh ? (
-                      <p className="text-xs text-neutral-500">
-                        Buku ini belum bisa diunduh.
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+          {visible.map((entry) => (
+            <LibraryCard key={entry.book.id} entry={entry} />
+          ))}
         </div>
       )}
 
@@ -179,7 +161,248 @@ async function AccountLibraryPageContent({
         perPage={perPage}
         total={total}
         label="buku"
+        params={filter !== "semua" ? { filter } : undefined}
       />
     </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "amber" | "red";
+}) {
+  const toneClass =
+    tone === "amber"
+      ? "text-amber-700"
+      : tone === "red"
+        ? "text-red-700"
+        : "text-black";
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white px-4 py-3">
+      <p className="text-xs text-neutral-500">{label}</p>
+      <p className={`font-heading mt-1 text-xl font-bold ${toneClass}`}>{value}</p>
+    </div>
+  );
+}
+
+function LibraryCard({ entry }: { entry: LibraryEntry }) {
+  const { book } = entry;
+  const menunggu = entry.latestStatus === "PENDING" && !entry.canAccess;
+  const dibatalkan = entry.latestStatus === "CANCELLED";
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white">
+      <div className="relative flex h-40 items-end bg-[#3d2b2e] p-3">
+        {book.coverUrl ? (
+          <Image
+            src={book.coverUrl}
+            alt={book.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
+          />
+        ) : null}
+        <div className="relative z-10 flex flex-wrap gap-2">
+          {book.isFree ? (
+            <span className="rounded-full bg-green-500/80 px-2.5 py-1 text-[11px] font-medium text-white">
+              GRATIS
+            </span>
+          ) : null}
+          {menunggu ? (
+            <span className="rounded-full bg-amber-500/80 px-2.5 py-1 text-[11px] font-medium text-white">
+              MENUNGGU BAYAR
+            </span>
+          ) : null}
+          {dibatalkan ? (
+            <span className="rounded-full bg-red-500/80 px-2.5 py-1 text-[11px] font-medium text-white">
+              DIBATALKAN
+            </span>
+          ) : null}
+          {book.archived ? (
+            <span className="rounded-full bg-black/50 px-2.5 py-1 text-[11px] text-white">
+              Diarsipkan
+            </span>
+          ) : null}
+          {book.isNew ? (
+            <span className="rounded-full bg-black/40 px-2.5 py-1 text-[11px] text-white backdrop-blur-sm">
+              BARU
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <h2 className="font-semibold text-black">{book.title}</h2>
+        <p className="mt-1 text-xs text-neutral-500">by {book.author}</p>
+
+        {book.category ? (
+          <p className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-maroon/10 px-2.5 py-0.5 text-[11px] font-medium text-maroon">
+            {book.category.name}
+          </p>
+        ) : null}
+
+        {book.description ? (
+          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-neutral-600">
+            {book.description}
+          </p>
+        ) : null}
+
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-neutral-600">
+          <div>
+            <dt className="text-neutral-400">Bahasa</dt>
+            <dd>{book.language}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Halaman</dt>
+            <dd>{book.pages}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Kata</dt>
+            <dd>{book.wordCount ? book.wordCount.toLocaleString("id-ID") : "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Format</dt>
+            <dd>{book.fileFormat ?? "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Ukuran</dt>
+            <dd>{formatBytes(book.fileSize) || "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Rating</dt>
+            <dd>{String(book.rating)}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Penerbit</dt>
+            <dd>{book.publisher ?? "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Tahun</dt>
+            <dd>{book.publishedYear ?? "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">ISBN</dt>
+            <dd>{book.isbn ?? "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-neutral-400">Edisi</dt>
+            <dd>{book.edition ?? "-"}</dd>
+          </div>
+          {book.translator ? (
+            <div>
+              <dt className="text-neutral-400">Penerjemah</dt>
+              <dd>{book.translator}</dd>
+            </div>
+          ) : null}
+          {book.editor ? (
+            <div>
+              <dt className="text-neutral-400">Editor</dt>
+              <dd>{book.editor}</dd>
+            </div>
+          ) : null}
+          {book.illustrator ? (
+            <div>
+              <dt className="text-neutral-400">Ilustrator</dt>
+              <dd>{book.illustrator}</dd>
+            </div>
+          ) : null}
+          {book.copyrightHolder ? (
+            <div>
+              <dt className="text-neutral-400">Hak cipta</dt>
+              <dd>{book.copyrightHolder}</dd>
+            </div>
+          ) : null}
+        </dl>
+
+        <div className="mt-3 border-t border-neutral-100 pt-3 text-[11px] text-neutral-500">
+          {entry.source === "free" ? (
+            <p>Buku gratis — dapat diakses tanpa pembayaran.</p>
+          ) : (
+            <>
+              <p>
+                Diperoleh {formatDate(entry.acquiredAt)}
+                {entry.paidUsd > 0
+                  ? ` · total $${entry.paidUsd.toFixed(2)}`
+                  : ""}
+              </p>
+              {entry.purchases.map((purchase) => (
+                <p
+                  key={purchase.orderId}
+                  className="mt-1 flex flex-wrap items-center gap-2"
+                >
+                  <span className="font-medium text-neutral-700">
+                    {purchase.orderNumber}
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                      STATUS_STYLE[purchase.status] ??
+                      "bg-neutral-100 text-neutral-600"
+                    }`}
+                  >
+                    {STATUS_LABEL[purchase.status] ?? purchase.status}
+                  </span>
+                  <span>{formatDate(purchase.paidAt ?? purchase.createdAt)}</span>
+                  <span>×{purchase.qty}</span>
+                  <span>${(purchase.priceUsd * purchase.qty).toFixed(2)}</span>
+                </p>
+              ))}
+            </>
+          )}
+        </div>
+
+        <div className="mt-auto flex flex-wrap gap-2 pt-4">
+          {entry.canAccess && entry.hasFile ? (
+            <a
+              href={`/api/read/${book.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white"
+            >
+              <BookOpen size={14} /> Baca
+            </a>
+          ) : null}
+
+          {entry.canDownload ? (
+            <a
+              href={`/api/download/${book.id}`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-4 py-1.5 text-xs font-medium text-neutral-700"
+            >
+              <Download size={14} /> Unduh
+              {book.fileSize ? (
+                <span className="text-neutral-400">{formatBytes(book.fileSize)}</span>
+              ) : null}
+            </a>
+          ) : null}
+
+          {!entry.canAccess && !dibatalkan ? (
+            <p className="inline-flex items-center gap-1.5 text-xs text-amber-700">
+              <Clock size={14} /> Menunggu pembayaran — akses belum aktif
+            </p>
+          ) : null}
+
+          {dibatalkan ? (
+            <p className="inline-flex items-center gap-1.5 text-xs text-red-700">
+              <Ban size={14} /> Order dibatalkan — akses tidak aktif
+            </p>
+          ) : null}
+
+          {entry.canAccess && !entry.hasFile ? (
+            <p className="text-xs text-neutral-500">File e-book belum tersedia.</p>
+          ) : null}
+
+          {entry.canAccess && entry.hasFile && !entry.canDownload ? (
+            <p className="text-xs text-neutral-500">
+              Buku ini belum bisa diunduh.
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </article>
   );
 }

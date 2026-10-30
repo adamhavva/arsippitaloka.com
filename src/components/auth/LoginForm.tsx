@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { sanitizeCallbackUrl } from "@/lib/callback-url";
 import { AMBER, CheckBox, Field, PasswordField, SubmitButton } from "./fields";
 
@@ -11,7 +11,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [callbackUrl, setCallbackUrl] = useState("/");
+  const [callbackUrl, setCallbackUrl] = useState<string | null>(null);
 
   // `callbackUrl` dibaca di client, bukan lewat `searchParams` server-side:
   //-awaiting `searchParams` di page membuat route tidak bisa di-prerender
@@ -19,7 +19,10 @@ export default function LoginForm() {
   // membuat form hanya ter-render di client.
   useEffect(() => {
     const raw = new URLSearchParams(window.location.search).get("callbackUrl");
-    setCallbackUrl(sanitizeCallbackUrl(raw));
+    const safe = sanitizeCallbackUrl(raw);
+    // Kalau tidak ada callbackUrl eksplisit, pembeli diarahkan ke pustakanya
+    // (/akun) dan admin ke dashboard — bukan ke beranda.
+    setCallbackUrl(safe === "/" ? null : safe);
   }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -44,7 +47,14 @@ export default function LoginForm() {
       return;
     }
 
-    router.push(callbackUrl);
+    let target = callbackUrl;
+
+    if (!target) {
+      const session = await getSession();
+      target = session?.user?.role === "ADMIN" ? "/admin" : "/akun";
+    }
+
+    router.push(target ?? "/");
     router.refresh();
   }
 

@@ -1,13 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
 import { Star, BookOpen, Download } from "lucide-react";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { canAccessBook } from "@/lib/library";
 import { getSettings } from "@/lib/site-settings";
 import { getMidtransConfig, isMidtransConfigured } from "@/lib/midtrans";
 import BuyButton from "@/components/books/BuyButton";
+import type { Prisma } from "../../../prisma/generated/prisma/client";
+
+export type BookWithRelations = Prisma.BookGetPayload<{
+  include: { category: true; tab: true };
+}>;
 
 function formatBytes(bytes: number | null): string {
   if (!bytes) return "-";
@@ -15,14 +18,15 @@ function formatBytes(bytes: number | null): string {
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
 }
 
-/** Halaman detail satu buku (`/buku/<slug-buku>`). */
-export default async function BookDetailView({ slug }: { slug: string }) {
-  const book = await prisma.book.findUnique({
-    where: { slug },
-    include: { category: true, tab: true },
-  });
-  if (!book) notFound();
-
+/**
+ * Halaman detail satu buku.
+ * URL: `/buku/<slug-tab>/<slug-buku>`.
+ */
+export default async function BookDetailView({
+  book,
+}: {
+  book: BookWithRelations;
+}) {
   const session = await auth();
   const userId = session?.user?.id ?? null;
   const sudahPunya = userId ? await canAccessBook(userId, book.id) : false;
@@ -30,6 +34,8 @@ export default async function BookDetailView({ slug }: { slug: string }) {
   const midtrans = await getMidtransConfig();
   const midtransAktif = midtrans.enabled && isMidtransConfigured(midtrans);
   const midtransMode = midtrans.mode;
+
+  const bookPath = `/buku/${book.tab.slug}/${book.slug}`;
 
   const meta: { label: string; value: string }[] = [
     { label: "Bahasa", value: book.language },
@@ -152,7 +158,7 @@ export default async function BookDetailView({ slug }: { slug: string }) {
                 <div className="space-y-2">
                   <BuyButton
                     bookId={book.id}
-                    loginUrl={`/login?callbackUrl=/buku/${book.slug}`}
+                    loginUrl={`/login?callbackUrl=${bookPath}`}
                     label={book.isFree ? "Ambil Gratis" : "Beli Sekarang"}
                   />
                   <p className="text-xs text-neutral-500">
@@ -172,7 +178,7 @@ export default async function BookDetailView({ slug }: { slug: string }) {
             ) : (
               <div className="flex flex-wrap items-center gap-3">
                 <Link
-                  href={`/login?callbackUrl=/buku/${book.slug}`}
+                  href={`/login?callbackUrl=${bookPath}`}
                   className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
                 >
                   Beli Sekarang

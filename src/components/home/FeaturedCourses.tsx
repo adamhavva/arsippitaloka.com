@@ -49,6 +49,7 @@ export default async function FeaturedCourses() {
       priceUsd: String(book.priceUsd),
       isNew: book.isNew,
       isFree: book.isFree,
+      tabSlug: book.tab.slug,
     });
     booksByTab[book.tab.slug] = list;
   }

@@ -93,26 +93,40 @@ aturan ini; `canAccessBook()` memakainya untuk `/api/read` dan `/api/download`.
 
 ### Katalog publik & tab yang bisa diklik
 
-URL katalog memakai **path**, bukan query string:
+URL katalog memakai **path**, bukan query string, dan detail buku hidup
+**di bawah tabnya**:
 
 | URL | Isi |
 | --- | --- |
 | `/buku` | katalog semua buku |
 | `/buku/<slug-tab>` | katalog per tab (mis. `/buku/berita-terkini`) |
 | `/buku/kategori/<slug>` | katalog per kategori (mis. `/buku/kategori/biografi`) |
-| `/buku/<slug-buku>` | detail buku (metadata lengkap, tombol Baca/Unduh bila pemili, CTA Beli bila belum login) |
+| `/buku/<slug-tab>/<slug-buku>` | detail buku (metadata lengkap, tombol Baca/Unduh bila pemili, CTA Beli bila belum login) |
 
-`/buku/[slug]` menerima dua jenis slug: kalau slug-nya cocok **tab** → katalog
-tab; kalau cocok **buku** → detail buku (tab menang kalau slug-nya sama).
+Route: `src/app/buku/[tab]/page.tsx` (katalog tab),
+`src/app/buku/[tab]/[slug]/page.tsx` (detail buku),
+`src/app/buku/kategori/[slug]/page.tsx` (katalog kategori).
 Kategori memakai prefiks `/buku/kategori/` karena ada tab dan kategori yang
 namanya sama ("blog", "e-book").
 
 Tampilan katalog dipakai bersama oleh ketiga route lewat
 `src/components/books/CatalogView.tsx` (server component) dan detail buku
 dipindah ke `src/components/books/BookDetailView.tsx`. Paginasi tetap memakai
-query `?page=` & `?per=` (aturan pagination proyek). URL lama
-(`/buku?tab=…` / `/buku?kategori=…`) otomatis di-redirect ke path baru oleh
-`src/proxy.ts`.
+query `?page=` & `?per=` (aturan pagination proyek).
+
+Tautan kartu buku selalu menyertakan tabnya — `BookCard` memakai field
+`tabSlug` (opsional) untuk membentuk `/buku/<tab>/<slug>`; kalau `tabSlug`
+kosong, jatuh ke `/buku/<slug>`.
+
+URL lama ditangani:
+
+- `/buku?tab=…` dan `/buku?kategori=…` → di-redirect (307) oleh
+  `src/proxy.ts` ke path barunya (query `page`/`per` tetap dibawa).
+- `/buku/<slug-buku>` (detail buku versi lama) → pengalihan dari sisi klien
+  (`src/components/books/RedirectTo.tsx`) ke `/buku/<tab>/<slug-buku>`.
+  **`redirect()` server tidak bisa dipakai di sini** karena halamannya sudah
+  mulai di-stream (dynamic API dibaca di dalam Suspense) — hasilnya 404,
+  bukan 307.
 
 - Baris tab di beranda **bisa diklik**: `CoursesBrowser` (client) menyaring
   buku sesuai tab yang dipilih, dan menampilkan empty state kalau tabnya belum
@@ -120,8 +134,8 @@ query `?page=` & `?per=` (aturan pagination proyek). URL lama
   **Kategori** (`/admin/category`); buku diberi tab lewat field "Tab Konten"
   di `/admin/book`.
 - Kartu kategori di beranda dan tautan "Browse" di footer menuju katalog
-  (`/buku?kategori=…` / `/buku?tab=…`). `Hero.tsx` tidak diubah, jadi overlay
-  nav "Books" masih menuju `#`.
+  (`/buku/kategori/<slug>` / `/buku/<slug-tab>`). `Hero.tsx` tidak diubah, jadi
+  overlay nav "Books" masih menuju `#`.
 
 ### Fixture pembeli
 

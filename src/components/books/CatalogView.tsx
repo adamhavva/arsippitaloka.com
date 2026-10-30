@@ -59,6 +59,7 @@ export default async function CatalogView({
       priceUsd: true,
       isNew: true,
       isFree: true,
+      tab: { select: { slug: true } },
     },
   });
 
@@ -162,6 +163,7 @@ export default async function CatalogView({
                 ...book,
                 rating: String(book.rating),
                 priceUsd: String(book.priceUsd),
+                tabSlug: book.tab.slug,
               }}
             />
           ))}

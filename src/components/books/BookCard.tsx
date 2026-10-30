@@ -15,6 +15,8 @@ export type BookCardData = {
   priceUsd: string | number;
   isNew: boolean;
   isFree: boolean;
+  /** Slug tab bukunya — dipakai untuk link detail `/buku/<tab>/<slug>`. */
+  tabSlug?: string | null;
 };
 
 /**
@@ -22,6 +24,11 @@ export type BookCardData = {
  * Dipakai di Server Component maupun Client Component.
  */
 export default function BookCard({ book }: { book: BookCardData }) {
+  // Detail buku hidup di bawah tabnya: /buku/<tab>/<slug-buku>
+  const href = book.tabSlug
+    ? `/buku/${book.tabSlug}/${book.slug}`
+    : `/buku/${book.slug}`;
+
   return (
     <div className="overflow-hidden rounded-xl border border-neutral-100 bg-white">
       <div className="relative flex h-44 items-end bg-[#3d2b2e] p-3">
@@ -59,7 +66,7 @@ export default function BookCard({ book }: { book: BookCardData }) {
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-black">
-            <Link href={`/buku/${book.slug}`} className="hover:underline">
+            <Link href={href} className="hover:underline">
               {book.title}
             </Link>
           </h3>
@@ -79,7 +86,7 @@ export default function BookCard({ book }: { book: BookCardData }) {
             ${String(book.priceUsd)}
           </span>
           <Link
-            href={`/buku/${book.slug}`}
+            href={href}
             className="rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white"
           >
             Lihat Detail

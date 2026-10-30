@@ -3,22 +3,40 @@
 import { useState } from "react";
 import Image from "next/image";
 
+type UploadMeta = {
+  url: string;
+  size?: number;
+  format?: string;
+  words?: number;
+  pages?: number;
+};
+
 type Props = {
   name: string;
   label: string;
   kind: "image" | "file";
   value?: string | null;
   help?: string;
+  /** Dipanggil setelah file berhasil diunggah (isi kolom otomatis). */
+  onUploaded?: (meta: UploadMeta) => void;
 };
 
 /**
  * Field upload: pilih file → langsung diunggah ke /api/admin/upload → URL
  * hasilnya ditaruh di input hidden supaya ikut terkirim saat form disubmit.
  */
-export default function ImageField({ name, label, kind, value, help }: Props) {
+export default function ImageField({
+  name,
+  label,
+  kind,
+  value,
+  help,
+  onUploaded,
+}: Props) {
   const [url, setUrl] = useState<string | null>(value ?? null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   async function handleFile(file: File) {
     setBusy(true);
@@ -35,6 +53,20 @@ export default function ImageField({ name, label, kind, value, help }: Props) {
         return;
       }
       setUrl(json.url);
+      onUploaded?.({
+        url: json.url,
+        size: json.size,
+        format: json.format,
+        words: json.words,
+        pages: json.pages,
+      });
+
+      const parts: string[] = [];
+      if (json.format) parts.push(json.format);
+      if (typeof json.size === "number") parts.push(`${json.size} byte`);
+      if (typeof json.pages === "number") parts.push(`${json.pages} halaman`);
+      if (typeof json.words === "number") parts.push(`${json.words} kata`);
+      setInfo(parts.join(" · "));
     } catch {
       setError("Upload gagal");
     } finally {
@@ -76,6 +108,7 @@ export default function ImageField({ name, label, kind, value, help }: Props) {
       />
 
       {busy ? <p className="text-xs text-neutral-500">Mengunggah…</p> : null}
+      {info ? <p className="text-xs text-green-700">{info}</p> : null}
       {error ? <p className="text-xs text-red-600">{error}</p> : null}
       {help ? <p className="text-xs text-neutral-500">{help}</p> : null}
     </div>

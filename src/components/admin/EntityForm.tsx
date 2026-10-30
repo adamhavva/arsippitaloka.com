@@ -1,16 +1,22 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveEntity, deleteEntity } from "@/lib/admin/actions";
+import { slugify } from "@/lib/slug";
 import type { FieldDef, EntityDef } from "@/lib/admin/entities";
 import ImageField from "./ImageField";
+import IconPicker from "./IconPicker";
+import TikTokField from "./TikTokField";
+import CategoryPicker, { type CategoryOption } from "./CategoryPicker";
 
 type Props = {
   def: EntityDef;
   fields: FieldDef[];
   values?: Record<string, unknown>;
   id?: string | null;
+  /** Opsi kategori (dengan ikon) untuk field bertipe "category". */
+  categoryOptions?: CategoryOption[];
 };
 
 function toInputValue(value: unknown): string | number {
@@ -22,13 +28,80 @@ function toInputValue(value: unknown): string | number {
   return value as string | number;
 }
 
-export default function EntityForm({ def, fields, values = {}, id = null }: Props) {
+type UploadMeta = {
+  url: string;
+  size?: number;
+  format?: string;
+  words?: number;
+  pages?: number;
+};
+
+export default function EntityForm({
+  def,
+  fields,
+  values = {},
+  id = null,
+  categoryOptions = [],
+}: Props) {
   const router = useRouter();
   const [state, action, pending] = useActionState(
     saveEntity.bind(null, def.key, id),
     { ok: false, message: "" },
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Nilai untuk kolom otomatis (format/ukuran/jumlah kata/halaman/rating).
+  const [autoValues, setAutoValues] = useState<Record<string, string | number>>(
+    () => {
+      const initial: Record<string, string | number> = {};
+      for (const field of fields) {
+        if (!field.auto && !field.autoFrom) continue;
+        const current = values[field.name];
+        if (current !== undefined && current !== null && current !== "") {
+          initial[field.name] = current as string | number;
+        } else if (field.defaultValue !== undefined) {
+          initial[field.name] = field.defaultValue;
+        } else {
+          initial[field.name] = "";
+        }
+      }
+      return initial;
+    },
+  );
+
+  // Slug dibuat otomatis dari field sumber (mis. "title" → slug).
+  const slugField = useMemo(
+    () => fields.find((field) => field.slugFrom),
+    [fields],
+  );
+  const [slugValue, setSlugValue] = useState<string>(() =>
+    slugField ? String(values[slugField.name] ?? "") : "",
+  );
+  const [slugTouched, setSlugTouched] = useState(false);
+
+  function handleUploaded(meta: UploadMeta) {
+    setAutoValues((prev) => {
+      const next = { ...prev };
+      for (const field of fields) {
+        if (!field.autoFrom) continue;
+        if (field.autoFrom === "format" && meta.format) {
+          next[field.name] = meta.format;
+        }
+        if (field.autoFrom === "size" && typeof meta.size === "number") {
+          next[field.name] = meta.size;
+        }
+        if (field.autoFrom === "words" && typeof meta.words === "number") {
+          next[field.name] = meta.words;
+        }
+        if (field.autoFrom === "pages" && typeof meta.pages === "number") {
+          next[field.name] = meta.pages;
+        }
+      }
+      return next;
+    });
+  }
+
+  const categoryOptions2 = categoryOptions;
 
   return (
     <form action={action} className="space-y-5 rounded-xl border border-neutral-200 bg-white p-5">
@@ -51,6 +124,12 @@ export default function EntityForm({ def, fields, values = {}, id = null }: Prop
         {fields.map((field) => {
           const error = state.fieldErrors?.[field.name];
           const raw = values[field.name];
+          // Kolom dengan nilai bawaan (mis. "order") tetap terisi walau form kosong.
+          const initial = toInputValue(raw);
+          const initialValue =
+            initial === "" && field.defaultValue !== undefined
+              ? field.defaultValue
+              : initial;
 
           if (field.type === "boolean") {
             return (
@@ -68,6 +147,41 @@ export default function EntityForm({ def, fields, values = {}, id = null }: Prop
             );
           }
 
+          // Kolom otomatis: nilainya diisi dari file yang diunggah.
+          if (field.auto || field.autoFrom) {
+            const value = autoValues[field.name] ?? "";
+            const display =
+              field.autoFrom === "size"
+                ? value
+                  ? `${value} byte`
+                  : "—"
+                : field.autoFrom === "words"
+                  ? value
+                    ? `${value} kata`
+                    : "—"
+                  : field.autoFrom === "pages"
+                    ? value
+                      ? `${value} halaman`
+                      : "—"
+                    : value || "—";
+            return (
+              <div key={field.name}>
+                <span className="mb-1 block text-sm font-medium text-neutral-700">
+                  {field.label}
+                </span>
+                <input type="hidden" name={field.name} value={String(value)} />
+                <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-600">
+                  {display}
+                  <span className="ml-2 text-xs text-neutral-400">(otomatis)</span>
+                </div>
+                {field.help ? (
+                  <p className="mt-1 text-xs text-neutral-500">{field.help}</p>
+                ) : null}
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+              </div>
+            );
+          }
+
           if (field.type === "image" || field.type === "file") {
             return (
               <div key={field.name} className="md:col-span-2">
@@ -77,7 +191,51 @@ export default function EntityForm({ def, fields, values = {}, id = null }: Prop
                   kind={field.type}
                   value={(raw as string) ?? null}
                   help={field.help}
+                  onUploaded={handleUploaded}
                 />
+              </div>
+            );
+          }
+
+          if (field.type === "icon") {
+            return (
+              <div key={field.name} className="md:col-span-2">
+                <IconPicker
+                  name={field.name}
+                  label={field.label}
+                  value={(raw as string) ?? null}
+                  help={field.help}
+                />
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+              </div>
+            );
+          }
+
+          if (field.type === "tiktok") {
+            return (
+              <div key={field.name} className="md:col-span-2">
+                <TikTokField
+                  name={field.name}
+                  label={field.label}
+                  value={(raw as string) ?? null}
+                  help={field.help}
+                />
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+              </div>
+            );
+          }
+
+          if (field.type === "category") {
+            return (
+              <div key={field.name} className="md:col-span-2">
+                <CategoryPicker
+                  name={field.name}
+                  label={field.label}
+                  options={categoryOptions2}
+                  value={(raw as string) ?? null}
+                  help={field.help}
+                />
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
               </div>
             );
           }
@@ -128,6 +286,39 @@ export default function EntityForm({ def, fields, values = {}, id = null }: Prop
             );
           }
 
+          // Slug: diisi otomatis dari field sumber.
+          if (field.slugFrom) {
+            const sourceValue = String(values[field.slugFrom] ?? "");
+            return (
+              <div key={field.name}>
+                <label className="mb-1 block text-sm font-medium text-neutral-700">
+                  {field.label}
+                </label>
+                <input
+                  type="text"
+                  name={field.name}
+                  value={slugValue}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    setSlugValue(e.target.value);
+                  }}
+                  onBlur={() => {
+                    if (!slugTouched) {
+                      const next = slugify(slugValue || sourceValue);
+                      if (next) setSlugValue(next);
+                    }
+                  }}
+                  placeholder={slugify(sourceValue) || "otomatis dari judul"}
+                  className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"
+                />
+                {field.help ? (
+                  <p className="mt-1 text-xs text-neutral-500">{field.help}</p>
+                ) : null}
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+              </div>
+            );
+          }
+
           return (
             <div key={field.name}>
               <label className="mb-1 block text-sm font-medium text-neutral-700">
@@ -137,9 +328,17 @@ export default function EntityForm({ def, fields, values = {}, id = null }: Prop
                 type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
                 name={field.name}
                 step={field.step}
-                defaultValue={toInputValue(raw)}
+                defaultValue={initialValue}
                 required={field.required}
                 placeholder={field.placeholder}
+                onChange={
+                  slugField && field.name === slugField.slugFrom && !slugTouched
+                    ? (e) => {
+                        const next = slugify(e.target.value);
+                        setSlugValue(next);
+                      }
+                    : undefined
+                }
                 className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"
               />
               {field.help ? (

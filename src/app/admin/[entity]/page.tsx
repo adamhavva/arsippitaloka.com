@@ -64,6 +64,12 @@ async function AdminEntityPageContent({
 
   // Isi opsi select yang sumbernya entitas lain (mis. tab konten untuk buku).
   const fields: FieldDef[] = [];
+  const categoryOptions: {
+    value: string;
+    label: string;
+    icon: string | null;
+  }[] = [];
+
   for (const field of def.fields) {
     if (!field.source) {
       fields.push(field);
@@ -71,19 +77,39 @@ async function AdminEntityPageContent({
     }
     const sourceDef = getEntity(field.source.entity);
     const sourceDelegate = sourceDef ? getDelegate(sourceDef.model) : undefined;
+
+    // Field kategori butuh ikon juga supaya bisa ditampilkan sebagai kartu.
+    const select =
+      field.type === "category"
+        ? { id: true, name: true, icon: true }
+        : { id: true, [field.source.labelField]: true };
+
     const sourceRows: Record<string, unknown>[] = sourceDelegate
       ? await sourceDelegate.findMany({
-          select: { id: true, [field.source.labelField]: true },
+          select,
           orderBy: sourceDef?.orderBy
             ? { [sourceDef.orderBy.field]: sourceDef.orderBy.dir }
             : undefined,
         })
       : [];
+
+    if (field.type === "category") {
+      for (const row of sourceRows) {
+        categoryOptions.push({
+          value: String(row.id),
+          label: String(row.name),
+          icon: row.icon ? String(row.icon) : null,
+        });
+      }
+    }
+
     fields.push({
       ...field,
       options: sourceRows.map((row) => ({
         value: String(row.id),
-        label: String(row[field.source!.labelField]),
+        label: String(
+          field.type === "category" ? row.name : row[field.source!.labelField],
+        ),
       })),
     });
   }
@@ -111,9 +137,16 @@ async function AdminEntityPageContent({
           fields={fields}
           values={editing}
           id={String(editing.id)}
+          categoryOptions={categoryOptions}
         />
       ) : (
-        <EntityForm def={def} fields={fields} values={{}} id={null} />
+        <EntityForm
+          def={def}
+          fields={fields}
+          values={{}}
+          id={null}
+          categoryOptions={categoryOptions}
+        />
       )}
 
       <EntityTable def={def} fields={fields} rows={rows} />

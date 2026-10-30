@@ -88,6 +88,7 @@ model Category {
   icon      String
   highlight Boolean @default(false)
   order     Int
+  books     Book[]
 }
 
 model ContentTab {
@@ -126,14 +127,18 @@ model Book {
   fileSize        Int?
   isDownloadable  Boolean    @default(false)
   copyrightHolder String?
+  tiktokEmbed     String?
   order           Int        @default(0)
   tabId           String
   tab             ContentTab @relation(fields: [tabId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  categoryId      String?
+  category        Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   orderItems      OrderItem[]
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
   @@index([tabId])
+  @@index([categoryId])
 }
 
 model Documentation {
@@ -155,6 +160,7 @@ model SiteSetting {
 model TiktokPost {
   id        String   @id @default(cuid())
   videoId   String   @unique
+  embedUrl  String?
   title     String
   caption   String?
   author    String?

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
  */
 export type LooseDelegate = {
   findMany(args?: any): Promise<any[]>;
+  findFirst(args?: any): Promise<any>;
   findUnique(args: any): Promise<any>;
   create(args: any): Promise<any>;
   update(args: any): Promise<any>;

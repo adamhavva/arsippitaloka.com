@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { parsePdfMeta } from "@/lib/pdf-meta";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const IMAGE_MAX = 5 * 1024 * 1024; // 5 MB
@@ -22,6 +23,9 @@ const EXT: Record<string, string> = {
  * PDF disimpan di `storage/private` (TIDAK ikut dilayani Next.js) supaya
  * halamannya hanya bisa diakses lewat route download yang memverifikasi
  * hak akses pembeli.
+ *
+ * Balasan memuat metadata file supaya form admin bisa mengisi kolom
+ * otomatis (format, ukuran, jumlah kata, jumlah halaman).
  */
 export async function POST(request: Request) {
   const admin = await requireAdmin();
@@ -31,7 +35,9 @@ export async function POST(request: Request) {
 
   const form = await request.formData();
   const file = form.get("file");
-  const kind = form.get("kind") === "pdf" ? "pdf" : "image";
+  const rawKind = String(form.get("kind") ?? "image");
+  // "file" dipakai field e-book (PDF) oleh komponen upload.
+  const kind = rawKind === "pdf" || rawKind === "file" ? "pdf" : "image";
 
   if (!(file instanceof File)) {
     return Response.json({ error: "File tidak ditemukan" }, { status: 400 });
@@ -78,5 +84,20 @@ export async function POST(request: Request) {
     url = `/uploads/${year}/${month}/${filename}`;
   }
 
-  return Response.json({ url });
+  if (kind === "pdf") {
+    const meta = parsePdfMeta(buffer);
+    return Response.json({
+      url,
+      size: buffer.length,
+      format: "PDF",
+      words: meta.words,
+      pages: meta.pages,
+    });
+  }
+
+  return Response.json({
+    url,
+    size: buffer.length,
+    format: ext.replace(".", "").toUpperCase(),
+  });
 }

@@ -15,7 +15,13 @@ export type FieldType =
   | "date"
   | "image"
   | "file"
-  | "lines";
+  | "lines"
+  /** Pilih ikon lucide-react lewat galeri (bukan ketik manual). */
+  | "icon"
+  /** Tempel share link / kode embed TikTok, ada pratinjau. */
+  | "tiktok"
+  /** Pilih satu kategori (dengan ikon) dari daftar kategori. */
+  | "category";
 
 export type FieldDef = {
   name: string;
@@ -31,6 +37,17 @@ export type FieldDef = {
   list?: boolean;
   readOnly?: boolean;
   step?: string;
+  /**
+   * Kolom diisi otomatis dari file yang diunggah:
+   * "format" | "size" | "words" | "pages".
+   */
+  autoFrom?: "format" | "size" | "words" | "pages";
+  /** Kolom otomatis (tidak diketik manual); nilainya dikirim lewat input tersembunyi. */
+  auto?: boolean;
+  /** Nilai awal untuk kolom otomatis. */
+  defaultValue?: string | number;
+  /** Slug dibuat otomatis dari field ini (mis. "title" atau "name"). */
+  slugFrom?: string;
 };
 
 export type EntityDef = {
@@ -58,16 +75,30 @@ export const ENTITIES: Record<string, EntityDef> = {
     orderBy: { field: "order", dir: "asc" },
     fields: [
       { name: "name", label: "Nama", type: "text", required: true, list: true },
-      { name: "slug", label: "Slug", type: "text", required: true, list: true },
       {
-        name: "icon",
-        label: "Icon (nama lucide-react)",
+        name: "slug",
+        label: "Slug",
         type: "text",
         list: true,
-        placeholder: "BookOpen",
+        slugFrom: "name",
+        help: "Dibuat otomatis dari nama. Kalau slug sama, ditambahkan angka unik.",
+      },
+      {
+        name: "icon",
+        label: "Icon",
+        type: "icon",
+        required: true,
+        list: true,
+        help: "Pilih ikon lucide-react.",
       },
       { name: "highlight", label: "Highlight", type: "boolean", list: true },
-      { name: "order", label: "Urutan", type: "number", list: true },
+      {
+        name: "order",
+        label: "Urutan",
+        type: "number",
+        list: true,
+        defaultValue: 0,
+      },
     ],
   },
 
@@ -80,8 +111,21 @@ export const ENTITIES: Record<string, EntityDef> = {
     orderBy: { field: "order", dir: "asc" },
     fields: [
       { name: "label", label: "Label", type: "text", required: true, list: true },
-      { name: "slug", label: "Slug", type: "text", required: true, list: true },
-      { name: "order", label: "Urutan", type: "number", list: true },
+      {
+        name: "slug",
+        label: "Slug",
+        type: "text",
+        list: true,
+        slugFrom: "label",
+        help: "Dibuat otomatis dari label. Kalau slug sama, ditambahkan angka unik.",
+      },
+      {
+        name: "order",
+        label: "Urutan",
+        type: "number",
+        list: true,
+        defaultValue: 0,
+      },
     ],
   },
 
@@ -95,7 +139,14 @@ export const ENTITIES: Record<string, EntityDef> = {
     fields: [
       { name: "title", label: "Judul", type: "text", required: true, list: true },
       { name: "author", label: "Penulis", type: "text", required: true, list: true },
-      { name: "slug", label: "Slug", type: "text", required: true, list: true },
+      {
+        name: "slug",
+        label: "Slug",
+        type: "text",
+        list: true,
+        slugFrom: "title",
+        help: "Dibuat otomatis dari judul. Kalau slug sama, ditambahkan angka unik.",
+      },
       { name: "description", label: "Deskripsi", type: "textarea" },
       {
         name: "tabId",
@@ -105,15 +156,64 @@ export const ENTITIES: Record<string, EntityDef> = {
         list: true,
         source: { entity: "tab", labelField: "label" },
       },
+      {
+        name: "categoryId",
+        label: "Kategori",
+        type: "category",
+        source: { entity: "category", labelField: "name" },
+        help: "Kategori ditempel ke buku ini.",
+      },
       { name: "coverUrl", label: "Sampul", type: "image" },
       { name: "fileUrl", label: "File e-book (PDF)", type: "file" },
-      { name: "fileFormat", label: "Format File", type: "text", placeholder: "PDF" },
-      { name: "fileSize", label: "Ukuran File (byte)", type: "number" },
+      {
+        name: "fileFormat",
+        label: "Format File",
+        type: "text",
+        auto: true,
+        autoFrom: "format",
+        defaultValue: "PDF",
+      },
+      {
+        name: "fileSize",
+        label: "Ukuran File (byte)",
+        type: "number",
+        auto: true,
+        autoFrom: "size",
+      },
       { name: "language", label: "Bahasa", type: "text", list: true },
-      { name: "pages", label: "Halaman", type: "number", list: true },
-      { name: "wordCount", label: "Jumlah Kata", type: "number" },
-      { name: "readCount", label: "Dibaca", type: "number", list: true },
-      { name: "rating", label: "Rating", type: "number", step: "0.1", list: true },
+      {
+        name: "pages",
+        label: "Halaman",
+        type: "number",
+        list: true,
+        auto: true,
+        autoFrom: "pages",
+        defaultValue: 1,
+      },
+      {
+        name: "wordCount",
+        label: "Jumlah Kata",
+        type: "number",
+        auto: true,
+        autoFrom: "words",
+      },
+      {
+        name: "readCount",
+        label: "Dibaca",
+        type: "number",
+        list: true,
+        defaultValue: 0,
+      },
+      {
+        name: "rating",
+        label: "Rating",
+        type: "number",
+        step: "0.1",
+        list: true,
+        auto: true,
+        defaultValue: 0,
+        help: "Terisi otomatis.",
+      },
       { name: "priceUsd", label: "Harga (USD)", type: "number", step: "0.01", list: true },
       { name: "isFree", label: "Gratis", type: "boolean", list: true },
       { name: "isNew", label: "Baru", type: "boolean", list: true },
@@ -127,6 +227,12 @@ export const ENTITIES: Record<string, EntityDef> = {
       { name: "illustrator", label: "Ilustrator", type: "text" },
       { name: "publisher", label: "Penerbit", type: "text" },
       { name: "copyrightHolder", type: "text", label: "Pemegang Hak Cipta" },
+      {
+        name: "tiktokEmbed",
+        label: "TikTok",
+        type: "tiktok",
+        help: "Tempel share link atau kode embed TikTok — videonya langsung muncul di sini.",
+      },
       { name: "order", label: "Urutan", type: "number", list: true },
     ],
   },
@@ -161,19 +267,29 @@ export const ENTITIES: Record<string, EntityDef> = {
     orderBy: { field: "order", dir: "asc" },
     fields: [
       {
-        name: "videoId",
-        label: "Video ID",
-        type: "text",
+        name: "embedUrl",
+        label: "Link / Embed TikTok",
+        type: "tiktok",
         required: true,
-        list: true,
-        placeholder: "7234567890123456789",
-        help: "Angka terakhir dari URL tiktok.com/@user/video/<id>",
+        help: "Tempel share link TikTok atau kode embed — videonya langsung dipreview di sini.",
       },
-      { name: "title", label: "Judul", type: "text", required: true, list: true },
+      {
+        name: "title",
+        label: "Judul",
+        type: "text",
+        list: true,
+        help: "Kosongkan saja kalau judul diambil otomatis dari TikTok.",
+      },
       { name: "caption", label: "Caption", type: "textarea" },
       { name: "author", label: "Autor", type: "text", list: true },
       { name: "highlight", label: "Highlight", type: "boolean", list: true },
-      { name: "order", label: "Urutan", type: "number", list: true },
+      {
+        name: "order",
+        label: "Urutan",
+        type: "number",
+        list: true,
+        defaultValue: 0,
+      },
       { name: "published", label: "Tayang", type: "boolean", list: true },
     ],
   },

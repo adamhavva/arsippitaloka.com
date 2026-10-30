@@ -38,13 +38,17 @@ export function coerceField(
   }
 }
 
-/** Buang nilai kosong supaya tidak menimpa kolom lain dengan null. */
+/**
+ * Buang nilai kosong supaya tidak menimpa kolom lain dengan null.
+ * Nilai `null` juga dibuang: kolom yang wajib di DB tidak boleh null, dan
+ * kolom opsional cukup dibiarkan memakai default kolomnya.
+ */
 export function pruneEmpty(
   data: Record<string, unknown>,
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
-    if (value === undefined) continue;
+    if (value === undefined || value === null) continue;
     if (typeof value === "string" && value.trim() === "") continue;
     out[key] = value;
   }

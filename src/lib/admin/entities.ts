@@ -195,14 +195,14 @@ export function getEntity(key: string): EntityDef | undefined {
 }
 
 /** Daftar entitas yang tampil di sidebar admin. */
-export const ADMIN_MENU: { href: string; label: string }[] = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/book", label: "Buku" },
-  { href: "/admin/category", label: "Kategori" },
-  { href: "/admin/tab", label: "Tab Konten" },
-  { href: "/admin/documentation", label: "Dokumentasi" },
-  { href: "/admin/tiktok", label: "TikTok" },
-  { href: "/admin/orders", label: "Order" },
-  { href: "/admin/users", label: "User" },
-  { href: "/admin/profile", label: "Profil Perusahaan" },
+export const ADMIN_MENU: { href: string; label: string; icon: string }[] = [
+  { href: "/admin", label: "Dashboard", icon: "LayoutDashboard" },
+  { href: "/admin/book", label: "Buku", icon: "BookOpen" },
+  { href: "/admin/category", label: "Kategori", icon: "LayoutGrid" },
+  { href: "/admin/tab", label: "Tab Konten", icon: "PanelsTopLeft" },
+  { href: "/admin/documentation", label: "Dokumentasi", icon: "FileText" },
+  { href: "/admin/tiktok", label: "TikTok", icon: "Music2" },
+  { href: "/admin/orders", label: "Order", icon: "ShoppingCart" },
+  { href: "/admin/users", label: "User", icon: "Users" },
+  { href: "/admin/profile", label: "Profil Perusahaan", icon: "Settings" },
 ];

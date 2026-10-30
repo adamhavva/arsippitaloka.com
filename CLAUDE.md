@@ -224,6 +224,30 @@ lewat `getSettings()` di `src/lib/site-settings.ts`.
   (komponen client). `src/lib/icon.ts` hanya berisi helper string, aman
   dipakai di Server Component.
 
+## Video TikTok di beranda
+
+Section `#ViralForJustice` (`src/components/home/ViralForJustice.tsx`) memuat
+maksimal **3** video TikTok dari tabel `TiktokPost`:
+
+- hanya baris `published = true`, urut `order` lalu `createdAt` terbaru;
+- tiap slot menampilkan `<iframe src="https://www.tiktok.com/embed/v2/{videoId}">`
+  + overlay caption (judul/author) yang menuju `https://www.tiktok.com/@i/video/{videoId}`;
+- slot yang tidak terisi memakai poster `home.viral.image` dari SiteSetting.
+
+Peng administeringannya lewat `/admin/tiktok` (CRUD generik, entitas `tiktok`).
+Admin cukup menempelkan share link atau kode embed; `videoId`, `judul`, dan
+`author` diambil otomatis (`src/lib/tiktok-oembed.ts` → `checkTikTokVideo`).
+`TiktokPost` **tidak di-seed** — id video asli milik Pitaloka.
+
+Pengecekan keberadaan video bersifat *best effort*: TikTok sering membatasi
+akses (balasan 5xx / halaman shell), jadi statusnya bisa `unknown` — posting
+tetap disimpan dan admin diberi tahu videonya belum bisa dicek. Hanya status
+`notfound` (TikTok jelas menyatakan video tidak ada) yang ditolak.
+
+Tambahan: field boolean pada CRUD admin generik harus dibaca dengan
+`formData.getAll()` — memakai `get()` selalu mengembalikan hidden `"0"` dan
+checkbox jadi selalu tersimpan `false`.
+
 ## Tailwind v4
 
 Token tema didefinisikan di `src/app/globals.css` (`:root` + `@theme inline`). Hati-hati tabrakan nama dengan utilitas bawaan — token bernama `cover` menghasilkan `bg-cover` yang bentrok dengan `background-size: cover`. Itu sebabnya token warna sampul bernama `bookcover`, dan kartu buku memakai nilai literal `bg-[#3d2b2e]`.

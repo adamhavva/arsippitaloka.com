@@ -8,7 +8,7 @@ import { getDelegate } from "./delegates";
 import { coerceField, pruneEmpty } from "./coerce";
 import { slugify } from "@/lib/slug";
 import { parseTikTok } from "@/lib/tiktok";
-import { fetchTikTokOEmbed } from "@/lib/tiktok-oembed";
+import { checkTikTokVideo } from "@/lib/tiktok-oembed";
 import type { ActionState } from "./action-state";
 
 /**
@@ -43,7 +43,18 @@ export async function saveEntity(
 
   for (const field of def.fields) {
     if (field.readOnly) continue;
-    let value = coerceField(field, formData.get(field.name));
+
+    // Field boolean mengirim hidden "0" + checkbox "1" — ambil nilai yang
+    // true. Kalau pakai formData.get(), nilainya selalu "0" karena hidden
+    // input lebih dulu di DOM.
+    const rawValue =
+      field.type === "boolean"
+        ? formData
+            .getAll(field.name)
+            .some((v) => v === "1" || v === "on" || v === "true")
+        : formData.get(field.name);
+
+    let value = coerceField(field, rawValue);
     // Kolom dengan nilai bawaan (mis. "order" = 0) tidak boleh jadi null
     // walau form dibiarkan kosong — kolomnya wajib di DB.
     if (
@@ -91,23 +102,33 @@ export async function saveEntity(
   }
 
   // TikTok: admin cukup menempelkan share link / kode embed. Id video,
-  // judul, dan nama author diambil otomatis dari link tersebut.
+  // judul, dan nama author diambil otomatis dari link tersebut, dan link
+  // yang menunjuk video yang tidak ada ditolak.
+  let tiktokWarning = "";
   if (def.key === "tiktok") {
     const source = String(raw.embedUrl ?? "").trim();
     const ref = parseTikTok(source);
 
-    let videoId = ref.videoId;
-    let title = String(raw.title ?? "").trim();
-    let author = String(raw.author ?? "").trim();
-
-    if (!videoId && source) {
-      const oembed = await fetchTikTokOEmbed(source);
-      if (oembed) {
-        videoId = oembed.videoId;
-        title = title || (oembed.title ?? "");
-        author = author || (oembed.author ?? "");
-      }
+    const check = await checkTikTokVideo(source);
+    if (check.status === "notfound") {
+      return {
+        ok: false,
+        message:
+          "Video TikTok tidak ditemukan. Cek link-nya, atau pakai link video yang sudah tayang.",
+        fieldErrors: { embedUrl: "Video tidak ditemukan" },
+      };
     }
+    if (check.status === "unknown") {
+      // TikTok sedang membatasi akses (rate-limit) → status video tidak bisa
+      // dipastikan. Tetap disimpan, tapi admin diberi tahu.
+      tiktokWarning =
+        " Status video tidak bisa dicek karena TikTok sedang membatasi akses — periksa nanti di halaman postingan.";
+    }
+
+    const videoId = check.videoId ?? ref.videoId;
+    const title = String(raw.title ?? "").trim() || check.title || "";
+    const author =
+      String(raw.author ?? "").trim() || check.author || ref.author || "";
 
     if (!videoId) {
       return {
@@ -120,7 +141,7 @@ export async function saveEntity(
 
     raw.videoId = videoId;
     raw.title = title || `Postingan TikTok ${videoId.slice(-6)}`;
-    raw.author = author || ref.author || "";
+    raw.author = author;
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -166,7 +187,7 @@ export async function saveEntity(
 
   return {
     ok: true,
-    message: `${def.label} berhasil disimpan.`,
+    message: `${def.label} berhasil disimpan.${tiktokWarning}`,
   };
 }
 

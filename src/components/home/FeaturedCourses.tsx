@@ -1,3 +1,4 @@
+import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import CoursesBrowser from "@/components/home/CoursesBrowser";
@@ -5,6 +6,7 @@ import type { BookCardData } from "@/components/books/BookCard";
 
 export default async function FeaturedCourses() {
   "use cache";
+  cacheTag("content");
   const [tabs, books, settings] = await Promise.all([
     prisma.contentTab.findMany({ orderBy: { order: "asc" } }),
     prisma.book.findMany({

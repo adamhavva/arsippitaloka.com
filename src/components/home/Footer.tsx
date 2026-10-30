@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 
@@ -12,6 +13,7 @@ function toList(value: string): string[] {
 
 export default async function Footer() {
   "use cache";
+  cacheTag("content");
   const [settings, tabs] = await Promise.all([
     getSettings(),
     prisma.contentTab.findMany({ select: { id: true, label: true, slug: true } }),

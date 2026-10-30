@@ -1,10 +1,12 @@
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
+import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 
 export default async function DocumentationSection() {
   "use cache";
+  cacheTag("content");
   const [doc, settings] = await Promise.all([
     prisma.documentation.findFirst({
       where: { published: true },

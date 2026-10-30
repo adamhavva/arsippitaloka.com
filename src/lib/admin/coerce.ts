@@ -7,8 +7,10 @@ import type { FieldDef } from "./entities";
  */
 export function coerceField(
   def: FieldDef,
-  raw: FormDataEntryValue | null,
+  raw: FormDataEntryValue | boolean | null,
 ): string | number | boolean | string[] | Date | null | undefined {
+  if (typeof raw === "boolean") return raw;
+
   const value = typeof raw === "string" ? raw : "";
 
   switch (def.type) {

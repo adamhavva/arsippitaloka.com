@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import CatalogIcon from "@/components/icons/CatalogIcon";
 
 export default async function FeatureCategories() {
   "use cache";
+  cacheTag("content");
   const [categories, settings] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: "asc" } }),
     getSettings(),

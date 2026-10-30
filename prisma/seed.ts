@@ -42,10 +42,9 @@ const settings: Record<string, string> = {
   "company.copyright": "@2026 Pitaloka. All Rights Reserved.",
 };
 
-const tiktokPosts = [
-  { videoId: "7234567890123456789", title: "#ViralForJustice", caption: "Contoh embed TikTok", author: "@pitaloka", highlight: true, order: 0 },
-  { videoId: "7234567890123456790", title: "Pitaloka Documentary", caption: "Contoh embed TikTok", author: "@pitaloka", highlight: false, order: 1 },
-];
+// Tidak ada seed untuk TiktokPost: id video harus milik Pitaloka dan tidak
+// bisa dikarang. Admin menambahkan lewat /admin/tiktok (tempel share link),
+// lalu mencentang "Tayang" supaya videonya tampil di beranda.
 
 async function main() {
   for (const c of categories) {
@@ -89,13 +88,6 @@ async function main() {
     await prisma.siteSetting.upsert({ where: { key }, update: {}, create: { key, value } });
   }
 
-  for (const p of tiktokPosts) {
-    await prisma.tiktokPost.upsert({
-      where: { videoId: p.videoId },
-      update: p,
-      create: { ...p, published: true },
-    });
-  }
 
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD;

@@ -19,6 +19,7 @@ import {
   getCatalogTabs,
 } from "@/components/books/marketplace/catalog-facets";
 import {
+  buildMarketHref,
   cleanParams,
   parseMarketPer,
 } from "@/components/books/marketplace/market-utils";
@@ -221,6 +222,12 @@ export default async function CatalogView({
     ? `Menampilkan hasil pencarian untuk “${filters.q}”`
     : "Menampilkan semua buku";
 
+  // "Semua kategori" tetap di tab aktif; "Semua tab" tetap di kategori aktif.
+  const allCategoriesPath = activeTab ? `/buku/${activeTab.slug}` : "/buku";
+  const allTabsPath = activeCategory
+    ? `/buku/kategori/${activeCategory.slug}`
+    : "/buku";
+
   const sidebar = (
     <FilterSidebar
       basePath={basePath}
@@ -228,6 +235,12 @@ export default async function CatalogView({
       categories={categoryFacets}
       tabs={tabFacets}
       languages={languageFacets}
+      allCategoriesHref={buildMarketHref(allCategoriesPath, linkParams, {
+        page: undefined,
+      })}
+      allTabsHref={buildMarketHref(allTabsPath, linkParams, {
+        page: undefined,
+      })}
       activeCategorySlug={activeCategory?.slug ?? ""}
       activeTabSlug={activeTab?.slug ?? ""}
       activeBahasa={filters.bahasa}

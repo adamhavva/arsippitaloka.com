@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cacheTag } from "next/cache";
+import SearchBar from "@/components/search/SearchBar";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 
@@ -51,6 +52,20 @@ export default async function Footer() {
           <p className="mt-3 max-w-sm text-xs text-white/60">
             {settings["footer.subscribe.text"]}
           </p>
+
+          {/* Pencarian global — submit diarahkan ke /cari?q=… */}
+          <div className="mt-6 max-w-sm">
+            <p className="mb-2 text-sm font-semibold text-white/90">
+              Cari Buku
+            </p>
+            <SearchBar
+              size="sm"
+              placeholder="Cari judul atau penulis…"
+              withSuggestions
+              inputClassName="text-neutral-900 placeholder:text-neutral-400"
+              buttonClassName="bg-maroon hover:bg-maroon-dark"
+            />
+          </div>
         </div>
 
         <div>

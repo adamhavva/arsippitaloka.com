@@ -68,8 +68,8 @@ export default function ProductCard({ book }: { book: MarketplaceBook }) {
       </Link>
 
       <div className="flex flex-1 flex-col p-3">
-        <p className="flex items-center gap-1.5 truncate text-[11px] text-neutral-500">
-          <span className="truncate">{book.author}</span>
+        <p className="flex items-center gap-1.5 text-[11px] text-neutral-500">
+          <span className="min-w-0 truncate">{book.author}</span>
           <span aria-hidden className="text-neutral-300">
             ·
           </span>
@@ -77,10 +77,12 @@ export default function ProductCard({ book }: { book: MarketplaceBook }) {
             <Star size={11} className="fill-yellow-400 text-yellow-400" />
             {String(book.rating)}
           </span>
-          <span aria-hidden className="text-neutral-300">
+          <span aria-hidden className="hidden text-neutral-300 sm:inline">
             ·
           </span>
-          <span className="shrink-0 text-neutral-500">{book.readCount} dibaca</span>
+          <span className="hidden shrink-0 text-neutral-500 sm:inline">
+            {book.readCount} dibaca
+          </span>
         </p>
 
         <h3 className="mt-1 line-clamp-2 text-sm font-medium leading-snug text-neutral-900">

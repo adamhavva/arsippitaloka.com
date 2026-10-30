@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import CariContent from "./cari-content";
+import Footer from "@/components/home/Footer";
 
 /**
  * `/cari?q=<kata kunci>` — hasil pencarian global.
@@ -14,11 +15,14 @@ export default function CariPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <main className="flex min-h-screen flex-col">
-      <Suspense fallback={<CariSkeleton />}>
-        <CariContent searchParams={searchParams} />
-      </Suspense>
-    </main>
+    <>
+      <main className="flex min-h-screen flex-col">
+        <Suspense fallback={<CariSkeleton />}>
+          <CariContent searchParams={searchParams} />
+        </Suspense>
+      </main>
+      <Footer />
+    </>
   );
 }
 

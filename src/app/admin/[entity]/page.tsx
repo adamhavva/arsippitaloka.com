@@ -15,7 +15,12 @@ export default function AdminEntityPage({
   searchParams,
 }: {
   params: Promise<{ entity: string }>;
-  searchParams: Promise<{ edit?: string; page?: string; per?: string }>;
+  searchParams: Promise<{
+    edit?: string;
+    page?: string;
+    per?: string;
+    q?: string;
+  }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
@@ -29,7 +34,12 @@ async function AdminEntityPageContent({
   searchParams,
 }: {
   params: Promise<{ entity: string }>;
-  searchParams: Promise<{ edit?: string; page?: string; per?: string }>;
+  searchParams: Promise<{
+    edit?: string;
+    page?: string;
+    per?: string;
+    q?: string;
+  }>;
 }) {
   await connection();
 
@@ -53,10 +63,26 @@ async function AdminEntityPageContent({
 
   // Pagination: minimal 5 baris per halaman.
   const perPage = parsePerPage(sp.per);
-  const total = await delegate.count();
+
+  // Pencarian generik: cocokkan field judul entitas (dan penulis untuk buku).
+  const q = sp.q?.trim();
+  const hasAuthor = def.fields.some((field) => field.name === "author");
+  const where = q
+    ? {
+        OR: [
+          { [def.titleField]: { contains: q, mode: "insensitive" } },
+          ...(hasAuthor
+            ? [{ author: { contains: q, mode: "insensitive" } }]
+            : []),
+        ],
+      }
+    : {};
+
+  const total = await delegate.count({ where });
   const page = clampPage(parsePage(sp.page), total, perPage);
 
   const rows: Record<string, unknown>[] = await delegate.findMany({
+    where,
     orderBy,
     skip: (page - 1) * perPage,
     take: perPage,
@@ -151,12 +177,38 @@ async function AdminEntityPageContent({
 
       <EntityTable def={def} fields={fields} rows={rows} />
 
+      <form method="get" className="flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder={`Cari ${def.label.toLowerCase()}…`}
+          aria-label={`Cari ${def.label.toLowerCase()}`}
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+        />
+        <button
+          type="submit"
+          className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+        >
+          Cari
+        </button>
+        {q ? (
+          <a
+            href={`/admin/${def.key}`}
+            className="text-sm text-neutral-500 underline"
+          >
+            Reset
+          </a>
+        ) : null}
+      </form>
+
       <Pagination
         basePath={`/admin/${def.key}`}
         page={page}
         perPage={perPage}
         total={total}
         label={def.label.toLowerCase()}
+        params={q ? { q } : undefined}
       />
     </div>
   );

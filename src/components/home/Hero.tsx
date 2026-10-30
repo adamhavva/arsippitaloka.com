@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import HeroSearch from "@/components/home/HeroSearch";
 
 // Posisi tiap label di dalam hero-full.jpg (kanvas PDF 1920 pt, teks navbar
 // diukur dari render 150 DPI): Pitaloka x99–301, Home x714–781,
@@ -38,22 +39,7 @@ export default function Hero() {
             style={{ top: "4%", left: z.left, width: z.width, height: "4%" }}
           />
         ))}
-        <form
-          className="absolute"
-          style={{ left: "30.5%", top: "72.5%", width: "31.5%", height: "6.5%" }}
-        >
-          <input
-            type="text"
-            aria-label="Cari buku"
-            className="h-full w-full rounded-full bg-transparent px-6 text-sm text-black outline-none"
-          />
-        </form>
-        <a
-          href="#"
-          aria-label="Search"
-          className="absolute block"
-          style={{ left: "62.5%", top: "72.5%", width: "6.5%", height: "6.5%" }}
-        />
+        <HeroSearch />
       </div>
     </section>
   );

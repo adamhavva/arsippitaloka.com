@@ -80,6 +80,10 @@ export default function AboutPage() {
         zones={[...SPLIT_NAV_ZONES, ...MENU_ZONES]}
         priority
       />
+      {/* Band statistik + profil + CTA di bawah mengikuti koordinat PDF
+          (band 1464–1628 pt, profil 1871 pt, CTA 2868,5 pt), jadi tidak ada
+          elemen HTML tambahan di antara hero dan band. Pencarian global
+          tersedia lewat kotak "Cari Buku" di footer. */}
       <AboutStats />
       <PdfHero
         src="/images/about-profile.jpg"

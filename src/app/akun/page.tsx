@@ -52,7 +52,7 @@ function formatDate(date: Date | null): string {
 export default function AccountLibraryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string; filter?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; filter?: string; q?: string }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
@@ -64,7 +64,7 @@ export default function AccountLibraryPage({
 async function AccountLibraryPageContent({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string; filter?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; filter?: string; q?: string }>;
 }) {
   await connection();
 
@@ -75,12 +75,20 @@ async function AccountLibraryPageContent({
   const sp = await searchParams;
   const perPage = parsePerPage(sp.per);
   const filter = FILTERS.some((f) => f.key === sp.filter) ? sp.filter! : "semua";
+  const q = sp.q?.trim() ?? "";
 
   const filtered = entries.filter((entry) => {
-    if (filter === "dibeli") return entry.source === "purchase";
-    if (filter === "gratis") return entry.source === "free";
-    if (filter === "menunggu") {
-      return entry.latestStatus === "PENDING" && !entry.canAccess;
+    if (filter === "dibeli" && entry.source !== "purchase") return false;
+    if (filter === "gratis" && entry.source !== "free") return false;
+    if (
+      filter === "menunggu" &&
+      !(entry.latestStatus === "PENDING" && !entry.canAccess)
+    ) {
+      return false;
+    }
+    if (q) {
+      const haystack = `${entry.book.title} ${entry.book.author}`.toLowerCase();
+      if (!haystack.includes(q.toLowerCase())) return false;
     }
     return true;
   });
@@ -126,7 +134,9 @@ async function AccountLibraryPageContent({
         {FILTERS.map((item) => (
           <a
             key={item.key}
-            href={`/akun?filter=${item.key}`}
+            href={`/akun?filter=${item.key}${
+              q ? `&q=${encodeURIComponent(q)}` : ""
+            }`}
             className={`rounded-full px-4 py-1.5 text-sm font-medium ${
               filter === item.key
                 ? "bg-maroon-dark text-white"
@@ -138,17 +148,51 @@ async function AccountLibraryPageContent({
         ))}
       </nav>
 
+      {/* Pencarian judul/penulis — filter dihitung di server lewat `?q=` */}
+      <form
+        method="get"
+        action="/akun"
+        className="flex flex-wrap items-center gap-3"
+      >
+        {filter !== "semua" ? (
+          <input type="hidden" name="filter" value={filter} />
+        ) : null}
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="Cari judul atau penulis buku…"
+          aria-label="Cari buku di Pustaka Saya"
+          className="min-w-64 flex-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm outline-none placeholder:text-neutral-400 focus:border-maroon"
+        />
+        <button
+          type="submit"
+          className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+        >
+          Cari
+        </button>
+        {q ? (
+          <a href="/akun" className="text-sm text-neutral-500 underline">
+            Reset
+          </a>
+        ) : null}
+      </form>
+
       {total === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center">
           <p className="font-medium text-black">
             {entries.length === 0
               ? "Belum ada buku di pustaka Anda"
-              : "Tidak ada buku pada filter ini"}
+              : q
+                ? "Tidak ada buku yang cocok dengan pencarian"
+                : "Tidak ada buku pada filter ini"}
           </p>
           <p className="mt-1 text-sm text-neutral-500">
             {entries.length === 0
               ? "Buku yang Anda beli akan muncul di sini beserta tombol baca dan unduh."
-              : "Coba pilih filter lain, misalnya Semua."}
+              : q
+                ? "Coba kata kunci lain, atau reset pencarian."
+                : "Coba pilih filter lain, misalnya Semua."}
           </p>
         </div>
       ) : (
@@ -165,7 +209,10 @@ async function AccountLibraryPageContent({
         perPage={perPage}
         total={total}
         label="buku"
-        params={filter !== "semua" ? { filter } : undefined}
+        params={{
+          ...(filter !== "semua" ? { filter } : {}),
+          ...(q ? { q } : {}),
+        }}
       />
     </div>
   );

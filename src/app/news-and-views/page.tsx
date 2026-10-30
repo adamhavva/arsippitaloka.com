@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PdfHero from "@/components/layout/PdfHero";
+import SearchBar from "@/components/search/SearchBar";
 import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
 import BeritaTerkini from "@/components/news/BeritaTerkini";
 import ViralForJustice from "@/components/home/ViralForJustice";
@@ -35,6 +36,12 @@ export default function NewsAndViewsPage() {
         zones={SPLIT_NAV_ZONES}
         priority
       />
+
+      {/* Pencarian global — navbar PDF tidak punya kotak search, jadi
+          elemennya ditaruh di bawah hero. */}
+      <div className="mx-auto w-full max-w-6xl px-6 py-8">
+        <SearchBar size="lg" placeholder="Cari buku di Pitaloka…" />
+      </div>
 
       <BeritaTerkini />
 

@@ -2,15 +2,14 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
-  SORT_OPTIONS,
   buildBookOrderBy,
   buildBookWhere,
   compactParams,
   parseFilters,
-  sortLabel,
 } from "@/lib/book-search";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import Pagination from "@/components/Pagination";
+import SortBar from "@/components/books/marketplace/SortBar";
 import SearchBar from "@/components/search/SearchBar";
 import SearchResults, {
   SearchEmptyState,
@@ -20,20 +19,6 @@ import type { Prisma } from "../../../prisma/generated/prisma/client";
 
 /** Panjang maksimum kata kunci yang diproses. */
 const MAX_QUERY_LENGTH = 100;
-
-/** Bangun URL dengan query string dari parameter yang sudah dibersihkan. */
-function buildHref(
-  basePath: string,
-  params: Record<string, string | undefined>,
-): string {
-  const search = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === "") continue;
-    search.set(key, value);
-  }
-  const qs = search.toString();
-  return qs ? `${basePath}?${qs}` : basePath;
-}
 
 /**
  * Isi halaman `/cari`. Dipanggil di dalam `<Suspense>`.
@@ -76,6 +61,8 @@ export default async function CariContent({
         coverUrl: true,
         priceUsd: true,
         isFree: true,
+        isNew: true,
+        readCount: true,
         rating: true,
         language: true,
         pages: true,
@@ -115,6 +102,8 @@ export default async function CariContent({
     rating: Number(book.rating),
     language: book.language,
     pages: book.pages,
+    readCount: book.readCount,
+    isNew: book.isNew,
   }));
 
   // Tanpa kata kunci → halaman ramah, bukan error.
@@ -200,31 +189,9 @@ export default async function CariContent({
         <SearchBar defaultValue={query} size="md" />
       </div>
 
-      <nav className="mt-6 flex flex-wrap items-center gap-2" aria-label="Urutan hasil">
-        <span className="text-xs uppercase tracking-wide text-neutral-400">
-          Urutkan
-        </span>
-        {SORT_OPTIONS.map((option) => {
-          const active = filters.sort === option.value;
-          return (
-            <Link
-              key={option.value}
-              href={buildHref("/cari", { ...linkParams, sort: option.value })}
-              aria-current={active ? "true" : undefined}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                active
-                  ? "bg-maroon-dark text-white"
-                  : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-              }`}
-            >
-              {option.label}
-            </Link>
-          );
-        })}
-        <span className="ml-auto text-xs text-neutral-400">
-          {sortLabel(filters.sort)}
-        </span>
-      </nav>
+      <div className="mt-6">
+        <SortBar basePath="/cari" params={linkParams} sort={filters.sort} />
+      </div>
 
       <div className="mt-8">
         {items.length === 0 ? (

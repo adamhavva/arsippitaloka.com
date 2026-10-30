@@ -60,6 +60,7 @@ async function TabCatalogContent({
       tabSlug={tab}
       page={sp.page}
       per={sp.per}
+      searchParams={sp}
     />
   );
 }

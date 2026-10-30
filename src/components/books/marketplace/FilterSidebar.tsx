@@ -33,6 +33,8 @@ export default function FilterSidebar({
   categories,
   tabs,
   languages,
+  allCategoriesHref,
+  allTabsHref,
   activeCategorySlug = "",
   activeTabSlug = "",
   activeBahasa = "",
@@ -46,6 +48,10 @@ export default function FilterSidebar({
   categories: FacetItem[];
   tabs: FacetItem[];
   languages: LanguageFacet[];
+  /** Link "Semua kategori" (biasanya tetap di tab yang aktif). */
+  allCategoriesHref: string;
+  /** Link "Semua tab" (biasanya tetap di kategori yang aktif). */
+  allTabsHref: string;
   activeCategorySlug?: string;
   activeTabSlug?: string;
   activeBahasa?: string;
@@ -110,7 +116,7 @@ export default function FilterSidebar({
         <ul className="space-y-1">
           <li>
             <FacetLink
-              href={buildMarketHref("/buku", params, { page: undefined })}
+              href={allCategoriesHref}
               label="Semua kategori"
               active={!activeCategorySlug}
             />
@@ -266,7 +272,7 @@ export default function FilterSidebar({
         <ul className="space-y-1">
           <li>
             <FacetLink
-              href={buildMarketHref("/buku", params, { page: undefined })}
+              href={allTabsHref}
               label="Semua tab"
               active={!activeTabSlug}
             />

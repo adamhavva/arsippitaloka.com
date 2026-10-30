@@ -43,6 +43,7 @@ async function CategoryCatalogContent({
       categorySlug={slug}
       page={sp.page}
       per={sp.per}
+      searchParams={sp}
     />
   );
 }

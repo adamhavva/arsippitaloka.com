@@ -13,7 +13,7 @@ export const metadata = {
 export default function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; q?: string }>;
 }) {
   return (
     <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
@@ -25,7 +25,7 @@ export default function AdminUsersPage({
 async function AdminUsersPageContent({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; per?: string }>;
+  searchParams: Promise<{ page?: string; per?: string; q?: string }>;
 }) {
   await connection();
 
@@ -34,10 +34,22 @@ async function AdminUsersPageContent({
 
   const sp = await searchParams;
   const perPage = parsePerPage(sp.per);
-  const total = await prisma.user.count();
+  const q = sp.q?.trim();
+
+  const where = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" as const } },
+          { email: { contains: q, mode: "insensitive" as const } },
+        ],
+      }
+    : {};
+
+  const total = await prisma.user.count({ where });
   const page = clampPage(parsePage(sp.page), total, perPage);
 
   const users = await prisma.user.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     skip: (page - 1) * perPage,
     take: perPage,
@@ -69,6 +81,28 @@ async function AdminUsersPageContent({
           user.
         </p>
       </header>
+
+      <form method="get" className="flex flex-wrap items-center gap-3">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="Cari nama atau email user"
+          aria-label="Cari user"
+          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+        />
+        <button
+          type="submit"
+          className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+        >
+          Cari
+        </button>
+        {q ? (
+          <a href="/admin/users" className="text-sm text-neutral-500 underline">
+            Reset
+          </a>
+        ) : null}
+      </form>
 
       <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white">
         <table className="w-full min-w-[900px] text-left text-sm">
@@ -135,6 +169,7 @@ async function AdminUsersPageContent({
         perPage={perPage}
         total={total}
         label="akun"
+        params={q ? { q } : undefined}
       />
     </div>
   );

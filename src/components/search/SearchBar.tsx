@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
@@ -45,6 +45,7 @@ export default function SearchBar({
   buttonClassName?: string;
 }) {
   const router = useRouter();
+  const inputId = useId();
   const [value, setValue] = useState(defaultValue);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
@@ -73,7 +74,7 @@ export default function SearchBar({
         });
         if (!response.ok) return;
         const data = (await response.json()) as { results?: Suggestion[] };
-        setSuggestions(data.results ?? []);
+        setSuggestions((data.results ?? []).slice(0, 8));
         setOpen(true);
       } catch {
         // Gagal fetch saran diabaikan — kolom pencarian tetap bisa dipakai.
@@ -120,11 +121,11 @@ export default function SearchBar({
         onSubmit={submit}
         className={`flex w-full items-center overflow-hidden rounded-full border border-neutral-300 bg-white ${sizes.wrap}`}
       >
-        <label htmlFor="global-search" className="sr-only">
+        <label htmlFor={inputId} className="sr-only">
           {placeholder}
         </label>
         <input
-          id="global-search"
+          id={inputId}
           type="search"
           name="q"
           value={value}

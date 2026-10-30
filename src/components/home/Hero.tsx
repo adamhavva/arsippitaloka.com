@@ -1,13 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 
+// Posisi tiap label di dalam hero-full.jpg (kanvas PDF 1920 pt, teks navbar
+// diukur dari render 150 DPI): Pitaloka x99–301, Home x714–781,
+// Books x832–898, About x942–1014, News & Views x1054–1206,
+// Sign In x1529–1591, Join Us x1626–1694.
 const navZones = [
-  { label: "Home", href: "/", left: "36%", width: "4.5%" },
-  { label: "Books", href: "#", left: "41.5%", width: "4.5%" },
-  { label: "About", href: "#", left: "47%", width: "4.5%" },
-  { label: "News & Views", href: "#", left: "52%", width: "8%" },
-  { label: "Sign In", href: "/login", left: "79%", width: "5.5%" },
-  { label: "Join Us", href: "/register", left: "85%", width: "5.5%" },
+  { label: "Pitaloka", href: "/", left: "5.2%", width: "10.5%" },
+  { label: "Home", href: "/", left: "37.2%", width: "3.5%" },
+  { label: "Books", href: "/buku", left: "43.3%", width: "3.5%" },
+  { label: "About", href: "/about", left: "49.1%", width: "3.8%" },
+  { label: "News & Views", href: "/news-and-views", left: "54.9%", width: "8%" },
+  { label: "Sign In", href: "/login", left: "79.6%", width: "3.3%" },
+  { label: "Join Us", href: "/register", left: "84.7%", width: "3.6%" },
 ];
 
 export default function Hero() {

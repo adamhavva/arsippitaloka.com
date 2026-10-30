@@ -19,11 +19,18 @@ export default async function CatalogView({
   categorySlug = "",
   page: pageParam,
   per: perParam,
+  showHeading = true,
 }: {
   tabSlug?: string;
   categorySlug?: string;
   page?: string;
   per?: string;
+  /**
+   * `false` dipakai route yang sudah punya judul sendiri di atas katalog
+   * (mis. banner `BooksLanding` pada `/buku`), supaya tidak ada judul dobel.
+   * Baris jumlah buku tetap ditampilkan.
+   */
+  showHeading?: boolean;
 }) {
   const perPage = parsePerPage(perParam);
   const page = parsePage(pageParam);
@@ -73,19 +80,27 @@ export default async function CatalogView({
       ? `/buku/${activeTab.slug}`
       : "/buku";
 
+  const countText = (
+    <>
+      {total} buku ditemukan
+      {activeTab ? ` pada tab ${activeTab.label}` : ""}
+      {activeCategory ? ` · kategori ${activeCategory.name}` : ""}.
+    </>
+  );
+
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-6 py-10 md:px-10">
-      <header>
-        <p className="text-sm font-medium text-maroon">Katalog</p>
-        <h1 className="font-heading mt-1 text-2xl font-bold text-black md:text-3xl">
-          {activeCategory ? activeCategory.name : activeTab ? activeTab.label : "Semua Buku"}
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {total} buku ditemukan
-          {activeTab ? ` pada tab ${activeTab.label}` : ""}
-          {activeCategory ? ` · kategori ${activeCategory.name}` : ""}.
-        </p>
-      </header>
+    <div className="mx-auto w-full min-h-screen max-w-6xl px-6 py-10 md:px-10">
+      {showHeading ? (
+        <header>
+          <p className="text-sm font-medium text-maroon">Katalog</p>
+          <h1 className="font-heading mt-1 text-2xl font-bold text-black md:text-3xl">
+            {activeCategory ? activeCategory.name : activeTab ? activeTab.label : "Semua Buku"}
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500">{countText}</p>
+        </header>
+      ) : (
+        <p className="text-sm text-neutral-500">{countText}</p>
+      )}
 
       <nav className="mt-6 space-y-3">
         <div className="flex flex-wrap items-center gap-2">

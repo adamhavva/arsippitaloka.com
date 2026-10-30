@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import CatalogView from "@/components/books/CatalogView";
+import BooksLanding from "@/components/books/BooksLanding";
+import Footer from "@/components/home/Footer";
 
 export const metadata = {
   title: "Katalog Buku — Arsip Pitaloka",
@@ -13,9 +15,13 @@ export default function CatalogPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
-      <CatalogContent searchParams={searchParams} />
-    </Suspense>
+    <>
+      <BooksLanding />
+      <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+        <CatalogContent searchParams={searchParams} />
+      </Suspense>
+      <Footer />
+    </>
   );
 }
 
@@ -27,5 +33,5 @@ async function CatalogContent({
   await connection();
   const sp = await searchParams;
 
-  return <CatalogView page={sp.page} per={sp.per} />;
+  return <CatalogView page={sp.page} per={sp.per} showHeading={false} />;
 }

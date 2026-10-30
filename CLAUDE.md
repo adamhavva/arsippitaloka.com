@@ -134,8 +134,11 @@ URL lama ditangani:
   **Kategori** (`/admin/category`); buku diberi tab lewat field "Tab Konten"
   di `/admin/book`.
 - Kartu kategori di beranda dan tautan "Browse" di footer menuju katalog
-  (`/buku/kategori/<slug>` / `/buku/<slug-tab>`). `Hero.tsx` tidak diubah, jadi
-  overlay nav "Books" masih menuju `#`.
+  (`/buku/kategori/<slug>` / `/buku/<slug-tab>`).
+- Overlay nav di `Hero.tsx` memakai href aktif: Home `/`, Books `/buku`,
+  About `/about`, News & Views `/news-and-views`, Sign In `/login`,
+  Join Us `/register`. Yang berubah hanya `href` — render gambar tidak
+  disentuh.
 
 ### Fixture pembeli
 

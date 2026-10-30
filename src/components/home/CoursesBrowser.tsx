@@ -28,7 +28,7 @@ export default function CoursesBrowser({
   const books = booksByTab[activeSlug] ?? [];
 
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-20 md:px-10">
+    <section className="mx-auto w-full max-w-6xl px-6 pb-20 md:px-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-maroon">{eyebrow}</p>

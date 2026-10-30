@@ -29,7 +29,7 @@ export default async function Footer() {
 
   return (
     <footer className="bg-maroon-dark px-6 pt-16 pb-6 text-white md:px-10">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 md:grid-cols-3">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 md:grid-cols-3">
         <div>
           <Image
             src={settings["company.logoUrl"] || "/images/logo-pitaloka.png"}
@@ -85,7 +85,7 @@ export default async function Footer() {
         </div>
       </div>
 
-      <div className="mx-auto mt-14 max-w-6xl border-t border-white/15 pt-6">
+      <div className="mx-auto mt-14 w-full max-w-6xl border-t border-white/15 pt-6">
         <div className="flex flex-col items-center justify-between gap-3 text-xs text-white/70 md:flex-row">
           <span>{settings["company.copyright"]}</span>
           <div className="flex gap-6">

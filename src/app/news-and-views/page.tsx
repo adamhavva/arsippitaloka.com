@@ -30,20 +30,10 @@ export default function NewsAndViewsPage() {
       <PdfHero
         src="/images/news-hero.jpg"
         alt="News & Views Pitaloka — What's Trending, What's True."
-        heightPx={1230}
+        heightPx={1705}
         originY={0}
         zones={SPLIT_NAV_ZONES}
         priority
-      />
-
-      {/* Pita foto gelap di bawah hero. Pada PDF area ini (984–1364 pt) adalah
-          foto raster, jadi dipotong dari render PDF (public/images/news-band.jpg)
-          — bukan gradient karangan. */}
-      <PdfHero
-        src="/images/news-band.jpg"
-        alt="Pita foto Pitaloka"
-        heightPx={475}
-        originY={984}
       />
 
       <BeritaTerkini />

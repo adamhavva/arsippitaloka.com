@@ -18,7 +18,7 @@ export default async function DocumentationSection() {
   if (!doc) return null;
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16 md:px-10">
+    <section className="mx-auto w-full max-w-6xl px-6 py-16 md:px-10">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:items-start">
         <div className="relative h-[420px] w-full overflow-hidden rounded-2xl">
           <Image

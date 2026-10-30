@@ -13,7 +13,7 @@ export default async function FeatureCategories() {
   ]);
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-16 md:px-10">
+    <section className="mx-auto w-full max-w-6xl px-6 py-16 md:px-10">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-maroon">

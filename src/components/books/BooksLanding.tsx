@@ -7,7 +7,7 @@ import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
  * Sumber desain: `references/layouts/split/MENU BOOKS.pdf` (kanvas 1920 pt
  * × 4430,91 pt). Navigasi taken dari varian yang sama: `MENU BOOKS 2.pdf`.
  *
- * Aset `public/images/books-hero.jpg` (2400 × 1234 px = kanvas 1920 pt
+ * Aset `public/images/books-hero.jpg` (2400 × 1705 px = kanvas 1920 pt
  * mulai pt y=0, jadi 1,25 px/pt) sudah memuat navbar + judul
  * "One Page, Endless Stories!" + subjudul "Find Your Next Favorite Read"
  * + "Jelajah ilmu tanpa batas dalam satu genggaman saja." — teksnya menyatu
@@ -30,7 +30,7 @@ export default function BooksLanding() {
       <PdfHero
         src="/images/books-hero.jpg"
         alt="Katalog E-Books Pitaloka"
-        heightPx={1234}
+        heightPx={1705}
         widthPx={2400}
         originY={0}
         zones={SPLIT_NAV_ZONES}

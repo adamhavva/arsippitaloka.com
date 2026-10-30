@@ -46,7 +46,7 @@ export default async function ViralForJustice() {
 
   return (
     <section className="bg-neutral-50 py-16">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-6 md:grid-cols-2 md:px-10">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 md:grid-cols-2 md:px-10">
         <div>
           <p className="text-sm font-medium text-maroon">
             {settings["home.viral.eyebrow"]}

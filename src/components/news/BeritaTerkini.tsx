@@ -75,7 +75,7 @@ export default async function BeritaTerkini() {
   const usingFallback = tabBooks.length === 0 && fallback.length > 0;
 
   return (
-    <section className="relative mx-auto max-w-[1440px] px-6 py-16 md:px-10">
+    <section className="relative mx-auto w-full max-w-[1440px] px-6 py-16 md:px-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="font-heading text-3xl font-bold text-black md:text-4xl">

@@ -89,7 +89,7 @@ export default function AboutPage() {
         zones={[KNOW_US_MORE_ZONE]}
       />
       {/* Jarak putih di PDF: profil berakhir di 2727,8 pt, CTA mulai 2868,5 pt. */}
-      <div className="h-[7.328vw]" aria-hidden />
+      <div className="h-[7.3vw]" aria-hidden />
       <AboutCta />
       <Footer />
     </div>

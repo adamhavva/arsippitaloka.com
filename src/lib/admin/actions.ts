@@ -9,6 +9,7 @@ import { coerceField, pruneEmpty } from "./coerce";
 import { slugify } from "@/lib/slug";
 import { parseTikTok } from "@/lib/tiktok";
 import { checkTikTokVideo } from "@/lib/tiktok-oembed";
+import { parseSocialRef, resolveThumbnailUrl } from "@/lib/social";
 import type { ActionState } from "./action-state";
 
 /**
@@ -142,6 +143,45 @@ export async function saveEntity(
     raw.videoId = videoId;
     raw.title = title || `Postingan TikTok ${videoId.slice(-6)}`;
     raw.author = author;
+  }
+
+  // Media sosial multi-platform: platform + id video + URL embed diambil
+  // otomatis dari link/kode embed yang ditempel. Cover (thumbnail) diisi
+  // otomatis bila dibiarkan kosong.
+  if (def.key === "social") {
+    const source = String(raw.embedUrl ?? "").trim();
+    const ref = parseSocialRef(source);
+
+    if (!ref.videoId) {
+      return {
+        ok: false,
+        message:
+          "Link media sosial belum bisa dibaca. Tempel share link TikTok/YouTube/Instagram atau kode embed lengkap.",
+        fieldErrors: { embedUrl: "Link tidak dikenali" },
+      };
+    }
+
+    raw.platform = ref.platform;
+    raw.videoId = ref.videoId;
+    raw.embedUrl = ref.embedUrl ?? source;
+
+    if (!String(raw.author ?? "").trim() && ref.author) {
+      raw.author = ref.author;
+    }
+
+    if (!String(raw.coverUrl ?? "").trim()) {
+      let tiktokThumbnail: string | null = null;
+      if (ref.platform === "tiktok") {
+        const check = await checkTikTokVideo(source);
+        tiktokThumbnail = check.thumbnailUrl;
+      }
+      const thumbnail = resolveThumbnailUrl({
+        platform: ref.platform,
+        videoId: ref.videoId,
+        tiktokThumbnail,
+      });
+      if (thumbnail) raw.coverUrl = thumbnail;
+    }
   }
 
   if (Object.keys(fieldErrors).length > 0) {

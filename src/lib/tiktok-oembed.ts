@@ -4,6 +4,7 @@ export type TikTokOEmbed = {
   videoId: string | null;
   title: string | null;
   author: string | null;
+  thumbnailUrl: string | null;
 };
 
 /** Hasil pengecekan video: ada, tidak ada, atau tidak bisa dipastikan. */
@@ -12,6 +13,7 @@ export type TikTokCheck = {
   videoId: string | null;
   title: string | null;
   author: string | null;
+  thumbnailUrl: string | null;
 };
 
 /**
@@ -40,6 +42,7 @@ export async function fetchTikTokOEmbed(
       title?: string;
       author_name?: string;
       html?: string;
+      thumbnail_url?: string;
     };
 
     const videoId =
@@ -50,6 +53,7 @@ export async function fetchTikTokOEmbed(
       videoId: videoId ?? null,
       title: data.title ?? null,
       author: data.author_name ?? null,
+      thumbnailUrl: data.thumbnail_url ?? null,
     };
   } catch {
     return null;
@@ -146,17 +150,18 @@ export async function checkTikTokVideo(url: string): Promise<TikTokCheck> {
   const videoId = page.videoId ?? oembed?.videoId ?? ref.videoId;
   const title = page.title ?? oembed?.title ?? null;
   const author = page.author ?? oembed?.author ?? ref.author ?? null;
+  const thumbnailUrl = oembed?.thumbnailUrl ?? null;
 
   if (!videoId) {
-    return { status: "unknown", videoId: null, title, author };
+    return { status: "unknown", videoId: null, title, author, thumbnailUrl };
   }
 
   if (page.found === true) {
-    return { status: "exists", videoId, title, author };
+    return { status: "exists", videoId, title, author, thumbnailUrl };
   }
 
   if (page.found === false) {
-    return { status: "notfound", videoId, title, author };
+    return { status: "notfound", videoId, title, author, thumbnailUrl };
   }
 
   // Halaman tidak terbaca → coba endpoint embed sebagai cadangan.
@@ -169,14 +174,14 @@ export async function checkTikTokVideo(url: string): Promise<TikTokCheck> {
     await res.text().catch(() => "");
 
     if (res.status === 400 || res.status === 404) {
-      return { status: "notfound", videoId, title, author };
+      return { status: "notfound", videoId, title, author, thumbnailUrl };
     }
     if (res.status === 200) {
-      return { status: "exists", videoId, title, author };
+      return { status: "exists", videoId, title, author, thumbnailUrl };
     }
   } catch {
     // abaikan, tetap "unknown"
   }
 
-  return { status: "unknown", videoId, title, author };
+  return { status: "unknown", videoId, title, author, thumbnailUrl };
 }

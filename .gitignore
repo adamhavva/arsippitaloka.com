@@ -56,3 +56,4 @@ prisma/generated/
 # file privat e-book (jangan di-commit)
 /storage/
 graphify-out
+.playwright-mcp

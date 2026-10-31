@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
+    "@tiptap/extension-image": "^3.32.2",
+    "@tiptap/extension-youtube": "^3.32.2",
     "@tiptap/pm": "^3.32.2",
     "@tiptap/react": "^3.32.2",
     "@tiptap/starter-kit": "^3.32.2",

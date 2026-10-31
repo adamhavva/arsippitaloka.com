@@ -5,6 +5,7 @@ export type AdminUser = {
   id: string;
   name: string;
   email: string;
+  image: string | null;
   role: "ADMIN";
 };
 
@@ -25,7 +26,7 @@ export async function requireAdmin(): Promise<AdminUser | null> {
 
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, name: true, email: true, role: true },
+    select: { id: true, name: true, email: true, image: true, role: true },
   });
 
   if (user?.role !== "ADMIN") return null;
@@ -34,6 +35,7 @@ export async function requireAdmin(): Promise<AdminUser | null> {
     id: user.id,
     name: user.name,
     email: user.email,
+    image: user.image ?? null,
     role: "ADMIN",
   };
 }

@@ -8,6 +8,7 @@ import type { FieldDef, EntityDef } from "@/lib/admin/entities";
 import ImageField from "./ImageField";
 import IconPicker from "./IconPicker";
 import TikTokField from "./TikTokField";
+import SocialField from "./SocialField";
 import CategoryPicker, { type CategoryOption } from "./CategoryPicker";
 import RichTextField from "./RichTextField";
 
@@ -216,6 +217,20 @@ export default function EntityForm({
             return (
               <div key={field.name} className="md:col-span-2">
                 <TikTokField
+                  name={field.name}
+                  label={field.label}
+                  value={(raw as string) ?? null}
+                  help={field.help}
+                />
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+              </div>
+            );
+          }
+
+          if (field.type === "social") {
+            return (
+              <div key={field.name} className="md:col-span-2">
+                <SocialField
                   name={field.name}
                   label={field.label}
                   value={(raw as string) ?? null}

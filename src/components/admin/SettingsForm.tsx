@@ -5,6 +5,7 @@ import { saveSettings } from "@/app/admin/profile/actions";
 import type { SettingField } from "@/lib/site-settings";
 import { SECRET_MASK } from "@/lib/site-settings-defaults";
 import RichTextField from "./RichTextField";
+import SettingsImageField from "./SettingsImageField";
 
 export default function SettingsForm({
   fields,
@@ -66,6 +67,8 @@ export default function SettingsForm({
                         value={value}
                         hideLabel
                       />
+                    ) : field.type === "image" ? (
+                      <SettingsImageField name={field.key} value={value} />
                     ) : field.type === "textarea" || field.type === "lines" ? (
                       <textarea
                         name={field.key}

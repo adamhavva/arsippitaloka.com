@@ -3,6 +3,7 @@ import PdfHero from "@/components/layout/PdfHero";
 import SearchBar from "@/components/search/SearchBar";
 import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
 import BeritaTerkini from "@/components/news/BeritaTerkini";
+import YoutubeBand from "@/components/news/YoutubeBand";
 import ViralForJustice from "@/components/home/ViralForJustice";
 import DocumentationSection from "@/components/home/DocumentationSection";
 import Footer from "@/components/home/Footer";
@@ -44,6 +45,8 @@ export default function NewsAndViewsPage() {
       </div>
 
       <BeritaTerkini />
+
+      <YoutubeBand />
 
       <DocumentationSection />
 

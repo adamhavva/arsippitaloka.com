@@ -7,7 +7,15 @@ export { DEFAULT_SETTINGS };
 export type SettingField = {
   key: string;
   label: string;
-  type: "text" | "textarea" | "boolean" | "lines" | "secret" | "select" | "richtext";
+  type:
+    | "text"
+    | "textarea"
+    | "boolean"
+    | "lines"
+    | "secret"
+    | "select"
+    | "richtext"
+    | "image";
   group: string;
   help?: string;
   options?: string[];
@@ -25,7 +33,7 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "company.address", label: "Alamat", type: "text", group: "Profil" },
   { key: "company.phone", label: "Telepon", type: "text", group: "Profil" },
   { key: "company.email", label: "Email", type: "text", group: "Profil" },
-  { key: "company.logoUrl", label: "URL logo", type: "text", group: "Profil" },
+  { key: "company.logoUrl", label: "Logo perusahaan", type: "image", group: "Profil", help: "Unggah gambar; disimpan langsung di database." },
   { key: "company.copyright", label: "Teks copyright", type: "text", group: "Profil" },
 
   { key: "home.categories.eyebrow", label: "Judul kecil kategori", type: "text", group: "Halaman Utama" },
@@ -40,7 +48,7 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "home.viral.title", label: "Judul #ViralForJustice", type: "text", group: "Halaman Utama" },
   { key: "home.viral.subtitle", label: "Nama di #ViralForJustice", type: "text", group: "Halaman Utama" },
   { key: "home.viral.body", label: "Paragraf #ViralForJustice", type: "richtext", group: "Halaman Utama" },
-  { key: "home.viral.image", label: "Gambar #ViralForJustice", type: "text", group: "Halaman Utama" },
+  { key: "home.viral.image", label: "Gambar #ViralForJustice", type: "image", group: "Halaman Utama", help: "Unggah gambar; disimpan langsung di database." },
   { key: "home.documentation.eyebrow", label: "Judul kecil dokumentasi", type: "text", group: "Halaman Utama" },
   { key: "home.documentation.signature", label: "Nama penanda dokumentasi", type: "text", group: "Halaman Utama" },
 

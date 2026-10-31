@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import { tiktokEmbedUrl, tiktokVideoUrl } from "@/lib/tiktok";
 import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
+import { isDataUrl } from "@/lib/file-to-data-url";
 
 /**
  * Slot kartu miring pada section #ViralForJustice (sesuai desain PDF).
@@ -119,6 +120,7 @@ export default async function ViralForJustice() {
                     alt="#ViralForJustice"
                     fill
                     sizes="(max-width: 768px) 70vw, 320px"
+                    unoptimized={isDataUrl(image)}
                     className="object-cover"
                   />
                 )}

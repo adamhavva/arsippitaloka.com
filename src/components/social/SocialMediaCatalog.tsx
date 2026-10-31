@@ -1,14 +1,9 @@
 import Link from "next/link";
 import {
-  Bookmark,
   ExternalLink,
   FileText,
-  Heart,
   Library,
-  MessageCircle,
   PanelsTopLeft,
-  Plus,
-  UserRound,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
@@ -51,7 +46,7 @@ export default async function SocialMediaCatalog({
 
   const posts = await prisma.socialMedia.findMany({
     where,
-    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
     skip: (currentPage - 1) * perPage,
     take: perPage,
     include: {
@@ -121,65 +116,14 @@ type EngagementPost = {
   coverUrl: string | null;
   caption: string | null;
   author: string | null;
-  likeCount: number | null;
-  commentCount: number | null;
-  bookmarkCount: number | null;
   book: { id: string; title: string; slug: string } | null;
   documentation: { id: string; title: string } | null;
   contentTab: { id: string; label: string; slug: string } | null;
 };
 
-function formatCount(value: number | null | undefined): string {
-  if (value == null) return "0";
-  return new Intl.NumberFormat("id-ID").format(value);
-}
-
-/** Rel engagement ala TikTok/Instagram: avatar+follow, suka, komentar, simpan. */
-function EngagementRail({
-  likeCount,
-  commentCount,
-  bookmarkCount,
-}: {
-  likeCount: number | null;
-  commentCount: number | null;
-  bookmarkCount: number | null;
-}) {
-  return (
-    <div className="pointer-events-none absolute bottom-3 right-2 z-10 flex flex-col items-center gap-3 text-white">
-      <div className="relative">
-        <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-neutral-700">
-          <UserRound size={18} />
-        </span>
-        <span className="absolute -bottom-1.5 left-1/2 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full bg-maroon text-white">
-          <Plus size={11} strokeWidth={3} />
-        </span>
-      </div>
-      <div className="flex flex-col items-center gap-1">
-        <Heart size={22} fill="white" />
-        <span className="text-[11px] font-semibold drop-shadow">
-          {formatCount(likeCount)}
-        </span>
-      </div>
-      <div className="flex flex-col items-center gap-1">
-        <MessageCircle size={22} fill="white" />
-        <span className="text-[11px] font-semibold drop-shadow">
-          {formatCount(commentCount)}
-        </span>
-      </div>
-      <div className="flex flex-col items-center gap-1">
-        <Bookmark size={22} fill="white" />
-        <span className="text-[11px] font-semibold drop-shadow">
-          {formatCount(bookmarkCount)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 /**
- * Satu kartu media sosial: video + rail engagement, judul, dan tautan ke
- * konten terkait (buku/dokumentasi/tab). Pola tombol relasi sama dengan
- * `SocialCard`.
+ * Satu kartu media sosial: video, judul, dan tautan ke konten terkait
+ * (buku/dokumentasi/tab). Pola tombol relasi sama dengan `SocialCard`.
  */
 function EngagementCard({
   post,
@@ -200,11 +144,6 @@ function EngagementCard({
           poster={post.coverUrl}
           defer
           showOverlay={false}
-        />
-        <EngagementRail
-          likeCount={post.likeCount}
-          commentCount={post.commentCount}
-          bookmarkCount={post.bookmarkCount}
         />
       </div>
 

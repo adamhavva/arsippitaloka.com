@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { getSettings } from "@/lib/site-settings";
 import AdminNav from "@/components/admin/AdminNav";
 
 export const metadata = {
@@ -34,9 +35,17 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
   if (!admin) redirect("/login?callbackUrl=/admin");
 
+  const settings = await getSettings();
+  const logoUrl = settings["company.logoUrl"]?.trim() || null;
+
   return (
     <>
-      <AdminNav name={admin.name} email={admin.email} />
+      <AdminNav
+        name={admin.name}
+        email={admin.email}
+        image={admin.image}
+        logoUrl={logoUrl}
+      />
       {/* Hanya konten yang ikut scroll; sidebar tetap diam di kiri. */}
       <main className="min-w-0 flex-1 overflow-y-auto px-6 py-8 md:px-10">
         {children}

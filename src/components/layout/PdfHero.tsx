@@ -1,5 +1,6 @@
 import Image from "next/image";
 import OverlayLinks, { type Zone } from "./OverlayLinks";
+import NavAuthChip from "./NavAuthChip";
 
 /**
  * Aset hasil konversi `references/layouts/split` dirender pada lebar
@@ -37,6 +38,20 @@ export default function PdfHero({
 }) {
   const originHeight = heightPx / PX_PER_PT;
 
+  // Chip akun menimpa "Sign In / Join Us" saat login. Posisinya dihitung dari
+  // zona navbar supaya ikut benar di tiap potongan PDF (originY/tinggi beda).
+  const signIn = zones.find((z) => z.label === "Sign In");
+  const joinUs = zones.find((z) => z.label === "Join Us");
+  const authEnd = joinUs ?? signIn;
+  const authChipStyle =
+    signIn && authEnd
+      ? {
+          top: `${((signIn.y - originY) / originHeight) * 100}%`,
+          right: `${((1920 - (authEnd.x + authEnd.w)) / 1920) * 100}%`,
+          height: `${(signIn.h / originHeight) * 100}%`,
+        }
+      : null;
+
   return (
     <section className={`relative w-full ${className}`}>
       <Image
@@ -56,6 +71,7 @@ export default function PdfHero({
             originWidth={1920}
             originHeight={originHeight}
           />
+          {authChipStyle ? <NavAuthChip style={authChipStyle} /> : null}
         </div>
       ) : null}
     </section>

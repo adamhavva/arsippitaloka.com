@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import HeroSearch from "@/components/home/HeroSearch";
+import NavAuthChip from "@/components/layout/NavAuthChip";
 
 // Posisi tiap label di dalam hero-full.jpg (kanvas PDF 1920 pt, teks navbar
 // diukur dari render 150 DPI): Pitaloka x99–301, Home x714–781,
@@ -39,6 +40,9 @@ export default function Hero() {
             style={{ top: "4%", left: z.left, width: z.width, height: "4%" }}
           />
         ))}
+        {/* Saat login: pill email menimpa "Sign In / Join Us" (Join Us berakhir
+            di 88,3%; ikon tas di ~90% tidak tertutup). */}
+        <NavAuthChip style={{ top: "4%", right: "11.7%", height: "4%" }} />
         <HeroSearch />
       </div>
     </section>

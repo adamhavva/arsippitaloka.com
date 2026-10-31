@@ -2,8 +2,21 @@
 
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useState } from "react";
-import { Bold, Italic, Heading2, Heading3, List, ListOrdered, LinkIcon } from "lucide-react";
+import Image from "@tiptap/extension-image";
+import Youtube from "@tiptap/extension-youtube";
+import { useRef, useState } from "react";
+import {
+  Bold,
+  Italic,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  LinkIcon,
+  ImageIcon,
+  MonitorPlay as YoutubeIcon,
+} from "lucide-react";
+import { fileToDataUrl, FileTooLargeError } from "@/lib/file-to-data-url";
 
 /**
  * Editor teks kaya (Tiptap) untuk field admin — bold/italic/heading/list/link.
@@ -25,6 +38,7 @@ export default function RichTextField({
   hideLabel?: boolean;
 }) {
   const [html, setHtml] = useState(value ?? "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -42,9 +56,41 @@ export default function RichTextField({
           HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
         },
       }),
+      Image.configure({
+        inline: false,
+        HTMLAttributes: { class: "rounded-lg" },
+      }),
+      Youtube.configure({
+        nocookie: true,
+        HTMLAttributes: { class: "rounded-lg" },
+      }),
     ],
     content: value ?? "",
     onUpdate: ({ editor }) => setHtml(editor.getHTML()),
+    editorProps: {
+      // Paste gambar dari clipboard → sisipkan sebagai data URL base64.
+      handlePaste: (view, event) => {
+        const files = Array.from(event.clipboardData?.files ?? []);
+        const images = files.filter((f) => f.type.startsWith("image/"));
+        if (images.length === 0) return false;
+        event.preventDefault();
+        void (async () => {
+          for (const file of images) {
+            try {
+              const src = await fileToDataUrl(file);
+              editor?.chain().focus().setImage({ src }).run();
+            } catch (err) {
+              window.alert(
+                err instanceof FileTooLargeError
+                  ? err.message
+                  : "Gagal menempel gambar.",
+              );
+            }
+          }
+        })();
+        return true;
+      },
+    },
   });
 
   return (
@@ -55,11 +101,33 @@ export default function RichTextField({
         </label>
       ) : null}
       <input type="hidden" name={name} value={html} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (!file || !editor) return;
+          try {
+            const src = await fileToDataUrl(file);
+            editor.chain().focus().setImage({ src }).run();
+          } catch (err) {
+            window.alert(
+              err instanceof FileTooLargeError ? err.message : "Gagal memuat gambar.",
+            );
+          }
+        }}
+      />
       <div className="overflow-hidden rounded-lg border border-neutral-300 focus-within:border-maroon">
-        <Toolbar editor={editor} />
+        <Toolbar
+          editor={editor}
+          onPickImage={() => fileInputRef.current?.click()}
+        />
         <EditorContent
           editor={editor}
-          className="prose-sm max-w-none px-3 py-2 text-sm [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_a]:text-maroon [&_a]:underline"
+          className="prose-sm max-w-none px-3 py-2 text-sm [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_a]:text-maroon [&_a]:underline [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-lg [&_iframe]:my-2 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:rounded-lg"
         />
       </div>
       {help ? <p className="mt-1 text-xs text-neutral-500">{help}</p> : null}
@@ -92,7 +160,13 @@ function ToolbarButton({
   );
 }
 
-function Toolbar({ editor }: { editor: Editor | null }) {
+function Toolbar({
+  editor,
+  onPickImage,
+}: {
+  editor: Editor | null;
+  onPickImage: () => void;
+}) {
   if (!editor) return null;
 
   function setLink() {
@@ -105,6 +179,13 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       return;
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  }
+
+  function addYoutube() {
+    if (!editor) return;
+    const url = window.prompt("URL video YouTube");
+    if (!url) return;
+    editor.commands.setYoutubeVideo({ src: url });
   }
 
   return (
@@ -157,6 +238,12 @@ function Toolbar({ editor }: { editor: Editor | null }) {
         onClick={setLink}
       >
         <LinkIcon size={15} />
+      </ToolbarButton>
+      <ToolbarButton label="Gambar" onClick={onPickImage}>
+        <ImageIcon size={15} />
+      </ToolbarButton>
+      <ToolbarButton label="Video YouTube" onClick={addYoutube}>
+        <YoutubeIcon size={15} />
       </ToolbarButton>
     </div>
   );

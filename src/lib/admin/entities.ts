@@ -20,6 +20,8 @@ export type FieldType =
   | "icon"
   /** Tempel share link / kode embed TikTok, ada pratinjau. */
   | "tiktok"
+  /** Tempel share link / kode embed multi-platform (TikTok/YouTube/Instagram), ada pratinjau. */
+  | "social"
   /** Editor teks kaya (bold/italic/heading/list/link) berbasis Tiptap. */
   | "richtext"
   /** Pilih satu kategori (dengan ikon) dari daftar kategori. */
@@ -247,16 +249,13 @@ export const ENTITIES: Record<string, EntityDef> = {
     titleField: "title",
     fields: [
       { name: "title", label: "Judul", type: "text", required: true, list: true },
-      { name: "lead", label: "Lead", type: "richtext" },
-      { name: "photoUrl", label: "Foto", type: "image" },
-      { name: "eventDate", label: "Tanggal", type: "date", required: true, list: true },
       {
-        name: "checklist",
-        label: "Checklist (satu per baris)",
-        type: "lines",
-        help: "Setiap baris jadi satu poin checklist.",
+        name: "lead",
+        label: "Lead",
+        type: "richtext",
+        help: "Isi lengkap dokumentasi — bisa sisipkan gambar & video YouTube.",
       },
-      { name: "published", label: "Tayang", type: "boolean", list: true },
+      { name: "eventDate", label: "Tanggal", type: "date", required: true, list: true },
     ],
   },
 
@@ -276,15 +275,12 @@ export const ENTITIES: Record<string, EntityDef> = {
         help: "Tempel share link TikTok atau kode embed — videonya langsung dipreview di sini.",
       },
       {
-        name: "title",
-        label: "Judul",
-        type: "text",
+        name: "caption",
+        label: "Caption",
+        type: "textarea",
         list: true,
-        help: "Kosongkan saja kalau judul diambil otomatis dari TikTok.",
+        help: "Keterangan opsional. Judul & author diambil otomatis dari TikTok.",
       },
-      { name: "caption", label: "Caption", type: "textarea" },
-      { name: "author", label: "Autor", type: "text", list: true },
-      { name: "highlight", label: "Highlight", type: "boolean", list: true },
       {
         name: "order",
         label: "Urutan",
@@ -292,7 +288,6 @@ export const ENTITIES: Record<string, EntityDef> = {
         list: true,
         defaultValue: 0,
       },
-      { name: "published", label: "Tayang", type: "boolean", list: true },
     ],
   },
 
@@ -307,9 +302,9 @@ export const ENTITIES: Record<string, EntityDef> = {
       {
         name: "embedUrl",
         label: "Link / Embed",
-        type: "tiktok",
+        type: "social",
         required: true,
-        help: "Tempel share link TikTok/YouTube/Instagram atau kode embed.",
+        help: "Tempel share link TikTok/YouTube/Instagram atau kode embed — platform & videonya terbaca otomatis.",
       },
       { name: "title", label: "Judul", type: "text", required: true, list: true },
       { name: "caption", label: "Caption", type: "textarea" },
@@ -318,15 +313,14 @@ export const ENTITIES: Record<string, EntityDef> = {
         name: "platform",
         label: "Platform",
         type: "select",
-        required: true,
         list: true,
+        help: "Terisi otomatis dari link. Boleh dikoreksi manual bila perlu.",
         options: [
           { value: "tiktok", label: "TikTok" },
           { value: "youtube", label: "YouTube" },
           { value: "instagram", label: "Instagram" },
         ],
       },
-      { name: "videoId", label: "Video ID", type: "text", required: true },
       { name: "coverUrl", label: "Cover", type: "image" },
       {
         name: "bookId",
@@ -347,25 +341,6 @@ export const ENTITIES: Record<string, EntityDef> = {
         source: { entity: "tab", labelField: "label" },
       },
       { name: "published", label: "Tayang", type: "boolean", list: true },
-      { name: "order", label: "Urutan", type: "number", list: true, defaultValue: 0 },
-      {
-        name: "likeCount",
-        label: "Jumlah Suka",
-        type: "number",
-        help: "Angka kosmetik yang ditampilkan di homepage (boleh kosong).",
-      },
-      {
-        name: "commentCount",
-        label: "Jumlah Komentar",
-        type: "number",
-        help: "Angka kosmetik yang ditampilkan di homepage (boleh kosong).",
-      },
-      {
-        name: "bookmarkCount",
-        label: "Jumlah Simpan",
-        type: "number",
-        help: "Angka kosmetik yang ditampilkan di homepage (boleh kosong).",
-      },
     ],
   },
 };
@@ -386,15 +361,33 @@ export function getEntity(key: string): EntityDef | undefined {
   return ENTITIES[key];
 }
 
+/**
+ * Item menu sidebar admin. Bisa berupa daun (punya `href`) atau parent
+ * (punya `children`). Parent menampilkan chevron untuk buka/tutup.
+ */
+export type AdminMenuItem = {
+  label: string;
+  icon: string;
+  href?: string;
+  children?: { href: string; label: string }[];
+};
+
 /** Daftar entitas yang tampil di sidebar admin. */
-export const ADMIN_MENU: { href: string; label: string; icon: string }[] = [
+export const ADMIN_MENU: AdminMenuItem[] = [
   { href: "/admin", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/admin/book", label: "Buku", icon: "BookOpen" },
   { href: "/admin/category", label: "Kategori", icon: "LayoutGrid" },
   { href: "/admin/tab", label: "Tab Konten", icon: "PanelsTopLeft" },
   { href: "/admin/documentation", label: "Dokumentasi", icon: "FileText" },
-  { href: "/admin/tiktok", label: "TikTok", icon: "Music2" },
-  { href: "/admin/social", label: "Media Sosial", icon: "Video" },
+  {
+    label: "Media Sosial",
+    icon: "Video",
+    children: [
+      { href: "/admin/tiktok", label: "TikTok" },
+      { href: "/admin/social?platform=youtube", label: "YouTube" },
+      { href: "/admin/social", label: "Semua" },
+    ],
+  },
   { href: "/admin/orders", label: "Order", icon: "ShoppingCart" },
   { href: "/admin/users", label: "User", icon: "Users" },
   { href: "/admin/profile", label: "Profil Perusahaan", icon: "Settings" },

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "@/components/home/Footer";
+import NavAuthChip from "@/components/layout/NavAuthChip";
 
 const navZones = [
   { label: "Home", href: "/", left: "36%", width: "4.5%" },
@@ -34,6 +35,7 @@ export default function NotFound() {
               style={{ top: "4%", left: z.left, width: z.width, height: "4%" }}
             />
           ))}
+          <NavAuthChip style={{ top: "4%", right: "9.5%", height: "4%" }} />
           <Link
             href="/"
             aria-label="Go to home page"

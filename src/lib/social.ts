@@ -189,3 +189,26 @@ export function resolveVideoUrl(input: {
   if (platform === "instagram") return instagramVideoUrl(input.videoId);
   return tiktokVideoUrl(input.videoId);
 }
+
+/**
+ * Susun URL thumbnail/cover default dari platform + videoId.
+ *
+ * - YouTube: `i.ytimg.com/vi/<id>/hqdefault.jpg` (deterministik dari id).
+ * - TikTok: tidak deterministik — thumbnail-nya hanya bisa dari oEmbed,
+ *   jadi dilewatkan lewat `tiktokThumbnail` kalau ada.
+ * - Instagram: tidak ada URL thumbnail publik yang stabil → null.
+ */
+export function resolveThumbnailUrl(input: {
+  platform: string;
+  videoId: string | null;
+  tiktokThumbnail?: string | null;
+}): string | null {
+  const platform = input.platform as SocialPlatform;
+  if (platform === "youtube" && input.videoId) {
+    return `https://i.ytimg.com/vi/${input.videoId}/hqdefault.jpg`;
+  }
+  if (platform === "tiktok") {
+    return input.tiktokThumbnail ?? null;
+  }
+  return null;
+}

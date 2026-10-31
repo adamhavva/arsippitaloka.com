@@ -11,7 +11,7 @@ async function SosmedList() {
   await connection();
   const posts = await prisma.socialMedia.findMany({
     where: { published: true },
-    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
     include: {
       book: { select: { id: true, title: true, slug: true, tab: { select: { slug: true } } } },
       documentation: { select: { id: true, title: true } },

@@ -147,7 +147,7 @@ model Documentation {
   id        String   @id @default(cuid())
   title     String
   lead      String
-  photoUrl  String
+  photoUrl  String?
   eventDate DateTime
   checklist String[]
   published Boolean  @default(true)

@@ -4,6 +4,7 @@ import { cacheTag } from "next/cache";
 import SearchBar from "@/components/search/SearchBar";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
+import { isDataUrl } from "@/lib/file-to-data-url";
 
 function toList(value: string): string[] {
   return value
@@ -37,6 +38,7 @@ export default async function Footer() {
             alt={settings["company.name"] || "Pitaloka"}
             width={160}
             height={60}
+            unoptimized={isDataUrl(settings["company.logoUrl"])}
             className="h-9 w-auto"
           />
           <div className="mt-6 flex max-w-sm overflow-hidden rounded-full bg-white p-1.5">

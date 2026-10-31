@@ -20,6 +20,7 @@ export default function AdminEntityPage({
     page?: string;
     per?: string;
     q?: string;
+    platform?: string;
   }>;
 }) {
   return (
@@ -39,6 +40,7 @@ async function AdminEntityPageContent({
     page?: string;
     per?: string;
     q?: string;
+    platform?: string;
   }>;
 }) {
   await connection();
@@ -67,16 +69,37 @@ async function AdminEntityPageContent({
   // Pencarian generik: cocokkan field judul entitas (dan penulis untuk buku).
   const q = sp.q?.trim();
   const hasAuthor = def.fields.some((field) => field.name === "author");
-  const where = q
-    ? {
-        OR: [
-          { [def.titleField]: { contains: q, mode: "insensitive" } },
-          ...(hasAuthor
-            ? [{ author: { contains: q, mode: "insensitive" } }]
-            : []),
-        ],
-      }
-    : {};
+
+  // Filter platform (mis. /admin/social?platform=youtube) hanya berlaku untuk
+  // entitas yang punya field `platform` — nilainya dibatasi ke daftar sah.
+  const hasPlatform = def.fields.some((field) => field.name === "platform");
+  const platform =
+    hasPlatform &&
+    sp.platform &&
+    ["tiktok", "youtube", "instagram"].includes(sp.platform)
+      ? sp.platform
+      : undefined;
+
+  const conditions: Record<string, unknown>[] = [];
+  if (q) {
+    conditions.push({
+      OR: [
+        { [def.titleField]: { contains: q, mode: "insensitive" } },
+        ...(hasAuthor
+          ? [{ author: { contains: q, mode: "insensitive" } }]
+          : []),
+      ],
+    });
+  }
+  if (platform) {
+    conditions.push({ platform });
+  }
+  const where = conditions.length > 0 ? { AND: conditions } : {};
+
+  // Parameter yang harus dibawa saat pindah halaman / submit pencarian.
+  const carryParams: Record<string, string> = {};
+  if (q) carryParams.q = q;
+  if (platform) carryParams.platform = platform;
 
   const total = await delegate.count({ where });
   const page = clampPage(parsePage(sp.page), total, perPage);
@@ -178,6 +201,9 @@ async function AdminEntityPageContent({
       <EntityTable def={def} fields={fields} rows={rows} />
 
       <form method="get" className="flex flex-wrap items-center gap-3">
+        {platform ? (
+          <input type="hidden" name="platform" value={platform} />
+        ) : null}
         <input
           type="search"
           name="q"
@@ -194,7 +220,11 @@ async function AdminEntityPageContent({
         </button>
         {q ? (
           <a
-            href={`/admin/${def.key}`}
+            href={
+              platform
+                ? `/admin/${def.key}?platform=${platform}`
+                : `/admin/${def.key}`
+            }
             className="text-sm text-neutral-500 underline"
           >
             Reset
@@ -208,7 +238,9 @@ async function AdminEntityPageContent({
         perPage={perPage}
         total={total}
         label={def.label.toLowerCase()}
-        params={q ? { q } : undefined}
+        params={
+          Object.keys(carryParams).length > 0 ? carryParams : undefined
+        }
       />
     </div>
   );

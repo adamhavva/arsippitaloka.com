@@ -53,7 +53,6 @@ export async function GET(request: Request) {
           coverUrl: true,
           priceUsd: true,
           isFree: true,
-          tab: { select: { slug: true } },
         },
       }),
     ]);
@@ -64,7 +63,7 @@ export async function GET(request: Request) {
         slug: book.slug,
         title: book.title,
         author: book.author,
-        tabSlug: book.tab.slug,
+        tabSlug: "e-book",
         coverUrl: book.coverUrl || null,
         priceUsd: Number(book.priceUsd),
         isFree: book.isFree,

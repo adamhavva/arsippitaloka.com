@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import BookDetailView from "@/components/books/BookDetailView";
 import RedirectTo from "@/components/books/RedirectTo";
 import PageLoader from "@/components/PageLoader";
+import { BOOK_TAB_SLUG } from "@/lib/site-tabs";
 
 export const metadata = {
   title: "Detail Buku — Arsip Pitaloka",
@@ -13,8 +14,8 @@ export const metadata = {
 /**
  * `/buku/<slug-tab>/<slug-buku>` — halaman detail buku.
  *
- * Kalau bukunya ada tapi berada di tab lain, URL-nya dialihkan ke tab yang
- * benar supaya tidak ada tautan mati.
+ * Semua buku adalah e-book; `tab` di URL hanya kosmetik. Kalau tab-nya bukan
+ * "e-book", dialihkan ke URL kanonik supaya tidak ada tautan mati.
  */
 export default function BookDetailPage({
   params,
@@ -37,21 +38,16 @@ async function BookDetailContent({
 
   const { tab, slug } = await params;
 
-  const book = await prisma.book.findFirst({
-    where: { slug, tab: { slug: tab } },
-    include: { category: true, tab: true },
+  const book = await prisma.book.findUnique({
+    where: { slug },
+    include: { category: true },
   });
 
-  if (!book) {
-    // Bukunya ada, tapi di tab lain → arahkan ke URL yang benar.
-    const elsewhere = await prisma.book.findUnique({
-      where: { slug },
-      select: { slug: true, tab: { select: { slug: true } } },
-    });
-    if (elsewhere) {
-      return <RedirectTo to={`/buku/${elsewhere.tab.slug}/${elsewhere.slug}`} />;
-    }
-    notFound();
+  if (!book) notFound();
+
+  // URL kanonik buku selalu di bawah tab e-book.
+  if (tab !== BOOK_TAB_SLUG) {
+    return <RedirectTo to={`/buku/${BOOK_TAB_SLUG}/${book.slug}`} />;
   }
 
   return <BookDetailView book={book} />;

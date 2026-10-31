@@ -24,9 +24,9 @@ async function SosmedDetail({ params }: { params: Promise<{ id: string }> }) {
   const post = await prisma.socialMedia.findUnique({
     where: { id, published: true },
     include: {
-      book: { select: { id: true, title: true, slug: true, coverUrl: true, tab: { select: { slug: true, label: true } } } },
+      book: { select: { id: true, title: true, slug: true, coverUrl: true } },
       documentation: { select: { id: true, title: true, lead: true, photoUrl: true } },
-      contentTab: { select: { id: true, label: true, slug: true } },
+      article: { select: { id: true, title: true, slug: true, type: true } },
     },
   });
   if (!post) notFound();
@@ -57,16 +57,16 @@ async function SosmedDetail({ params }: { params: Promise<{ id: string }> }) {
         {post.caption ? <p className="mt-2 text-sm leading-relaxed text-neutral-700">{post.caption}</p> : null}
       </div>
 
-      {(post.book || post.documentation || post.contentTab) ? (
+      {(post.book || post.documentation || post.article) ? (
         <div className="mt-8 rounded-xl border border-neutral-200 bg-neutral-50 p-5">
           <h2 className="mb-4 text-sm font-semibold text-neutral-600">Konten Terkait</h2>
           <div className="space-y-3">
             {post.book ? (
-              <Link href={`/buku/${post.book.tab?.slug ?? "e-book"}/${post.book.slug}`} className="flex items-center gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+              <Link href={`/buku/e-book/${post.book.slug}`} className="flex items-center gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
                 <BookOpen size={20} className="text-maroon" />
                 <div>
                   <p className="text-sm font-medium text-neutral-900">{post.book.title}</p>
-                  <p className="text-xs text-neutral-500">Buku · {post.book.tab?.label ?? "E-Book"}</p>
+                  <p className="text-xs text-neutral-500">Buku · E-Book</p>
                 </div>
               </Link>
             ) : null}
@@ -79,12 +79,12 @@ async function SosmedDetail({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
             ) : null}
-            {post.contentTab ? (
-              <Link href={`/buku/${post.contentTab.slug}`} className="flex items-center gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
+            {post.article ? (
+              <Link href={`/artikel/${post.article.slug}`} className="flex items-center gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition-shadow">
                 <PanelsTopLeft size={20} className="text-maroon" />
                 <div>
-                  <p className="text-sm font-medium text-neutral-900">{post.contentTab.label}</p>
-                  <p className="text-xs text-neutral-500">Tab Konten</p>
+                  <p className="text-sm font-medium text-neutral-900">{post.article.title}</p>
+                  <p className="text-xs text-neutral-500">Artikel</p>
                 </div>
               </Link>
             ) : null}

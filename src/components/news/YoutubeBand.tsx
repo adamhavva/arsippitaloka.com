@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import SocialEmbedPlayer from "@/components/social/SocialEmbedPlayer";
-import { BandPagination } from "@/components/news/BeritaTerkini";
+import { BandPagination } from "@/components/news/BandPagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 
 /** Nama query khusus band ini — terpisah dari band Berita Terkini. */

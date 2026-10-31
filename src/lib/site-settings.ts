@@ -103,6 +103,20 @@ export const SETTINGS_SCHEMA: SettingField[] = [
     help: "Boleh tampil di browser. Kosongkan untuk kembali ke nilai .env.",
   },
 
+  {
+    key: "contact.smtp.enabled",
+    label: "Aktifkan formulir kontak (SMTP)",
+    type: "boolean",
+    group: "Kontak / SMTP",
+    help: "Kalau mati, formulir kontak tidak mengirim email.",
+  },
+  { key: "contact.smtp.host", label: "SMTP Host", type: "text", group: "Kontak / SMTP", help: "mis. smtp.gmail.com" },
+  { key: "contact.smtp.port", label: "SMTP Port", type: "text", group: "Kontak / SMTP", help: "587 (STARTTLS) atau 465 (SSL)" },
+  { key: "contact.smtp.user", label: "SMTP User", type: "text", group: "Kontak / SMTP" },
+  { key: "contact.smtp.pass", label: "SMTP Password", type: "secret", group: "Kontak / SMTP", help: "Rahasia — disimpan di server saja." },
+  { key: "contact.smtp.from", label: "Email pengirim (From)", type: "text", group: "Kontak / SMTP", help: "Kosongkan untuk memakai SMTP User." },
+  { key: "contact.smtp.to", label: "Email tujuan (Inbox)", type: "text", group: "Kontak / SMTP", help: "Kosongkan untuk memakai Email perusahaan." },
+
   { key: "tax.enabled", label: "Aktifkan pajak", type: "boolean", group: "Pajak" },
   { key: "tax.type", label: "Jenis pajak", type: "text", group: "Pajak", help: "percentage atau fixed" },
   { key: "tax.percentage", label: "Pajak persen", type: "text", group: "Pajak" },
@@ -116,6 +130,7 @@ export const SETTING_GROUPS = [
   "Footer",
   "Copy Landing Page",
   "Midtrans",
+  "Kontak / SMTP",
   "Pajak",
 ];
 

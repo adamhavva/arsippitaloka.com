@@ -29,7 +29,13 @@ export async function fetchTikTokOEmbed(
   const target = url.match(/https?:\/\/[^\s"'<>]+/)?.[0];
   if (!target || !/tiktok\.com/i.test(target)) return null;
 
-  const endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(target)}`;
+  // Endpoint oEmbed hanya memahami URL halaman video, bukan URL player.
+  const playerId = target.match(/\/player\/(?:v1\/)?(\d{5,})/i)?.[1];
+  const pageUrl = playerId
+    ? `https://www.tiktok.com/@i/video/${playerId}`
+    : target;
+
+  const endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(pageUrl)}`;
 
   try {
     const res = await fetch(endpoint, {
@@ -85,8 +91,15 @@ export async function fetchTikTokPage(
     return { videoId: null, title: null, author: null, found: null };
   }
 
+  // URL player (player/v1) tidak memuat metadata di halamannya — ambil dari
+  // halaman video aslinya supaya judul, author, dan status video terbaca.
+  const playerId = target.match(/\/player\/(?:v1\/)?(\d{5,})/i)?.[1];
+  const pageTarget = playerId
+    ? `https://www.tiktok.com/@i/video/${playerId}`
+    : target;
+
   try {
-    const res = await fetch(target, {
+    const res = await fetch(pageTarget, {
       redirect: "follow",
       signal: AbortSignal.timeout(10000),
       headers: {
@@ -164,23 +177,35 @@ export async function checkTikTokVideo(url: string): Promise<TikTokCheck> {
     return { status: "notfound", videoId, title, author, thumbnailUrl };
   }
 
-  // Halaman tidak terbaca → coba endpoint embed sebagai cadangan.
-  try {
-    const res = await fetch(`https://www.tiktok.com/embed/v2/${videoId}`, {
-      method: "GET",
-      signal: AbortSignal.timeout(6000),
-      headers: { accept: "text/html" },
-    });
-    await res.text().catch(() => "");
+  // Halaman tidak terbaca → cek endpoint embed sebagai cadangan.
+  //
+  // `embed/v2` masih jadi sinyal paling kuat: ia membalas 400/404 untuk
+  // video yang tidak ada. `player/v1` selalu membalas 200 (even untuk id
+  // yang tidak ada), jadi hanya dipakai sebagai buktiweak bahwa videonya
+  // bisa dimuat.
+  const candidates = [
+    `https://www.tiktok.com/embed/v2/${videoId}`,
+    `https://www.tiktok.com/player/v1/${videoId}`,
+  ];
 
-    if (res.status === 400 || res.status === 404) {
-      return { status: "notfound", videoId, title, author, thumbnailUrl };
+  for (const candidate of candidates) {
+    try {
+      const res = await fetch(candidate, {
+        method: "GET",
+        signal: AbortSignal.timeout(6000),
+        headers: { accept: "text/html" },
+      });
+      await res.text().catch(() => "");
+
+      if (res.status === 400 || res.status === 404) {
+        return { status: "notfound", videoId, title, author, thumbnailUrl };
+      }
+      if (res.status === 200) {
+        return { status: "exists", videoId, title, author, thumbnailUrl };
+      }
+    } catch {
+      // abaikan, coba kandidat berikutnya
     }
-    if (res.status === 200) {
-      return { status: "exists", videoId, title, author, thumbnailUrl };
-    }
-  } catch {
-    // abaikan, tetap "unknown"
   }
 
   return { status: "unknown", videoId, title, author, thumbnailUrl };

@@ -4,6 +4,8 @@ import { Star } from "lucide-react";
 import { formatIdr } from "./market-utils";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import BuyButton from "@/components/books/BuyButton";
+import FreeDownloadButton from "@/components/books/FreeDownloadButton";
+import { BOOK_TAB_SLUG } from "@/lib/site-tabs";
 
 export type MarketplaceBook = {
   id: string;
@@ -30,9 +32,7 @@ export type MarketplaceBook = {
  * Warna tetap mengikuti tema Pitaloka (maroon), bukan warna marketplace lain.
  */
 export default function ProductCard({ book }: { book: MarketplaceBook }) {
-  const href = book.tabSlug
-    ? `/buku/${book.tabSlug}/${book.slug}`
-    : `/buku/${book.slug}`;
+  const href = `/buku/${book.tabSlug || BOOK_TAB_SLUG}/${book.slug}`;
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:border-maroon/40 hover:shadow-sm">
@@ -101,8 +101,14 @@ export default function ProductCard({ book }: { book: MarketplaceBook }) {
             {book.language} · {book.pages} halaman
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <AddToCartButton bookId={book.id} />
-            <BuyButton bookId={book.id} label="Beli" compact />
+            {book.isFree ? (
+              <FreeDownloadButton bookId={book.id} compact />
+            ) : (
+              <>
+                <AddToCartButton bookId={book.id} />
+                <BuyButton bookId={book.id} label="Beli" compact />
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -26,8 +26,8 @@ export type SocialDocLink = {
   title: string;
 };
 
-export type SocialTabLink = {
+export type SocialArticleLink = {
   id: string;
-  label: string;
+  title: string;
   slug: string;
 };

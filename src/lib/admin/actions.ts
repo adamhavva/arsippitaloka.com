@@ -42,6 +42,17 @@ export async function saveEntity(
   const raw: Record<string, unknown> = {};
   const fieldErrors: Record<string, string> = {};
 
+  // Embed TikTok/YouTube/Instagram dibaca lebih awal — judulnya dipakai
+  // otomatis untuk mengisi field "Judul" (wajib di Media Sosial), jadi admin
+  // cukup menempelkan kode embed tanpa mengisi judul manual.
+  const embedSource =
+    def.key === "social" || def.key === "tiktok"
+      ? String(formData.get("embedUrl") ?? "").trim()
+      : "";
+  const socialRef = def.key === "social" ? parseSocialRef(embedSource) : null;
+  const tiktokRef = def.key === "tiktok" ? parseTikTok(embedSource) : null;
+  const embedTitle = socialRef?.title ?? tiktokRef?.title ?? null;
+
   for (const field of def.fields) {
     if (field.readOnly) continue;
 
@@ -65,6 +76,31 @@ export async function saveEntity(
     ) {
       value = field.defaultValue;
     }
+    // Judul media sosial boleh dikosongkan kalau kode embed-nya menyertakan
+    // judul (atribut `title`). Kalau embed tidak punya judul, buat label
+    // otomatis dari platform + id video supaya tetap bisa disimpan.
+    if (
+      def.key === "social" &&
+      field.name === "title" &&
+      (value === null || value === undefined || value === "")
+    ) {
+      value =
+        embedTitle ??
+        (socialRef?.videoId
+          ? `Video ${socialRef.platform.toUpperCase()} ${socialRef.videoId.slice(-6)}`
+          : value);
+    }
+
+    // Penulis media sosial juga diambil otomatis dari link/embed.
+    if (
+      def.key === "social" &&
+      field.name === "author" &&
+      (value === null || value === undefined || value === "") &&
+      socialRef?.author
+    ) {
+      value = socialRef.author;
+    }
+
     if (field.required && (value === null || value === "" || value === undefined)) {
       fieldErrors[field.name] = `${field.label} wajib diisi`;
     }
@@ -108,7 +144,7 @@ export async function saveEntity(
   let tiktokWarning = "";
   if (def.key === "tiktok") {
     const source = String(raw.embedUrl ?? "").trim();
-    const ref = parseTikTok(source);
+    const ref = tiktokRef ?? parseTikTok(source);
 
     const check = await checkTikTokVideo(source);
     if (check.status === "notfound") {
@@ -127,7 +163,8 @@ export async function saveEntity(
     }
 
     const videoId = check.videoId ?? ref.videoId;
-    const title = String(raw.title ?? "").trim() || check.title || "";
+    const title =
+      String(raw.title ?? "").trim() || check.title || ref.title || "";
     const author =
       String(raw.author ?? "").trim() || check.author || ref.author || "";
 
@@ -135,7 +172,7 @@ export async function saveEntity(
       return {
         ok: false,
         message:
-          "Link TikTok belum bisa dibaca. Tempel share link yang memuat /video/<id> atau kode embed lengkap.",
+          "Link TikTok belum bisa dibaca. Tempel share link yang memuat /video/<id>, kode embed player/v1/<id>, atau kode embed lengkap.",
         fieldErrors: { embedUrl: "Link TikTok tidak dikenali" },
       };
     }
@@ -143,6 +180,9 @@ export async function saveEntity(
     raw.videoId = videoId;
     raw.title = title || `Postingan TikTok ${videoId.slice(-6)}`;
     raw.author = author;
+    // Simpan URL player yang sudah dinormalisasi (bukan kode embed mentah),
+    // supaya form admin berikutnya menampilkan link yang rapi.
+    raw.embedUrl = ref.embedUrl ?? String(raw.embedUrl ?? "").trim();
   }
 
   // Media sosial multi-platform: platform + id video + URL embed diambil
@@ -150,7 +190,7 @@ export async function saveEntity(
   // otomatis bila dibiarkan kosong.
   if (def.key === "social") {
     const source = String(raw.embedUrl ?? "").trim();
-    const ref = parseSocialRef(source);
+    const ref = socialRef ?? parseSocialRef(source);
 
     if (!ref.videoId) {
       return {

@@ -28,9 +28,9 @@ async function SosmedList({
     skip: (page - 1) * perPage,
     take: perPage,
     include: {
-      book: { select: { id: true, title: true, slug: true, tab: { select: { slug: true } } } },
+      book: { select: { id: true, title: true, slug: true } },
       documentation: { select: { id: true, title: true } },
-      contentTab: { select: { id: true, label: true, slug: true } },
+      article: { select: { id: true, title: true, slug: true } },
     },
   });
 
@@ -46,10 +46,10 @@ async function SosmedList({
             id: p.id, title: p.title, platform: p.platform, videoId: p.videoId,
             embedUrl: p.embedUrl, coverUrl: p.coverUrl, caption: p.caption, author: p.author,
           };
-          const bookLink = p.book ? { id: p.book.id, title: p.book.title, slug: p.book.slug, tabSlug: p.book.tab?.slug ?? null } : undefined;
+          const bookLink = p.book ? { id: p.book.id, title: p.book.title, slug: p.book.slug, tabSlug: "e-book" } : undefined;
           const docLink = p.documentation ? { id: p.documentation.id, title: p.documentation.title } : undefined;
-          const tabLink = p.contentTab ? { id: p.contentTab.id, label: p.contentTab.label, slug: p.contentTab.slug } : undefined;
-          return <SocialCard key={p.id} post={post} book={bookLink} documentation={docLink} contentTab={tabLink} />;
+          const articleLink = p.article ? { id: p.article.id, title: p.article.title, slug: p.article.slug } : undefined;
+          return <SocialCard key={p.id} post={post} book={bookLink} documentation={docLink} article={articleLink} />;
         })}
       </div>
 

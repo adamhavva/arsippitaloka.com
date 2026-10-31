@@ -6,7 +6,7 @@ import type {
   SocialBookLink,
   SocialDocLink,
   SocialPostData,
-  SocialTabLink,
+  SocialArticleLink,
 } from "./types";
 
 /** Badge kecil penanda platform (TikTok / YouTube / Instagram). */
@@ -41,13 +41,13 @@ export default function SocialCard({
   post,
   book,
   documentation,
-  contentTab,
+  article,
   defer = true,
 }: {
   post: SocialPostData;
   book?: SocialBookLink | null;
   documentation?: SocialDocLink | null;
-  contentTab?: SocialTabLink | null;
+  article?: SocialArticleLink | null;
   defer?: boolean;
 }) {
   return (
@@ -107,12 +107,12 @@ export default function SocialCard({
               <FileText size={14} className="sm:w-3 sm:h-3 w-3.5 h-3.5" /> Lihat dokumentasi
             </Link>
           ) : null}
-          {contentTab ? (
+          {article ? (
             <Link
-              href={`/buku/${contentTab.slug}`}
+              href={`/artikel/${article.slug}`}
               className="inline-flex items-center gap-1 rounded-full border border-neutral-300 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50 active:scale-95 sm:px-3 sm:py-1.5"
             >
-              <PanelsTopLeft size={14} className="sm:w-3 sm:h-3 w-3.5 h-3.5" /> {contentTab.label}
+              <PanelsTopLeft size={14} className="sm:w-3 sm:h-3 w-3.5 h-3.5" /> {article.title}
             </Link>
           ) : null}
           <Link

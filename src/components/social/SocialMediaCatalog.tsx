@@ -30,17 +30,19 @@ export default async function SocialMediaCatalog({
   basePath,
   page: pageParam,
   per: perParam,
+  platform,
 }: {
   basePath: string;
   page?: string;
   per?: string;
+  platform?: "youtube" | "tiktok" | "instagram";
 }) {
   const perPage = parseMarketPer(perParam);
   const page = parsePage(pageParam);
 
   const settings = await getSettings();
 
-  const where = { published: true } as const;
+  const where = { published: true, ...(platform ? { platform } : {}) } as const;
   const total = await prisma.socialMedia.count({ where });
   const currentPage = clampPage(page, total, perPage);
 
@@ -51,10 +53,10 @@ export default async function SocialMediaCatalog({
     take: perPage,
     include: {
       book: {
-        select: { id: true, title: true, slug: true, tab: { select: { slug: true } } },
+        select: { id: true, title: true, slug: true },
       },
       documentation: { select: { id: true, title: true } },
-      contentTab: { select: { id: true, label: true, slug: true } },
+      article: { select: { id: true, title: true, slug: true } },
     },
   });
 
@@ -86,7 +88,7 @@ export default async function SocialMediaCatalog({
               <EngagementCard
                 key={post.id}
                 post={post}
-                bookTabSlug={post.book?.tab?.slug ?? null}
+                bookTabSlug={post.book ? "e-book" : null}
               />
             ))}
           </div>
@@ -118,7 +120,7 @@ type EngagementPost = {
   author: string | null;
   book: { id: string; title: string; slug: string } | null;
   documentation: { id: string; title: string } | null;
-  contentTab: { id: string; label: string; slug: string } | null;
+  article: { id: string; title: string; slug: string } | null;
 };
 
 /**
@@ -187,12 +189,12 @@ function EngagementCard({
               <FileText size={13} /> Lihat dokumentasi
             </Link>
           ) : null}
-          {post.contentTab ? (
+          {post.article ? (
             <Link
-              href={`/buku/${post.contentTab.slug}`}
+              href={`/artikel/${post.article.slug}`}
               className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
             >
-              <PanelsTopLeft size={13} /> {post.contentTab.label}
+              <PanelsTopLeft size={13} /> {post.article.title}
             </Link>
           ) : null}
           <Link

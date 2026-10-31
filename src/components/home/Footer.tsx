@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { cacheTag } from "next/cache";
 import SearchBar from "@/components/search/SearchBar";
-import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
+import { getSiteTabs } from "@/lib/site-tabs";
 import { isDataUrl } from "@/lib/file-to-data-url";
 
 function toList(value: string): string[] {
@@ -16,10 +16,7 @@ function toList(value: string): string[] {
 export default async function Footer() {
   "use cache";
   cacheTag("content");
-  const [settings, tabs] = await Promise.all([
-    getSettings(),
-    prisma.contentTab.findMany({ select: { id: true, label: true, slug: true } }),
-  ]);
+  const [settings, tabs] = await Promise.all([getSettings(), Promise.resolve(getSiteTabs())]);
 
   // Tautan "Browse" diarahkan ke tab katalog yang namanya cocok.
   const slugByLabel = new Map(

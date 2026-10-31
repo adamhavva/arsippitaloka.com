@@ -7,7 +7,6 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const tab = await prisma.contentTab.findFirst({ orderBy: { order: "asc" } });
   await prisma.socialMedia.upsert({
     where: { id: "seed-social-0" },
     update: {},
@@ -19,7 +18,6 @@ async function main() {
       embedUrl: "https://www.tiktok.com/player/v1/7669105916377173269?embed_from=webapp_share&music_info=1&description=1&autoplay=1&muted=1",
       published: true,
       order: 0,
-      contentTabId: tab?.id ?? null,
     },
   });
   console.log("Social fixture seeded.");

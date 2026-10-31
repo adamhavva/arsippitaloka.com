@@ -61,11 +61,6 @@ async function create() {
     },
   });
 
-  const ebookTab = await prisma.contentTab.findUnique({
-    where: { slug: "e-book" },
-  });
-  if (!ebookTab) throw new Error("ContentTab e-book tidak ditemukan");
-
   const books = await prisma.book.findMany({
     where: { slug: { startsWith: "bung-karno" } },
     take: 4,
@@ -91,7 +86,6 @@ async function create() {
       fileFormat: "PDF",
       fileSize: 398,
       isDownloadable: true,
-      tabId: ebookTab.id,
       order: 99,
     },
   });

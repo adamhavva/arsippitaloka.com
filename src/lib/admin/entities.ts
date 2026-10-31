@@ -60,7 +60,13 @@ export type EntityDef = {
   label: string;
   singular: string;
   /** Nama delegate Prisma — harus ada di ENTITY_MODELS. */
-  model: "category" | "contentTab" | "book" | "documentation" | "tiktokPost" | "socialMedia";
+  model:
+    | "category"
+    | "book"
+    | "article"
+    | "documentation"
+    | "tiktokPost"
+    | "socialMedia";
   titleField: string;
   orderBy?: { field: string; dir: "asc" | "desc" };
   fields: FieldDef[];
@@ -106,33 +112,6 @@ export const ENTITIES: Record<string, EntityDef> = {
     ],
   },
 
-  tab: {
-    key: "tab",
-    label: "Tab Konten",
-    singular: "tab",
-    model: "contentTab",
-    titleField: "label",
-    orderBy: { field: "order", dir: "asc" },
-    fields: [
-      { name: "label", label: "Label", type: "text", required: true, list: true },
-      {
-        name: "slug",
-        label: "Slug",
-        type: "text",
-        list: true,
-        slugFrom: "label",
-        help: "Dibuat otomatis dari label. Kalau slug sama, ditambahkan angka unik.",
-      },
-      {
-        name: "order",
-        label: "Urutan",
-        type: "number",
-        list: true,
-        defaultValue: 0,
-      },
-    ],
-  },
-
   book: {
     key: "book",
     label: "Buku",
@@ -152,14 +131,6 @@ export const ENTITIES: Record<string, EntityDef> = {
         help: "Dibuat otomatis dari judul. Kalau slug sama, ditambahkan angka unik.",
       },
       { name: "description", label: "Deskripsi", type: "richtext" },
-      {
-        name: "tabId",
-        label: "Tab Konten",
-        type: "select",
-        required: true,
-        list: true,
-        source: { entity: "tab", labelField: "label" },
-      },
       {
         name: "categoryId",
         label: "Kategori",
@@ -267,6 +238,55 @@ export const ENTITIES: Record<string, EntityDef> = {
     ],
   },
 
+  article: {
+    key: "article",
+    label: "Artikel",
+    singular: "artikel",
+    model: "article",
+    titleField: "title",
+    orderBy: { field: "order", dir: "asc" },
+    fields: [
+      { name: "title", label: "Judul", type: "text", required: true, list: true },
+      {
+        name: "slug",
+        label: "Slug",
+        type: "text",
+        list: true,
+        slugFrom: "title",
+        help: "Dibuat otomatis dari judul. Dipakai di URL /artikel/<slug>.",
+      },
+      {
+        name: "type",
+        label: "Kanal",
+        type: "select",
+        required: true,
+        list: true,
+        defaultValue: "berita-terkini",
+        options: [
+          { value: "berita-terkini", label: "Berita Terkini" },
+          { value: "blog", label: "Blog" },
+          { value: "umkm", label: "UMKM" },
+        ],
+      },
+      {
+        name: "excerpt",
+        label: "Ringkasan",
+        type: "textarea",
+        help: "Kutipan singkat yang tampil di kartu daftar.",
+      },
+      {
+        name: "body",
+        label: "Isi Artikel",
+        type: "richtext",
+        help: "Tulis seperti Microsoft Word — heading, daftar, gambar, dan tautan didukung.",
+      },
+      { name: "coverUrl", label: "Gambar Sampul", type: "image" },
+      { name: "publishedAt", label: "Tanggal Terbit", type: "date", list: true },
+      { name: "published", label: "Tayang", type: "boolean", list: true, defaultValue: 0 },
+      { name: "order", label: "Urutan", type: "number", list: true, defaultValue: 0 },
+    ],
+  },
+
   tiktok: {
     key: "tiktok",
     label: "TikTok",
@@ -343,10 +363,10 @@ export const ENTITIES: Record<string, EntityDef> = {
         source: { entity: "documentation", labelField: "title" },
       },
       {
-        name: "contentTabId",
-        label: "Tab Konten Terkait",
+        name: "articleId",
+        label: "Artikel Terkait",
         type: "select",
-        source: { entity: "tab", labelField: "label" },
+        source: { entity: "article", labelField: "title" },
       },
       { name: "published", label: "Tayang", type: "boolean", list: true },
     ],
@@ -356,8 +376,8 @@ export const ENTITIES: Record<string, EntityDef> = {
 /** Allowlist model → delegate Prisma. */
 export const ENTITY_MODELS = {
   category: "category",
-  contentTab: "contentTab",
   book: "book",
+  article: "article",
   documentation: "documentation",
   tiktokPost: "tiktokPost",
   socialMedia: "socialMedia",
@@ -383,20 +403,37 @@ export type AdminMenuItem = {
 /** Daftar entitas yang tampil di sidebar admin. */
 export const ADMIN_MENU: AdminMenuItem[] = [
   { href: "/admin", label: "Dashboard", icon: "LayoutDashboard" },
-  { href: "/admin/book", label: "Buku", icon: "BookOpen" },
-  { href: "/admin/category", label: "Kategori", icon: "LayoutGrid" },
-  { href: "/admin/tab", label: "Tab Konten", icon: "PanelsTopLeft" },
-  { href: "/admin/documentation", label: "Dokumentasi", icon: "FileText" },
+  // Produk (e-book) — satu-satunya konten yang punya harga & keranjang.
+  {
+    label: "Toko E-Book",
+    icon: "BookOpen",
+    children: [
+      { href: "/admin/book", label: "Buku" },
+      { href: "/admin/category", label: "Kategori" },
+      { href: "/admin/orders", label: "Order" },
+    ],
+  },
+  // Konten bebas baca (bukan produk): artikel & dokumentasi.
+  {
+    label: "Konten",
+    icon: "Newspaper",
+    children: [
+      { href: "/admin/article?type=berita-terkini", label: "Berita Terkini" },
+      { href: "/admin/article?type=blog", label: "Blog" },
+      { href: "/admin/article?type=umkm", label: "UMKM" },
+      { href: "/admin/documentation", label: "Dokumentasi" },
+    ],
+  },
+  // Video.
   {
     label: "Media Sosial",
     icon: "Video",
     children: [
       { href: "/admin/tiktok", label: "TikTok" },
       { href: "/admin/social?platform=youtube", label: "YouTube" },
-      { href: "/admin/social", label: "Semua" },
+      { href: "/admin/social", label: "Semua Video" },
     ],
   },
-  { href: "/admin/orders", label: "Order", icon: "ShoppingCart" },
   { href: "/admin/users", label: "User", icon: "Users" },
   { href: "/admin/profile", label: "Profil Perusahaan", icon: "Settings" },
 ];

@@ -81,9 +81,7 @@ async function CartPageContent() {
           <ul className="space-y-4">
             {cart.map((entry) => {
               const { book } = entry;
-              const href = book.tabSlug
-                ? `/buku/${book.tabSlug}/${book.slug}`
-                : `/buku/${book.slug}`;
+              const href = `/buku/e-book/${book.slug}`;
               return (
                 <li
                   key={entry.id}

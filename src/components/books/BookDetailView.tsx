@@ -11,10 +11,11 @@ import RelatedSocialMedia from "@/components/relations/RelatedSocialMedia";
 import ShareButtons from "@/components/books/ShareButtons";
 import { formatIdr } from "@/components/books/marketplace/market-utils";
 import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
+import { BOOK_TAB_SLUG } from "@/lib/site-tabs";
 import type { Prisma } from "../../../prisma/generated/prisma/client";
 
 export type BookWithRelations = Prisma.BookGetPayload<{
-  include: { category: true; tab: true };
+  include: { category: true };
 }>;
 
 function formatBytes(bytes: number | null): string {
@@ -41,7 +42,7 @@ export default async function BookDetailView({
   const midtransMode = midtrans.mode;
   const { socialMedia } = await getBookRelations(book.id);
 
-  const bookPath = `/buku/${book.tab.slug}/${book.slug}`;
+  const bookPath = `/buku/${BOOK_TAB_SLUG}/${book.slug}`;
 
   const fitur: { label: string; value: string }[] = [
     { label: "Bahasa", value: book.language },
@@ -59,7 +60,6 @@ export default async function BookDetailView({
     { label: "Editor", value: book.editor ?? "-" },
     { label: "Ilustrator", value: book.illustrator ?? "-" },
     { label: "Pemegang hak cipta", value: book.copyrightHolder ?? "-" },
-    { label: "Tab", value: book.tab.label },
     { label: "Kategori", value: book.category?.name ?? "-" },
   ];
 
@@ -99,8 +99,8 @@ export default async function BookDetailView({
             Katalog
           </Link>
           {" · "}
-          <Link href={`/buku/${book.tab.slug}`} className="shrink-0 truncate hover:underline">
-            {book.tab.label}
+          <Link href={`/buku/${BOOK_TAB_SLUG}`} className="shrink-0 truncate hover:underline">
+            E-Book
           </Link>
           {book.category ? (
             <>

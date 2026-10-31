@@ -2,22 +2,23 @@
 
 import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getSiteTabs } from "@/lib/site-tabs";
 
 /**
- * Facet katalog yang relatif statis (daftar tab & kategori).
+ * Facet katalog yang relatif statis (daftar kategori + daftar kanal).
  *
- * Dipisah dari `CatalogView` supaya bisa di-cache: daftar ini jarang
- * berubah, sementara query buku di `CatalogView` selalu bergantung pada
- * filter/searchParams (jadi tidak boleh di-cache).
+ * Kanal konten (E-Book, Berita Terkini, YouTube, TikTok, Blog, UMKM,
+ * Dokumentasi) sekarang bersifat STATIS — tidak lagi tabel `ContentTab`.
+ * Daftar kategori masih dari database.
  *
  * Cache di-invalidate lewat `updateTag("content")` dari admin CRUD.
  */
 export async function getCatalogTabs() {
-  cacheTag("content");
-  return prisma.contentTab.findMany({
-    orderBy: { order: "asc" },
-    select: { id: true, label: true, slug: true },
-  });
+  return getSiteTabs().map((tab) => ({
+    id: tab.slug,
+    label: tab.label,
+    slug: tab.slug,
+  }));
 }
 
 export async function getCatalogCategories() {

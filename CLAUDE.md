@@ -70,6 +70,46 @@ Jangan pakai `export const instant = false` — itu membuat route jadi blocking.
 
 Halaman yang membaca cookie/params (area admin & area pembeli) **tidak** bisa memakai `"use cache"`. Polanya: komponen default synchronously membungkus isi dinamis dengan `<Suspense>`, lalu komponen async di dalamnya memanggil `await connection()`. Tanpa boundary itu build gagal dengan "uncached data during prerendering". `await connection()` di dalam boundary tetap wajib — `connection()` tidak bisa di-cache.
 
+## Model konten (PENTING — berubah besar)
+
+Tabel **`ContentTab` sudah DIHAPUS**. "Tab/kanal" sekarang **daftar statis** di
+`src/lib/site-tabs.ts` (`SITE_TABS`), bukan data DB. Isi tiap kanal dipisah per
+jenisnya:
+
+| Kanal | Sumber data | Sifat |
+| --- | --- | --- |
+| E-Book | `Book` | Produk: ada harga, keranjang, checkout |
+| Berita Terkini / Blog / UMKM | `Article` (`type`) | Artikel bebas baca — TANPA harga/keranjang |
+| YouTube | `SocialMedia` (platform youtube) | Video |
+| TikTok | `TiktokPost` | Video (diunggah di `/admin/tiktok`) |
+| Dokumentasi | `Documentation` | Pola blog |
+
+- `Book` **tidak punya** `tabId` lagi — semua buku adalah e-book
+  (`BOOK_TAB_SLUG = "e-book"`). URL detail tetap `/buku/e-book/<slug>`.
+- `Article` dibaca di `/artikel/<slug>` (`src/app/artikel/[slug]`), isinya
+  rich-text (Tiptap, `type: "richtext"` = editor seperti MS Word: heading,
+  list, gambar, tautan, YouTube).
+- `/buku/<tab>` mengarahkan ke tampilan sesuai jenis kanal
+  (`src/app/buku/[tab]/page.tsx`): katalog buku, `ArticleCatalog`,
+  `SocialMediaCatalog`/`TikTokCatalog`, atau redirect ke News & Views.
+- `SocialMedia.contentTabId` diganti `articleId` (relasi ke `Article`).
+- Buku **gratis** di kartu → tombol **Download** (`FreeDownloadButton`): klaim
+  via `/api/checkout` (jadi order PAID → tercatat di `/akun`), lalu buka
+  `/api/read/<id>` di tab baru (PDF/gambar preview inline; format lain terunduh).
+  Buku berbayar → Keranjang + Beli.
+- Admin generik: tambah/ubah dibuka sebagai **halaman tersendiri**
+  (`/admin/<entity>?create=1` dan `?edit=<id>`), bukan form inline.
+- Menu admin dikelompokkan (`ADMIN_MENU` di `entities.ts`): Toko E-Book
+  (Buku/Kategori/Order), Konten (Berita/Blog/UMKM/Dokumentasi), Media Sosial,
+  User, Profil. Tidak ada menu "Tab Konten".
+
+## Kontak / SMTP
+
+Formulir kontak di `/kontak` (`ContactForm` → `POST /api/contact` →
+`src/lib/smtp.ts`, pakai `nodemailer`). Bisa di-on/off + dikonfigurasi dari
+`/admin/profile` grup **"Kontak / SMTP"** (host/port/user/pass/from/to), fallback
+ke env `SMTP_*`. Password SMTP bertipe `secret` (tidak pernah ke browser).
+
 ## Dua area terpisah: admin vs pembeli
 
 - **Area admin (`/admin`)** — back-office untuk mengelola konten: buku, kategori, tab konten, dokumentasi, TikTok, order, user, dan profil perusahaan. Guard: `src/proxy.ts` (lapis 1, JWT) + `requireAdmin()` (lapis 2, cek role ke DB).
@@ -135,6 +175,21 @@ URL lama ditangani:
   di `/admin/book`.
 - Kartu kategori di beranda dan tautan "Browse" di footer menuju katalog
   (`/buku/kategori/<slug>` / `/buku/<slug-tab>`).
+- Facet "Kategori" & "Tab Konten" di sidebar menghitung **buku + video**:
+  - Buku ikut masuk kategori kalau `Book.category` cocok atau slug tabnya
+    sama dengan slug kategori (mis. kategori "e-book" ikut berisi isi tab
+    "e-book"). Buku tanpa kategori ditandai otomatis lewat
+    `npm run db:tag-categories` (skrip `scripts/tag-book-categories.ts`).
+  - Video ikut dihitung: `SocialMedia` → kategori "Social Media" + tab
+    konten terkait (atau tab bukunya, atau tab default platform);
+    `TiktokPost` → kategori "#ViralForJustice" + tab "TikTok"
+    (`src/lib/catalog-counts.ts`).
+  - Afiliasi video ke buku (`SocialMedia.bookId`) **tidak** memengaruhi
+    hitungan facet — ia hanya memunculkan video sebagai section "Video
+    terkait" di halaman katalog & detail buku.
+- Dua kategori punya tampilan sendiri (bukan katalog buku):
+  `/buku/kategori/social-media` → `SocialMediaCatalog`, dan
+  `/buku/kategori/viral-for-justice` → `TikTokCatalog` (curate video TikTok).
 - Overlay nav di `Hero.tsx` memakai href aktif: Home `/`, Books `/buku`,
   About `/about`, News & Views `/news-and-views`, Sign In `/login`,
   Join Us `/register`. Yang berubah hanya `href` — render gambar tidak

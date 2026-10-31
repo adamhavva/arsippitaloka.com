@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CatalogView from "@/components/books/CatalogView";
 import SocialMediaCatalog from "@/components/social/SocialMediaCatalog";
+import TikTokCatalog from "@/components/social/TikTokCatalog";
 import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
@@ -17,6 +18,12 @@ export const metadata = {
  * sembarangan.
  */
 const SOCIAL_MEDIA_CATEGORY_SLUG = "social-media";
+
+/**
+ * Kategori "#ViralForJustice" menampilkan curate video TikTok
+ * (tabel `TiktokPost`) — sama dengan section #ViralForJustice di beranda.
+ */
+const VIRAL_FOR_JUSTICE_CATEGORY_SLUG = "viral-for-justice";
 
 /** `/buku/kategori/<slug>` — katalog buku per kategori. */
 export default function CategoryCatalogPage({
@@ -51,6 +58,16 @@ async function CategoryCatalogContent({
   if (slug === SOCIAL_MEDIA_CATEGORY_SLUG) {
     return (
       <SocialMediaCatalog
+        basePath={`/buku/kategori/${slug}`}
+        page={sp.page}
+        per={sp.per}
+      />
+    );
+  }
+
+  if (slug === VIRAL_FOR_JUSTICE_CATEGORY_SLUG) {
+    return (
+      <TikTokCatalog
         basePath={`/buku/kategori/${slug}`}
         page={sp.page}
         per={sp.per}

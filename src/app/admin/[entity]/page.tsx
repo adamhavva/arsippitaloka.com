@@ -1,6 +1,8 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { Plus, ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { getEntity } from "@/lib/admin/entities";
 import { getDelegate } from "@/lib/admin/delegates";
@@ -11,18 +13,22 @@ import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import type { FieldDef } from "@/lib/admin/entities";
 import PageLoader from "@/components/PageLoader";
 
+type EntitySearchParams = {
+  edit?: string;
+  create?: string;
+  page?: string;
+  per?: string;
+  q?: string;
+  platform?: string;
+  type?: string;
+};
+
 export default function AdminEntityPage({
   params,
   searchParams,
 }: {
   params: Promise<{ entity: string }>;
-  searchParams: Promise<{
-    edit?: string;
-    page?: string;
-    per?: string;
-    q?: string;
-    platform?: string;
-  }>;
+  searchParams: Promise<EntitySearchParams>;
 }) {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -36,13 +42,7 @@ async function AdminEntityPageContent({
   searchParams,
 }: {
   params: Promise<{ entity: string }>;
-  searchParams: Promise<{
-    edit?: string;
-    page?: string;
-    per?: string;
-    q?: string;
-    platform?: string;
-  }>;
+  searchParams: Promise<EntitySearchParams>;
 }) {
   await connection();
 
@@ -81,6 +81,15 @@ async function AdminEntityPageContent({
       ? sp.platform
       : undefined;
 
+  // Filter kanal artikel (mis. /admin/article?type=blog).
+  const hasType = def.fields.some((field) => field.name === "type");
+  const type =
+    hasType &&
+    sp.type &&
+    ["berita-terkini", "blog", "umkm"].includes(sp.type)
+      ? sp.type
+      : undefined;
+
   const conditions: Record<string, unknown>[] = [];
   if (q) {
     conditions.push({
@@ -95,12 +104,16 @@ async function AdminEntityPageContent({
   if (platform) {
     conditions.push({ platform });
   }
+  if (type) {
+    conditions.push({ type });
+  }
   const where = conditions.length > 0 ? { AND: conditions } : {};
 
   // Parameter yang harus dibawa saat pindah halaman / submit pencarian.
   const carryParams: Record<string, string> = {};
   if (q) carryParams.q = q;
   if (platform) carryParams.platform = platform;
+  if (type) carryParams.type = type;
 
   const total = await delegate.count({ where });
   const page = clampPage(parsePage(sp.page), total, perPage);
@@ -172,32 +185,65 @@ async function AdminEntityPageContent({
       > | null)
     : null;
 
+  const creating = sp.create === "1";
+  // Nilai default untuk form tambah (mis. kanal artikel dari URL).
+  const createDefaults: Record<string, unknown> = {};
+  if (type) createDefaults.type = type;
+
+  const backHref =
+    Object.keys(carryParams).length > 0
+      ? `/admin/${def.key}?${new URLSearchParams(carryParams).toString()}`
+      : `/admin/${def.key}`;
+
+  // Point #9: tambah / ubah dibuka sebagai halaman tersendiri (URL berbeda).
+  if (editing || creating) {
+    return (
+      <div className="space-y-6">
+        <Link
+          href={backHref}
+          className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800"
+        >
+          <ArrowLeft size={16} /> Kembali ke daftar {def.label.toLowerCase()}
+        </Link>
+        <header>
+          <h1 className="font-heading text-2xl font-bold text-black">
+            {editing ? `Ubah ${def.singular}` : `Tambah ${def.singular}`}
+          </h1>
+        </header>
+        <EntityForm
+          def={def}
+          fields={fields}
+          values={editing ?? createDefaults}
+          id={editing ? String(editing.id) : null}
+          categoryOptions={categoryOptions}
+        />
+      </div>
+    );
+  }
+
+  const createHref =
+    Object.keys(carryParams).length > 0
+      ? `/admin/${def.key}?${new URLSearchParams({ ...carryParams, create: "1" }).toString()}`
+      : `/admin/${def.key}?create=1`;
+
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="font-heading text-2xl font-bold text-black">{def.label}</h1>
-        <p className="text-sm text-neutral-500">
-          Kelola data {def.label.toLowerCase()} — perubahan langsung tampil di situs.
-        </p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-black">{def.label}</h1>
+          <p className="text-sm text-neutral-500">
+            Kelola data {def.label.toLowerCase()} — perubahan langsung tampil di situs.
+          </p>
+        </div>
+        {def.canCreate !== false ? (
+          <Link
+            href={createHref}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-maroon-dark px-4 py-2 text-sm font-medium text-white"
+          >
+            <Plus size={16} /> Tambah {def.singular}
+          </Link>
+        ) : null}
       </header>
-
-      {editing ? (
-        <EntityForm
-          def={def}
-          fields={fields}
-          values={editing}
-          id={String(editing.id)}
-          categoryOptions={categoryOptions}
-        />
-      ) : (
-        <EntityForm
-          def={def}
-          fields={fields}
-          values={{}}
-          id={null}
-          categoryOptions={categoryOptions}
-        />
-      )}
 
       <EntityTable def={def} fields={fields} rows={rows} />
 

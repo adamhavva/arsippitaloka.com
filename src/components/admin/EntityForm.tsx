@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveEntity, deleteEntity } from "@/lib/admin/actions";
 import { slugify } from "@/lib/slug";
@@ -51,6 +51,16 @@ export default function EntityForm({
     { ok: false, message: "" },
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Setelah simpan sukses, kembali ke daftar (tambah/ubah dibuka sebagai
+  // halaman tersendiri — point #9).
+  useEffect(() => {
+    if (state.ok) {
+      router.push(`/admin/${def.key}`);
+      router.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.ok]);
 
   // Nilai untuk kolom otomatis (format/ukuran/jumlah kata/halaman/rating).
   const [autoValues, setAutoValues] = useState<Record<string, string | number>>(

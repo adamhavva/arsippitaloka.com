@@ -19,7 +19,6 @@ const CART_BOOK_SELECT = {
   priceUsd: true,
   isFree: true,
   archived: true,
-  tab: { select: { slug: true } },
 } as const;
 
 export type CartEntry = {
@@ -34,7 +33,6 @@ export type CartEntry = {
     priceUsd: number;
     isFree: boolean;
     archived: boolean;
-    tabSlug: string | null;
   };
 };
 
@@ -61,7 +59,6 @@ export async function getCart(userId: string): Promise<CartEntry[]> {
       priceUsd: Number(item.book.priceUsd),
       isFree: item.book.isFree,
       archived: item.book.archived,
-      tabSlug: item.book.tab?.slug ?? null,
     },
   }));
 }

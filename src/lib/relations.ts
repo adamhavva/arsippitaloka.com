@@ -23,9 +23,9 @@ export async function getDocumentationRelations(documentationId: string) {
   return { socialMedia };
 }
 
-export async function getTabRelations(contentTabId: string) {
+export async function getArticleRelations(articleId: string) {
   const socialMedia = await prisma.socialMedia.findMany({
-    where: { contentTabId, published: true },
+    where: { articleId, published: true },
     orderBy: { order: "asc" },
     select: SOCIAL_SELECT,
   });

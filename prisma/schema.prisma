@@ -106,15 +106,6 @@ model Category {
   books     Book[]
 }
 
-model ContentTab {
-  id    String @id @default(cuid())
-  label String
-  slug  String @unique
-  order Int
-  books Book[]
-  socialMedia SocialMedia[]
-}
-
 model Book {
   id              String     @id @default(cuid())
   slug            String     @unique
@@ -145,8 +136,6 @@ model Book {
   copyrightHolder String?
   tiktokEmbed     String?
   order           Int        @default(0)
-  tabId           String
-  tab             ContentTab @relation(fields: [tabId], references: [id], onDelete: Restrict, onUpdate: Cascade)
   categoryId      String?
   category        Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   orderItems      OrderItem[]
@@ -155,8 +144,32 @@ model Book {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  @@index([tabId])
   @@index([categoryId])
+}
+
+/// Artikel/berita (Berita Terkini, Blog, UMKM).
+///
+/// Konten ini BUKAN buku: tidak ada harga, tidak ada keranjang, tidak bisa
+/// dibeli. Hanya dibaca bebas di situs.
+model Article {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  excerpt   String?
+  /// Isi artikel dalam markdown (heading, list, gambar, tautan, dll).
+  body      String?
+  coverUrl  String?
+  /// "berita-terkini" | "blog" | "umkm"
+  type      String   @default("berita-terkini")
+  published Boolean  @default(true)
+  publishedAt DateTime?
+  order     Int      @default(0)
+
+  socialMedia SocialMedia[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
 }
 
 model Documentation {
@@ -201,15 +214,15 @@ model SocialMedia {
   book          Book?         @relation(fields: [bookId], references: [id], onDelete: Cascade)
   documentationId String?
   documentation  Documentation? @relation(fields: [documentationId], references: [id], onDelete: Cascade)
-  contentTabId  String?
-  contentTab    ContentTab?   @relation(fields: [contentTabId], references: [id], onDelete: Cascade)
+  articleId     String?
+  article       Article?      @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([bookId])
   @@index([documentationId])
-  @@index([contentTabId])
+  @@index([articleId])
   @@index([platform])
 }
 

@@ -264,10 +264,10 @@ export default function FilterSidebar({
         </button>
       </section>
 
-      {/* Tab konten — analogi "Tipe Penjual" */}
+      {/* Navigasi antar-kanal konten (bukan tabel "Tab Konten" lagi). */}
       <section>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-400">
-          Tab Konten
+          Jelajah Kanal
         </h3>
         <ul className="space-y-1">
           <li>

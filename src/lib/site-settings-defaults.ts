@@ -82,6 +82,15 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   "payment.midtrans.serverKey": "",
   "payment.midtrans.clientKey": "",
 
+  // Kontak / SMTP
+  "contact.smtp.enabled": "false",
+  "contact.smtp.host": "",
+  "contact.smtp.port": "587",
+  "contact.smtp.user": "",
+  "contact.smtp.pass": "",
+  "contact.smtp.from": "",
+  "contact.smtp.to": "",
+
   // Pajak
   "tax.enabled": "false",
   "tax.type": "percentage",

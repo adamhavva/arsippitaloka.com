@@ -1,6 +1,8 @@
 import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
+import { getSiteTabs, BOOK_TAB_SLUG } from "@/lib/site-tabs";
+import { tiktokPlayerUrl } from "@/lib/tiktok";
 import CoursesBrowser, { type TabItem } from "@/components/home/CoursesBrowser";
 
 /** Berapa banyak item per tab yang diambil dari DB (pagination sisanya di client). */
@@ -10,12 +12,13 @@ export default async function FeaturedCourses() {
   "use cache";
   cacheTag("content");
 
-  const [tabs, books, socials, docs, settings] = await Promise.all([
-    prisma.contentTab.findMany({ orderBy: { order: "asc" } }),
+  const tabs = getSiteTabs();
+
+  const [books, youtube, tiktoks, articles, docs, settings] = await Promise.all([
     prisma.book.findMany({
       where: { archived: false },
       orderBy: { order: "asc" },
-      take: PER_TAB_LIMIT * 4,
+      take: PER_TAB_LIMIT,
       select: {
         id: true,
         slug: true,
@@ -29,13 +32,13 @@ export default async function FeaturedCourses() {
         priceUsd: true,
         isNew: true,
         isFree: true,
-        tab: { select: { slug: true } },
       },
     }),
+    // Tab YouTube → video YouTube (tabel SocialMedia).
     prisma.socialMedia.findMany({
-      where: { published: true, platform: { in: ["youtube", "tiktok"] } },
+      where: { published: true, platform: "youtube" },
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-      take: PER_TAB_LIMIT * 2,
+      take: PER_TAB_LIMIT,
       select: {
         id: true,
         title: true,
@@ -45,6 +48,34 @@ export default async function FeaturedCourses() {
         coverUrl: true,
         caption: true,
         author: true,
+      },
+    }),
+    // Tab TikTok → postingan TikTok yang diunggah admin (tabel TiktokPost).
+    prisma.tiktokPost.findMany({
+      where: { published: true },
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+      take: PER_TAB_LIMIT,
+      select: {
+        id: true,
+        videoId: true,
+        embedUrl: true,
+        title: true,
+        caption: true,
+        author: true,
+      },
+    }),
+    prisma.article.findMany({
+      where: { published: true },
+      orderBy: [{ order: "asc" }, { publishedAt: "desc" }, { createdAt: "desc" }],
+      take: PER_TAB_LIMIT,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverUrl: true,
+        type: true,
+        publishedAt: true,
       },
     }),
     prisma.documentation.findMany({
@@ -62,16 +93,14 @@ export default async function FeaturedCourses() {
     getSettings(),
   ]);
 
-  // Setiap tab diisi sesuai jenis sumber datanya. Union bertag `TabItem`
-  // dikirim ke client; nilai non-plain (Decimal, Date) diserialisasi dulu.
   const itemsByTab: Record<string, TabItem[]> = {};
   for (const tab of tabs) itemsByTab[tab.slug] = [];
 
   for (const tab of tabs) {
     const list = itemsByTab[tab.slug];
-    if (tab.slug === "youtube" || tab.slug === "tiktok") {
-      for (const s of socials) {
-        if (s.platform !== tab.slug) continue;
+
+    if (tab.slug === "youtube") {
+      for (const s of youtube) {
         list.push({
           kind: "social",
           social: {
@@ -83,6 +112,22 @@ export default async function FeaturedCourses() {
             coverUrl: s.coverUrl,
             caption: s.caption,
             author: s.author,
+          },
+        });
+      }
+    } else if (tab.slug === "tiktok") {
+      for (const t of tiktoks) {
+        list.push({
+          kind: "social",
+          social: {
+            id: t.id,
+            title: t.title,
+            platform: "tiktok",
+            videoId: t.videoId,
+            embedUrl: t.embedUrl ?? tiktokPlayerUrl(t.videoId),
+            coverUrl: null,
+            caption: t.caption,
+            author: t.author,
           },
         });
       }
@@ -99,9 +144,13 @@ export default async function FeaturedCourses() {
           },
         });
       }
+    } else if (tab.kind === "articles") {
+      for (const a of articles) {
+        if (a.type !== tab.articleType) continue;
+        list.push({ kind: "article", article: a });
+      }
     } else {
       for (const book of books) {
-        if (book.tab?.slug !== tab.slug) continue;
         list.push({
           kind: "book",
           book: {
@@ -117,7 +166,7 @@ export default async function FeaturedCourses() {
             priceUsd: String(book.priceUsd),
             isNew: book.isNew,
             isFree: book.isFree,
-            tabSlug: book.tab.slug,
+            tabSlug: BOOK_TAB_SLUG,
           },
         });
       }
@@ -126,7 +175,7 @@ export default async function FeaturedCourses() {
 
   return (
     <CoursesBrowser
-      tabs={tabs.map((tab) => ({ id: tab.id, label: tab.label, slug: tab.slug }))}
+      tabs={tabs.map((tab) => ({ id: tab.slug, label: tab.label, slug: tab.slug }))}
       itemsByTab={itemsByTab}
       eyebrow={settings["home.courses.eyebrow"]}
       title={settings["home.courses.title"]}

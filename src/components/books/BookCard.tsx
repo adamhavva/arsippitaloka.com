@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 import BuyButton from "@/components/books/BuyButton";
+import FreeDownloadButton from "@/components/books/FreeDownloadButton";
 import { formatIdr } from "@/components/books/marketplace/market-utils";
+import { BOOK_TAB_SLUG } from "@/lib/site-tabs";
 
 export type BookCardData = {
   id: string;
@@ -27,10 +29,8 @@ export type BookCardData = {
  * Dipakai di Server Component maupun Client Component.
  */
 export default function BookCard({ book }: { book: BookCardData }) {
-  // Detail buku hidup di bawah tabnya: /buku/<tab>/<slug-buku>
-  const href = book.tabSlug
-    ? `/buku/${book.tabSlug}/${book.slug}`
-    : `/buku/${book.slug}`;
+  // Detail buku hidup di bawah tab e-book: /buku/e-book/<slug-buku>
+  const href = `/buku/${book.tabSlug || BOOK_TAB_SLUG}/${book.slug}`;
 
   return (
     <div className="overflow-hidden rounded-xl border border-neutral-100 bg-white">
@@ -86,7 +86,7 @@ export default function BookCard({ book }: { book: BookCardData }) {
         </div>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-sm font-semibold text-black">
-            {formatIdr(book.priceUsd)}
+            {book.isFree ? "Gratis" : formatIdr(book.priceUsd)}
           </span>
           <Link
             href={href}
@@ -96,8 +96,14 @@ export default function BookCard({ book }: { book: BookCardData }) {
           </Link>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <AddToCartButton bookId={book.id} />
-          <BuyButton bookId={book.id} label="Beli" compact />
+          {book.isFree ? (
+            <FreeDownloadButton bookId={book.id} compact />
+          ) : (
+            <>
+              <AddToCartButton bookId={book.id} />
+              <BuyButton bookId={book.id} label="Beli" compact />
+            </>
+          )}
         </div>
       </div>
     </div>

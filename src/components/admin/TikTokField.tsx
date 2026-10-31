@@ -31,7 +31,7 @@ export default function TikTokField({
         value={source}
         onChange={(e) => setSource(e.target.value)}
         rows={2}
-        placeholder='https://www.tiktok.com/@username/video/7234567890123456789 atau kode <blockquote class="tiktok-embed" …>'
+        placeholder='https://www.tiktok.com/@username/video/7234567890123456789 atau kode <iframe src="https://www.tiktok.com/player/v1/7234567890123456789?…">'
         className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"
       />
 
@@ -40,16 +40,18 @@ export default function TikTokField({
           <iframe
             src={ref.embedUrl}
             title="Pratinjau TikTok"
-            className="h-[540px] w-full"
-            allow="encrypted-media; picture-in-picture"
+            className="h-[540px] w-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
             allowFullScreen
+            loading="lazy"
           />
         </div>
       ) : source.trim() ? (
         <p className="text-xs text-amber-700">
           Link-nya belum bisa dikenali. Tempel share link TikTok yang memuat
-          bagian <span className="font-medium">/video/&lt;id&gt;</span> atau kode
-          embed lengkap.
+          bagian <span className="font-medium">/video/&lt;id&gt;</span>, kode
+          embed <span className="font-medium">player/v1/&lt;id&gt;</span>,
+          atau kode embed lengkap.
         </p>
       ) : (
         <p className="text-xs text-neutral-500">

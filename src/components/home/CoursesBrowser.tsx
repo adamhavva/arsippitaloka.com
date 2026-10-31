@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import BookCard, { type BookCardData } from "@/components/books/BookCard";
+import ArticleCard, { type ArticleCardData } from "@/components/articles/ArticleCard";
 import SocialEmbedPlayer from "@/components/social/SocialEmbedPlayer";
 import type { SocialPostData } from "@/components/social/types";
 
@@ -21,20 +22,23 @@ export type DocItemData = {
 };
 
 /**
- * Union bertag: tiap tab bisa berisi buku, video sosial, atau dokumentasi.
- * Jenis item ditentukan oleh slug tab di server (lihat FeaturedCourses).
+ * Union bertag: tiap tab bisa berisi buku, video, dokumentasi, atau artikel.
+ * Jenis item ditentukan oleh jenis tab di server (lihat FeaturedCourses).
  */
 export type TabItem =
   | { kind: "book"; book: BookCardData }
   | { kind: "social"; social: SocialPostData }
-  | { kind: "doc"; doc: DocItemData };
+  | { kind: "doc"; doc: DocItemData }
+  | { kind: "article"; article: ArticleCardData };
 
-type TabKind = "book" | "social" | "doc";
+type TabKind = "book" | "social" | "doc" | "article";
 
 /** Jenis konten tiap tab diturunkan dari slug-nya. */
 function tabKind(slug: string): TabKind {
   if (slug === "youtube" || slug === "tiktok") return "social";
   if (slug === "dokumentasi") return "doc";
+  if (slug === "berita-terkini" || slug === "blog" || slug === "umkm")
+    return "article";
   return "book";
 }
 
@@ -45,7 +49,7 @@ function pageSize(kind: TabKind): number {
 
 /** Tujuan tombol "View More" sesuai jenis tab. */
 function viewMoreHref(slug: string, kind: TabKind): string {
-  if (kind === "social") return "/sosmed";
+  if (kind === "social") return `/buku/${slug}`;
   if (kind === "doc") return "/news-and-views";
   return `/buku/${slug}`;
 }
@@ -194,6 +198,9 @@ export default function CoursesBrowser({
               }
               if (item.kind === "doc") {
                 return <DocCard key={item.doc.id} doc={item.doc} />;
+              }
+              if (item.kind === "article") {
+                return <ArticleCard key={item.article.id} article={item.article} />;
               }
               const post = item.social;
               return (

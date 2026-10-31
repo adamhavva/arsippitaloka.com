@@ -18,6 +18,9 @@ import {
   getCatalogCategories,
   getCatalogTabs,
 } from "@/components/books/marketplace/catalog-facets";
+import { getCatalogVideoCounts } from "@/lib/catalog-counts";
+import RelatedSocialMedia from "@/components/relations/RelatedSocialMedia";
+import { BOOK_TAB_SLUG } from "@/lib/site-tabs";
 import {
   buildMarketHref,
   cleanParams,
@@ -89,15 +92,21 @@ export default async function CatalogView({
   const perPage = parseMarketPer(perParam);
   const page = parsePage(pageParam);
 
-  const [tabs, categories] = await Promise.all([
+  const [tabs, categories, videoCounts] = await Promise.all([
     getCatalogTabs(),
     getCatalogCategories(),
+    getCatalogVideoCounts(),
   ]);
 
-  const scope = {
-    ...(tabSlug ? { tab: { slug: tabSlug } } : {}),
-    ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-  };
+  const activeTab = tabs.find((tab) => tab.slug === tabSlug);
+  const activeCategory = categories.find((category) => category.slug === categorySlug);
+
+  // Semua buku adalah e-book; kategori menyaring lewat relasi kategori.
+  const categoryScope = activeCategory
+    ? { category: { slug: activeCategory.slug } }
+    : {};
+
+  const scope = { ...categoryScope };
 
   const where = buildBookWhere(filters, scope);
 
@@ -122,58 +131,68 @@ export default async function CatalogView({
       priceUsd: true,
       isNew: true,
       isFree: true,
-      tab: { select: { slug: true } },
     },
   });
 
-  // Facet: jumlah buku per kategori & per tab, dalam konteks filter saat ini.
-  const [categoryGroups, tabGroups, languageGroups, languageBooks] =
-    await Promise.all([
-      prisma.book.groupBy({
-        by: ["categoryId"],
-        where: { archived: false, ...(tabSlug ? { tab: { slug: tabSlug } } : {}) },
-        _count: { _all: true },
-      }),
-      prisma.book.groupBy({
-        by: ["tabId"],
-        where: {
-          archived: false,
-          ...(categorySlug ? { category: { slug: categorySlug } } : {}),
-        },
-        _count: { _all: true },
-      }),
-      prisma.book.groupBy({
-        by: ["language"],
-        where: { archived: false, ...scope },
-        _count: { _all: true },
-      }),
-      prisma.book.findMany({
-        where: { archived: false, ...scope },
-        select: { language: true },
-      }),
-    ]);
+  // Video yang tertaut ke buku-buku dalam scope katalog ini.
+  const relatedPosts = await prisma.socialMedia.findMany({
+    where: {
+      published: true,
+      ...(Object.keys(scope).length ? { book: { is: scope } } : {}),
+    },
+    orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+    take: 6,
+    select: {
+      id: true,
+      title: true,
+      platform: true,
+      videoId: true,
+      embedUrl: true,
+      coverUrl: true,
+      caption: true,
+      author: true,
+    },
+  });
 
-  const categoryCount = new Map<string, number>();
-  for (const group of categoryGroups) {
-    if (group.categoryId) {
-      categoryCount.set(group.categoryId, group._count._all);
+  // Facet: jumlah buku per kategori & bahasa, dalam konteks filter saat ini.
+  const [categoryGroups, languageGroups, languageBooks] = await Promise.all([
+    prisma.book.groupBy({
+      by: ["categoryId"],
+      where: { archived: false },
+      _count: { _all: true },
+    }),
+    prisma.book.groupBy({
+      by: ["language"],
+      where: { archived: false, ...scope },
+      _count: { _all: true },
+    }),
+    prisma.book.findMany({
+      where: { archived: false, ...scope },
+      select: { language: true },
+    }),
+  ]);
+
+  const bookTotal = await prisma.book.count({ where: { archived: false } });
+
+  const categoryFacets = categories.map((category) => {
+    let count = 0;
+    for (const group of categoryGroups) {
+      if (group.categoryId === category.id) count += group._count._all;
     }
-  }
-  const tabCount = new Map<string, number>();
-  for (const group of tabGroups) {
-    tabCount.set(group.tabId, group._count._all);
-  }
-
-  const categoryFacets = categories.map((category) => ({
-    slug: category.slug,
-    name: category.name,
-    count: categoryCount.get(category.id) ?? 0,
-  }));
+    // Video ikut dihitung: kategori "Social Media" (semua video) dan
+    // "#ViralForJustice" (postingan TikTok).
+    count += videoCounts.byCategory.get(category.slug) ?? 0;
+    return { slug: category.slug, name: category.name, count };
+  });
 
   const tabFacets = tabs.map((tab) => ({
     slug: tab.slug,
     name: tab.label,
-    count: tabCount.get(tab.id) ?? 0,
+    // Kanal e-book = semua buku; kanal lain (video/artikel) dihitung dari
+    // videoCounts / jumlah artikel yang sudah dihitung di tempat lain.
+    count:
+      (tab.slug === BOOK_TAB_SLUG ? bookTotal : 0) +
+      (videoCounts.byTab.get(tab.slug) ?? 0),
   }));
 
   const languageCount = new Map<string, number>();
@@ -185,9 +204,6 @@ export default async function CatalogView({
     value: option.value,
     count: languageCount.get(option.value) ?? 0,
   }));
-
-  const activeTab = tabs.find((tab) => tab.slug === tabSlug);
-  const activeCategory = categories.find((category) => category.slug === categorySlug);
 
   // Path aktif dipakai sebagai basis link paginasi & filter.
   const basePath = activeCategory
@@ -316,9 +332,16 @@ export default async function CatalogView({
               priceUsd: String(book.priceUsd),
               isNew: book.isNew,
               isFree: book.isFree,
-              tabSlug: book.tab.slug,
+              tabSlug: BOOK_TAB_SLUG,
             }))}
           />
+
+          {relatedPosts.length > 0 ? (
+            <RelatedSocialMedia
+              posts={relatedPosts}
+              heading="Video terkait"
+            />
+          ) : null}
 
           <div className="mt-8">
             <MarketPagination

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSiteTabs } from "@/lib/site-tabs";
 import {
   buildBookOrderBy,
   buildBookWhere,
@@ -66,17 +67,13 @@ export default async function CariContent({
         rating: true,
         language: true,
         pages: true,
-        tab: { select: { slug: true } },
       },
     }),
     prisma.category.findMany({
       orderBy: { order: "asc" },
       select: { name: true, slug: true },
     }),
-    prisma.contentTab.findMany({
-      orderBy: { order: "asc" },
-      select: { label: true, slug: true },
-    }),
+    Promise.resolve(getSiteTabs()),
   ]);
 
   // Parameter yang diteruskan ke link sort & paginasi supaya filter tidak hilang.
@@ -96,7 +93,7 @@ export default async function CariContent({
     title: book.title,
     author: book.author,
     coverUrl: book.coverUrl || null,
-    tabSlug: book.tab.slug,
+    tabSlug: "e-book",
     priceUsd: Number(book.priceUsd),
     isFree: book.isFree,
     rating: Number(book.rating),

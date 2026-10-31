@@ -16,6 +16,11 @@
  * dan `muted=1` benar-benar diterima — `embed/v2` mengabaikan keduanya.
  */
 
+import {
+  tiktokPlayerUrl as buildTikTokPlayerUrl,
+  tiktokVideoUrl as buildTikTokVideoUrl,
+} from "./tiktok";
+
 export type SocialPlatform = "tiktok" | "youtube" | "instagram";
 
 export const SOCIAL_PLATFORMS: { value: SocialPlatform; label: string }[] = [
@@ -45,6 +50,8 @@ export type SocialRef = {
   embedUrl: string | null;
   /** Nama pembuat kalau bisa dibaca dari link. */
   author: string | null;
+  /** Judul/caption dari kode embed (atribut `title`), kalau ada. */
+  title: string | null;
 };
 
 const EMPTY: SocialRef = {
@@ -53,16 +60,17 @@ const EMPTY: SocialRef = {
   videoUrl: null,
   embedUrl: null,
   author: null,
+  title: null,
 };
 
 /** URL pemutar TikTok yang benar-benar bisa diputar (autoplay + muted). */
 export function tiktokPlayerUrl(videoId: string): string {
-  return `https://www.tiktok.com/player/v1/${videoId}?embed_from=webapp_share&music_info=1&description=1&autoplay=1&muted=1`;
+  return buildTikTokPlayerUrl(videoId);
 }
 
 /** URL halaman video TikTok. */
 export function tiktokVideoUrl(videoId: string): string {
-  return `https://www.tiktok.com/@i/video/${videoId}`;
+  return buildTikTokVideoUrl(videoId);
 }
 
 /** URL embed YouTube. */
@@ -83,6 +91,20 @@ export function instagramEmbedUrl(shortcode: string): string {
 /** URL halaman Instagram. */
 export function instagramVideoUrl(shortcode: string): string {
   return `https://www.instagram.com/p/${shortcode}`;
+}
+
+/** Judul/caption yang ikut pada kode embed (atribut `title`). */
+function extractEmbedTitle(text: string): string | null {
+  const raw = text.match(/\stitle=["']([^"']+)["']/i)?.[1];
+  if (!raw) return null;
+  const title = raw
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .trim();
+  return title || null;
 }
 
 /**
@@ -114,6 +136,7 @@ export function parseSocialRef(
       videoUrl: tiktokVideoUrl(tiktokPlayer[1]),
       embedUrl: tiktokPlayerUrl(tiktokPlayer[1]),
       author: null,
+      title: extractEmbedTitle(text),
     };
   }
   const tiktokVideo = url.match(/\/video\/(\d{5,})/);
@@ -124,6 +147,7 @@ export function parseSocialRef(
       videoUrl: tiktokVideoUrl(tiktokVideo[1]),
       embedUrl: tiktokPlayerUrl(tiktokVideo[1]),
       author: url.match(/@([A-Za-z0-9._-]+)/)?.[1] ?? null,
+      title: extractEmbedTitle(text),
     };
   }
 
@@ -139,6 +163,7 @@ export function parseSocialRef(
       videoUrl: youtubeVideoUrl(ytId),
       embedUrl: youtubeEmbedUrl(ytId),
       author: null,
+      title: extractEmbedTitle(text),
     };
   }
 
@@ -153,6 +178,7 @@ export function parseSocialRef(
       videoUrl: instagramVideoUrl(igId),
       embedUrl: instagramEmbedUrl(igId),
       author: url.match(/instagram\.com\/([A-Za-z0-9._]+)/)?.[1] ?? null,
+      title: extractEmbedTitle(text),
     };
   }
 

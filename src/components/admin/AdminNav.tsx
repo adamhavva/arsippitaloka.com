@@ -106,20 +106,21 @@ export default function AdminNav({
         )}
       </button>
 
-      {/* Backdrop gelap untuk drawer di mobile. */}
+      {/* Backdrop gelap untuk drawer — HANYA di mobile saat sidebar terbuka.
+          `lg:hidden` memastikan tidak pernah muncul di desktop (tempat sidebar
+          selalu tampil statis), tanpa inline style yang menimpa kelas responsif. */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 hidden bg-black/50 lg:block lg:hidden"
-          style={{ display: sidebarOpen ? "block" : "none" }}
+          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar drawer — mobile: fixed overlay (slide-in/out); desktop: static panel. */}
       <aside
-        className={`flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-maroon-dark text-white transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-30 flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-maroon-dark text-white transition-transform duration-300 lg:static lg:z-auto lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        }`}
       >
       {/* Brand */}
       <div className="px-5 py-6">

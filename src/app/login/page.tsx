@@ -1,13 +1,14 @@
 import Link from "next/link";
 import AuthShell from "@/components/auth/AuthShell";
 import LoginForm from "@/components/auth/LoginForm";
-import { isGoogleAuthEnabled } from "@/lib/auth-config";
+// Login Google dinonaktifkan — lihat blok SocialButtons di bawah.
+// import { isGoogleAuthEnabled } from "@/lib/auth-config";
 import {
   AMBER,
   Heading,
   LogoMark,
-  OrDivider,
-  SocialButtons,
+  // OrDivider,
+  // SocialButtons,
   SubText,
 } from "@/components/auth/fields";
 
@@ -32,12 +33,16 @@ export default function LoginPage() {
         <SubText>Welcome back, please enter your detail</SubText>
       </div>
 
+      {/* Login dengan Google dinonaktifkan sementara.
       <div className="mt-[37px]">
         <SocialButtons googleEnabled={isGoogleAuthEnabled()} />
       </div>
       <div className="mt-[29px]">
         <OrDivider />
       </div>
+      */}
+
+      <div className="mt-[37px]" />
 
       <LoginForm />
 

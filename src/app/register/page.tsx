@@ -2,13 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import AuthShell from "@/components/auth/AuthShell";
 import RegisterForm from "@/components/auth/RegisterForm";
-import { isGoogleAuthEnabled } from "@/lib/auth-config";
+// Daftar dengan Google dinonaktifkan — lihat blok SocialButtons di bawah.
+// import { isGoogleAuthEnabled } from "@/lib/auth-config";
 import {
   AMBER,
   Heading,
   LogoMark,
-  OrDivider,
-  SocialButtons,
+  // OrDivider,
+  // SocialButtons,
   SubText,
 } from "@/components/auth/fields";
 
@@ -46,12 +47,16 @@ export default function RegisterPage() {
         <SubText>Let&apos;s get started with your 30 days free trial</SubText>
       </div>
 
+      {/* Daftar dengan Google dinonaktifkan sementara.
       <div className="mt-[32px]">
         <SocialButtons googleEnabled={isGoogleAuthEnabled()} />
       </div>
       <div className="mt-[26px]">
         <OrDivider />
       </div>
+      */}
+
+      <div className="mt-[32px]" />
 
       <RegisterForm />
 

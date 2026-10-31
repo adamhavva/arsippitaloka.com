@@ -13,6 +13,28 @@ import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import type { FieldDef } from "@/lib/admin/entities";
 import PageLoader from "@/components/PageLoader";
 
+/**
+ * Ubah nilai yang tidak bisa diserialisasi ke Client Component:
+ * Prisma `Decimal` → string. (Date & tipe plain lain aman dikirim.)
+ */
+function serializeRow(
+  row: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) {
+    if (
+      value !== null &&
+      typeof value === "object" &&
+      value.constructor?.name === "Decimal"
+    ) {
+      out[key] = value.toString();
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
 type EntitySearchParams = {
   edit?: string;
   create?: string;
@@ -178,12 +200,15 @@ async function AdminEntityPageContent({
   }
 
   // Baris yang sedang diedit boleh berada di halaman lain → ambil terpisah.
-  const editing = editId
+  const editingRaw = editId
     ? ((await delegate.findUnique({ where: { id: editId } })) as Record<
         string,
         unknown
       > | null)
     : null;
+
+  // Prisma Decimal tidak bisa dikirim ke Client Component → ubah jadi string.
+  const editing = editingRaw ? serializeRow(editingRaw) : null;
 
   const creating = sp.create === "1";
   // Nilai default untuk form tambah (mis. kanal artikel dari URL).

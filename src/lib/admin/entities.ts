@@ -250,6 +250,14 @@ export const ENTITIES: Record<string, EntityDef> = {
     fields: [
       { name: "title", label: "Judul", type: "text", required: true, list: true },
       {
+        name: "slug",
+        label: "Slug",
+        type: "text",
+        list: true,
+        slugFrom: "title",
+        help: "Dibuat otomatis dari judul. Dipakai di URL /dokumentasi/<slug>.",
+      },
+      {
         name: "lead",
         label: "Lead",
         type: "richtext",

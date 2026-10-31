@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Dashboard — Arsip Pitaloka",
@@ -26,7 +27,7 @@ function rupiah(value: unknown): string {
 
 export default function AdminDashboard() {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminDashboardContent />
     </Suspense>
   );

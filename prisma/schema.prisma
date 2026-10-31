@@ -161,6 +161,7 @@ model Book {
 
 model Documentation {
   id        String   @id @default(cuid())
+  slug      String   @unique
   title     String
   lead      String
   photoUrl  String?

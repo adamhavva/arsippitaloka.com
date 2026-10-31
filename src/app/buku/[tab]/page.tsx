@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CatalogView from "@/components/books/CatalogView";
 import RedirectTo from "@/components/books/RedirectTo";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Katalog Buku — Arsip Pitaloka",
@@ -23,7 +24,7 @@ export default function TabCatalogPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <TabCatalogContent params={params} searchParams={searchParams} />
     </Suspense>
   );

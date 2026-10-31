@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 import { getSettings, SETTINGS_SCHEMA } from "@/lib/site-settings";
 import { SECRET_MASK } from "@/lib/site-settings-defaults";
 import SettingsForm from "@/components/admin/SettingsForm";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Profil Perusahaan — Admin",
@@ -11,7 +12,7 @@ export const metadata = {
 
 export default function AdminProfilePage() {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminProfilePageContent />
     </Suspense>
   );

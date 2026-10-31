@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Order — Admin",
@@ -34,7 +35,7 @@ export default function AdminOrdersPage({
   searchParams: Promise<{ status?: string; q?: string; page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminOrdersPageContent searchParams={searchParams} />
     </Suspense>
   );

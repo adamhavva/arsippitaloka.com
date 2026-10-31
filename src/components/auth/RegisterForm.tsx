@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { CheckBox, Field, PasswordField, SubmitButton } from "./fields";
+import Spinner from "@/components/Spinner";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -113,7 +114,13 @@ export default function RegisterForm() {
 
       <div className="mt-[33px]">
         <SubmitButton disabled={pending}>
-          {pending ? "Loading..." : "Create an account"}
+          {pending ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner size={18} /> Create an account
+            </span>
+          ) : (
+            "Create an account"
+          )}
         </SubmitButton>
       </div>
 

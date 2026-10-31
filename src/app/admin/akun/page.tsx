@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import AdminAccountForms from "@/components/admin/AdminAccountForms";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Akun Saya — Admin Arsip Pitaloka",
@@ -10,7 +11,7 @@ export const metadata = {
 
 export default function AdminAccountPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminAccountPageContent />
     </Suspense>
   );

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { sanitizeCallbackUrl } from "@/lib/callback-url";
 import { AMBER, CheckBox, Field, PasswordField, SubmitButton } from "./fields";
+import Spinner from "@/components/Spinner";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -93,7 +94,13 @@ export default function LoginForm() {
 
       <div className="mt-[20px]">
         <SubmitButton disabled={pending}>
-          {pending ? "Loading..." : "Login"}
+          {pending ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner size={18} /> Login
+            </span>
+          ) : (
+            "Login"
+          )}
         </SubmitButton>
       </div>
 

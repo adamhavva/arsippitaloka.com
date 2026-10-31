@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 import OrderStatusControl from "@/components/admin/OrderStatusControl";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Detail Order — Admin",
@@ -27,7 +28,7 @@ export default function AdminOrderDetailPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminOrderDetailPageContent params={params} searchParams={searchParams} />
     </Suspense>
   );

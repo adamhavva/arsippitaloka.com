@@ -58,10 +58,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
 
   // Footer
   "footer.browse.title": "Browse",
-  "footer.browse.links":
-    "E- Book\nSocial Media\nDokumentasi\nBiografi\nBerita Terkini\nPerpustakaan Digital\nSubscription",
+  "footer.browse.links": "E- Book\nDokumentasi\nBerita Terkini",
   "footer.platform.title": "Platform",
-  "footer.platform.links": "Contact\nHelp\nAbout",
+  "footer.platform.links": "About",
   "footer.subscribe.placeholder": "Enter your email",
   "footer.subscribe.button": "Search",
   "footer.subscribe.text":

@@ -13,6 +13,7 @@ export type CourseTab = { id: string; label: string; slug: string };
 /** Data satu item dokumentasi untuk kartu di beranda. */
 export type DocItemData = {
   id: string;
+  slug: string;
   title: string;
   photoUrl: string | null;
   /** ISO string (eventDate diserialisasi di server). */
@@ -59,7 +60,7 @@ const DATE_FMT = new Intl.DateTimeFormat("id-ID", {
 function DocCard({ doc }: { doc: DocItemData }) {
   return (
     <Link
-      href="/news-and-views"
+      href={`/dokumentasi/${doc.slug}`}
       className="group flex flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white transition hover:border-neutral-300"
     >
       <div className="relative flex h-40 items-center justify-center bg-[#3d2b2e]">

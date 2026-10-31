@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import PdfHero from "@/components/layout/PdfHero";
 import SearchBar from "@/components/search/SearchBar";
 import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
-import BeritaTerkini from "@/components/news/BeritaTerkini";
 import YoutubeBand from "@/components/news/YoutubeBand";
 import ViralForJustice from "@/components/home/ViralForJustice";
 import DocumentationSection from "@/components/home/DocumentationSection";
@@ -30,8 +29,6 @@ export default function NewsAndViewsPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    beritaPage?: string;
-    beritaPer?: string;
     ytPage?: string;
     ytPer?: string;
   }>;
@@ -53,11 +50,9 @@ export default function NewsAndViewsPage({
         <SearchBar size="md" placeholder="Cari buku di Pitaloka…" />
       </div>
 
-      <BeritaTerkini searchParams={searchParams} />
+      <DocumentationSection />
 
       <YoutubeBand searchParams={searchParams} />
-
-      <DocumentationSection />
 
       <ViralForJustice />
 

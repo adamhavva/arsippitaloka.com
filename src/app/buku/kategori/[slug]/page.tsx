@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CatalogView from "@/components/books/CatalogView";
 import SocialMediaCatalog from "@/components/social/SocialMediaCatalog";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Katalog Buku — Arsip Pitaloka",
@@ -26,7 +27,7 @@ export default function CategoryCatalogPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <CategoryCatalogContent params={params} searchParams={searchParams} />
     </Suspense>
   );

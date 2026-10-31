@@ -53,6 +53,7 @@ export default async function FeaturedCourses() {
       take: PER_TAB_LIMIT,
       select: {
         id: true,
+        slug: true,
         title: true,
         photoUrl: true,
         eventDate: true,
@@ -91,6 +92,7 @@ export default async function FeaturedCourses() {
           kind: "doc",
           doc: {
             id: d.id,
+            slug: d.slug,
             title: d.title,
             photoUrl: d.photoUrl,
             eventDate: d.eventDate.toISOString(),

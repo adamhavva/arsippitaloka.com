@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 import UserRowActions from "@/components/admin/UserRowActions";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "User — Admin",
@@ -16,7 +17,7 @@ export default function AdminUsersPage({
   searchParams: Promise<{ page?: string; per?: string; q?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminUsersPageContent searchParams={searchParams} />
     </Suspense>
   );

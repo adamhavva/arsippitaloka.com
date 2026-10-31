@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import SocialEmbedPlayer from "@/components/social/SocialEmbedPlayer";
 import { SocialPlatformBadge } from "@/components/social/SocialCard";
 import { BookOpen, FileText, PanelsTopLeft, ArrowLeft } from "lucide-react";
+import PageLoader from "@/components/PageLoader";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -97,7 +98,7 @@ async function SosmedDetail({ params }: { params: Promise<{ id: string }> }) {
 export default function SosmedDetailPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
-      <Suspense fallback={<p className="py-20 text-center text-neutral-400">Memuat…</p>}>
+      <Suspense fallback={<PageLoader />}>
         <SosmedDetail params={params} />
       </Suspense>
     </div>

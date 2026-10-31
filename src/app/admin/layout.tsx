@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { getSettings } from "@/lib/site-settings";
 import AdminNav from "@/components/admin/AdminNav";
@@ -33,8 +34,13 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
   // `await connection()` → opt-in dynamic (halaman ini baca cookie).
   await connection();
 
+  // Anonim → arahkan ke login. Sudah login tapi bukan admin → 404 (halaman
+  // admin disembunyikan dari pengguna biasa).
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login?callbackUrl=/admin");
+
   const admin = await requireAdmin();
-  if (!admin) redirect("/login?callbackUrl=/admin");
+  if (!admin) notFound();
 
   const settings = await getSettings();
   const logoUrl = settings["company.logoUrl"]?.trim() || null;

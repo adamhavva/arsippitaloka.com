@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser, ACCESS_STATUSES } from "@/lib/library";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Riwayat Order — Arsip Pitaloka",
@@ -49,7 +50,7 @@ export default function AccountOrdersPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AccountOrdersPageContent searchParams={searchParams} />
     </Suspense>
   );

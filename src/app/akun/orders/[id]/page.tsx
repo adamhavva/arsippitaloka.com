@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUser, ACCESS_STATUSES } from "@/lib/library";
 import PaymentStatusChecker from "@/components/books/PaymentStatusChecker";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Detail Order — Arsip Pitaloka",
@@ -51,7 +52,7 @@ export default function AccountOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AccountOrderDetailContent params={params} />
     </Suspense>
   );

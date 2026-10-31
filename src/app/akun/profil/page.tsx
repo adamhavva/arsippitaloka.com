@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { requireUser } from "@/lib/library";
 import ProfileForms from "@/components/account/ProfileForms";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Profil — Arsip Pitaloka",
@@ -9,7 +10,7 @@ export const metadata = {
 
 export default function AccountProfilePage() {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AccountProfilePageContent />
     </Suspense>
   );

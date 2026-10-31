@@ -7,6 +7,7 @@ import type { LibraryEntry } from "@/lib/library";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Pustaka Saya — Arsip Pitaloka",
@@ -64,7 +65,7 @@ export default function AccountLibraryPage({
   searchParams: Promise<{ page?: string; per?: string; filter?: string; q?: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AccountLibraryPageContent searchParams={searchParams} />
     </Suspense>
   );

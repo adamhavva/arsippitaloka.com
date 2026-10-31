@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import BuyButton from "@/components/books/BuyButton";
 import { formatIdr } from "@/components/books/marketplace/market-utils";
 
 export type BookCardData = {
@@ -94,8 +95,9 @@ export default function BookCard({ book }: { book: BookCardData }) {
             Lihat Detail
           </Link>
         </div>
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <AddToCartButton bookId={book.id} />
+          <BuyButton bookId={book.id} label="Beli" compact />
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import EntityForm from "@/components/admin/EntityForm";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import type { FieldDef } from "@/lib/admin/entities";
+import PageLoader from "@/components/PageLoader";
 
 export default function AdminEntityPage({
   params,
@@ -24,7 +25,7 @@ export default function AdminEntityPage({
   }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <AdminEntityPageContent params={params} searchParams={searchParams} />
     </Suspense>
   );

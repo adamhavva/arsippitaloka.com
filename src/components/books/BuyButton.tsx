@@ -1,23 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 /**
  * Tombol "Beli Sekarang" — membuat order di /api/checkout lalu mengarahkan
  * pembeli ke halaman Snap Midtrans.
+ *
+ * `loginUrl` opsional: kalau tidak diberikan (mis. dari kartu buku), tujuan
+ * login dihitung saat diklik dari URL halaman sekarang. `compact` memberi
+ * ukuran kecil agar pas di kartu.
  */
 export default function BuyButton({
   bookId,
   loginUrl,
   label = "Beli Sekarang",
+  compact = false,
 }: {
   bookId: string;
-  loginUrl: string;
+  loginUrl?: string;
   label?: string;
+  compact?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +45,9 @@ export default function BuyButton({
       };
 
       if (res.status === 401) {
-        router.push(loginUrl);
+        router.push(
+          loginUrl ?? `/login?callbackUrl=${encodeURIComponent(pathname)}`,
+        );
         return;
       }
 
@@ -61,9 +70,13 @@ export default function BuyButton({
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="inline-flex items-center gap-2 rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white disabled:opacity-60"
+        className={`inline-flex items-center gap-1.5 rounded-full bg-maroon-dark font-medium text-white transition hover:bg-maroon disabled:opacity-60 ${
+          compact ? "px-3 py-1.5 text-xs" : "gap-2 px-5 py-2 text-sm"
+        }`}
       >
-        {loading ? <Loader2 size={16} className="animate-spin" /> : null}
+        {loading ? (
+          <Loader2 size={compact ? 14 : 16} className="animate-spin" />
+        ) : null}
         {loading ? "Memproses…" : label}
       </button>
       {error ? (

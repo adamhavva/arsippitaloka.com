@@ -73,8 +73,6 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "company.social.youtube", label: "Tautan YouTube", type: "text", group: "Copy Landing Page" },
   { key: "company.social.instagram", label: "Tautan Instagram", type: "text", group: "Copy Landing Page" },
 
-  { key: "payment.usdToIdr", label: "Kurs USD → IDR", type: "text", group: "Pembayaran", help: "Dipakai saat membuat order." },
-
   {
     key: "payment.midtrans.enabled",
     label: "Aktifkan pembayaran Midtrans",
@@ -117,7 +115,6 @@ export const SETTING_GROUPS = [
   "Media Sosial",
   "Footer",
   "Copy Landing Page",
-  "Pembayaran",
   "Midtrans",
   "Pajak",
 ];

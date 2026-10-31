@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BookDetailView from "@/components/books/BookDetailView";
 import RedirectTo from "@/components/books/RedirectTo";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Detail Buku — Arsip Pitaloka",
@@ -21,7 +22,7 @@ export default function BookDetailPage({
   params: Promise<{ tab: string; slug: string }>;
 }) {
   return (
-    <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+    <Suspense fallback={<PageLoader />}>
       <BookDetailContent params={params} />
     </Suspense>
   );

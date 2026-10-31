@@ -44,6 +44,17 @@ export default auth((req) => {
 
   if (isAdminArea) {
     if (session?.role === "ADMIN") return NextResponse.next();
+    // Sudah login tapi bukan admin:
+    //  - endpoint API admin → 403 JSON (bukan redirect, supaya fetch tidak
+    //    menerima HTML);
+    //  - halaman admin → biarkan lewat agar layout merender 404 (notFound).
+    if (session?.id) {
+      if (pathname.startsWith("/api/admin")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+      return NextResponse.next();
+    }
+    // Anonim → jatuh ke redirect login di bawah.
   } else if (isAccountArea) {
     // Area pembeli: cukup punya sesi, tidak boleh kehilangan akses
     // hanya karena role-nya bukan ADMIN.

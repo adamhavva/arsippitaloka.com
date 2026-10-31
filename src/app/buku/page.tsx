@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import CatalogView from "@/components/books/CatalogView";
+import PageLoader from "@/components/PageLoader";
 
 export const metadata = {
   title: "Katalog Buku — Arsip Pitaloka",
@@ -27,7 +28,7 @@ export default function CatalogPage({
           E-Books Collections
         </h1>
       </section>
-      <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
+      <Suspense fallback={<PageLoader />}>
         <CatalogContent searchParams={searchParams} />
       </Suspense>
     </>

@@ -70,6 +70,7 @@ async function main() {
   await prisma.documentation.deleteMany();
   await prisma.documentation.create({
     data: {
+      slug: "demo-ruu-perampasan-aset-demi-indonesia-maju",
       title: "Demo RUU Perampasan Aset Demi Indonesia Maju",
       lead: "Turun langsung ke gedung DPR/MPR RI Untuk Menemui para Demonstrasi. Jakarta, 27 Agustus 2026",
       photoUrl: "/images/doc-demo-photo.jpg",

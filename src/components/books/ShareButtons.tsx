@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageCircle, Send, Link } from "lucide-react";
 
 export default function ShareButtons({ url, title }: { url: string; title: string }) {
   const [copied, setCopied] = useState(false);
-  const full = typeof window !== "undefined" ? window.location.origin + url : url;
+  // Awali dengan URL relatif agar SSR & render klien pertama identik (hindari
+  // hydration mismatch), lalu lengkapi dengan origin setelah mount.
+  const [full, setFull] = useState(url);
+
+  useEffect(() => {
+    setFull(window.location.origin + url);
+  }, [url]);
 
   function copy() {
     navigator.clipboard.writeText(full).then(() => {

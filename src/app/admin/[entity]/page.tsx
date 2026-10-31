@@ -22,15 +22,15 @@ function serializeRow(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(row)) {
-    if (
-      value !== null &&
-      typeof value === "object" &&
-      value.constructor?.name === "Decimal"
-    ) {
-      out[key] = value.toString();
-    } else {
-      out[key] = value;
+    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+      // Date aman dikirim ke Client Component, tetapi Prisma Decimal tidak.
+      // Decimal.js dikenali dari method `toFixed`; ubah jadi string.
+      if (typeof (value as { toFixed?: unknown }).toFixed === "function") {
+        out[key] = (value as { toString(): string }).toString();
+        continue;
+      }
     }
+    out[key] = value;
   }
   return out;
 }

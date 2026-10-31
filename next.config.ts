@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
     agentFeedback: true,
+    // Upload PDF e-book (maks 500 MB) lewat route di bawah matcher proxy.ts.
+    // Default 10 MB membuat body ter-truncate → FormData gagal di-parse.
+    proxyClientMaxBodySize: 512 * 1024 * 1024, // 512 MB
   },
   cacheComponents: true,
   partialPrefetching: true,

@@ -6,7 +6,7 @@ import { parsePdfMeta } from "@/lib/pdf-meta";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const IMAGE_MAX = 5 * 1024 * 1024; // 5 MB
-const PDF_MAX = 50 * 1024 * 1024; // 50 MB
+const PDF_MAX = 500 * 1024 * 1024; // 500 MB
 
 const EXT: Record<string, string> = {
   "image/jpeg": ".jpg",

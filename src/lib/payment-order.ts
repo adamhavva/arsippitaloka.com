@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { mapTransactionStatus } from "@/lib/midtrans";
+import { clearCartBooks } from "@/lib/cart";
 
 /**
  * Terapkan status transaksi Midtrans ke order.
@@ -17,7 +18,14 @@ export async function applyTransactionStatus(
 > {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
-    select: { id: true, status: true, total: true, paidAt: true },
+    select: {
+      id: true,
+      status: true,
+      total: true,
+      paidAt: true,
+      userId: true,
+      items: { select: { bookId: true } },
+    },
   });
 
   if (!order) return { ok: false, error: "Order tidak ditemukan." };
@@ -45,6 +53,12 @@ export async function applyTransactionStatus(
         paidAt: order.paidAt ?? new Date(),
       },
     });
+    // Buku yang baru lunas dikeluarkan dari keranjang (aman juga untuk order
+    // satu-buku BuyButton: buku itu memang tidak ada di keranjang).
+    await clearCartBooks(
+      order.userId,
+      order.items.map((item) => item.bookId),
+    );
     return { ok: true, orderStatus: "PAID", paid: true };
   }
 

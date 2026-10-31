@@ -38,7 +38,9 @@ export default auth((req) => {
   }
 
   const isAdminArea = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
-  const isAccountArea = pathname.startsWith("/akun");
+  // Keranjang diperlakukan seperti area pembeli: wajib login, role apa pun.
+  const isAccountArea =
+    pathname.startsWith("/akun") || pathname.startsWith("/keranjang");
 
   if (isAdminArea) {
     if (session?.role === "ADMIN") return NextResponse.next();
@@ -62,5 +64,11 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*", "/akun/:path*", "/buku"],
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/akun/:path*",
+    "/keranjang/:path*",
+    "/buku",
+  ],
 };

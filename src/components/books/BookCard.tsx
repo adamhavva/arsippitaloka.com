@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 
 export type BookCardData = {
   id: string;
@@ -91,6 +92,9 @@ export default function BookCard({ book }: { book: BookCardData }) {
           >
             Lihat Detail
           </Link>
+        </div>
+        <div className="mt-2">
+          <AddToCartButton bookId={book.id} />
         </div>
       </div>
     </div>

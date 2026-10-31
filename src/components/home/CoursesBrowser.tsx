@@ -28,23 +28,23 @@ export default function CoursesBrowser({
   const books = booksByTab[activeSlug] ?? [];
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pb-20 md:px-10">
-      <div className="mb-6 flex items-center justify-between gap-4">
+    <section className="mx-auto w-full max-w-6xl px-4 pb-16 md:px-6 lg:pb-20">
+      <div className="mb-4 flex items-center justify-between gap-4 sm:mb-6">
         <div>
-          <p className="text-sm font-medium text-maroon">{eyebrow}</p>
-          <h2 className="font-heading mt-1 text-2xl font-bold text-black md:text-3xl">
+          <p className="text-xs font-medium text-maroon sm:text-sm">{eyebrow}</p>
+          <h2 className="font-heading mt-1 text-xl font-bold text-black sm:text-2xl md:text-3xl">
             {title}
           </h2>
         </div>
         <Link
           href={active ? `/buku/${active.slug}` : "/buku"}
-          className="shrink-0 rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+          className="shrink-0 rounded-full bg-maroon-dark px-4 py-2 text-sm font-medium text-white sm:px-5 sm:py-2"
         >
           {buttonLabel}
         </Link>
       </div>
 
-      <div className="mb-8 flex flex-wrap gap-3">
+      <div className="mb-6 flex flex-wrap gap-2 sm:mb-8 sm:gap-3">
         {tabs.map((tab) => (
           <button
             key={tab.id}

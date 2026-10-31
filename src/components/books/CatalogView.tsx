@@ -252,31 +252,32 @@ export default async function CatalogView({
   );
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8">
-      <div className="flex flex-col gap-4 border-b border-neutral-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex flex-col gap-3 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between sm:pb-5">
         <div className="min-w-0">
           {showHeading ? (
             <header>
-              <p className="text-sm font-medium text-maroon">Katalog</p>
-              <h1 className="font-heading mt-1 text-2xl font-bold text-black md:text-3xl">
+              <p className="text-xs font-medium text-maroon sm:text-sm">Katalog</p>
+              <h1 className="font-heading mt-1 text-xl font-bold text-black sm:text-2xl md:text-3xl">
                 {heading}
               </h1>
             </header>
           ) : null}
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
             {summary} · {total} buku ditemukan
             {activeTab ? ` pada tab ${activeTab.label}` : ""}
             {activeCategory ? ` · kategori ${activeCategory.name}` : ""}.
           </p>
           <SearchBar
-            className="mt-4 max-w-xl"
+            className="mt-3 max-w-lg sm:max-w-xl"
             basePath="/buku"
             defaultValue={filters.q}
             placeholder="Cari judul, penulis, atau deskripsi buku…"
           />
         </div>
 
-        <div className="lg:shrink-0">
+        {/* Sort bar di bawah heading di mobile (tidak overlap). */}
+        <div className="shrink-0 self-start sm:self-center">
           <SortBar
             basePath={basePath}
             params={linkParams}
@@ -285,9 +286,9 @@ export default async function CatalogView({
         </div>
       </div>
 
-      <div className="mt-6 flex gap-8">
+      <div className="mt-6 flex gap-6 sm:gap-8">
         {/* Sidebar filter — sticky di layar besar, jadi drawer di layar kecil. */}
-        <aside className="hidden w-60 shrink-0 lg:block">
+        <aside className="hidden w-[18rem] shrink-0 lg:block">
           <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
             {sidebar}
           </div>

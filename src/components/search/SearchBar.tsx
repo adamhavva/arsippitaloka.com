@@ -119,7 +119,7 @@ export default function SearchBar({
       <form
         role="search"
         onSubmit={submit}
-        className={`flex w-full items-center overflow-hidden rounded-full border border-neutral-300 bg-white ${sizes.wrap}`}
+        className={`flex w-full items-center overflow-hidden rounded-full border border-neutral-300 bg-white shadow-sm ${sizes.wrap}`}
       >
         <label htmlFor={inputId} className="sr-only">
           {placeholder}
@@ -137,9 +137,9 @@ export default function SearchBar({
         <button
           type="submit"
           aria-label="Cari"
-          className={`flex h-full shrink-0 items-center justify-center bg-maroon-dark px-4 text-white transition hover:bg-maroon ${buttonClassName}`}
+          className={`flex h-full shrink-0 items-center justify-center bg-maroon-dark px-3 py-0 text-white transition hover:bg-maroon sm:px-4 ${buttonClassName}`}
         >
-          <Search size={size === "lg" ? 22 : 18} />
+          <Search size={size === "lg" ? 22 : 18} className="sm:w-5 sm:h-5 w-4 h-4" />
         </button>
       </form>
 
@@ -147,7 +147,7 @@ export default function SearchBar({
         <ul
           role="listbox"
           aria-label="Saran pencarian"
-          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg"
+          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-lg max-h-[60vh] overflow-y-auto"
         >
           {suggestions.map((item) => (
             <li key={item.id} role="option" aria-selected={false}>
@@ -158,7 +158,7 @@ export default function SearchBar({
                     : `/buku/${item.slug}`
                 }
                 onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 hover:bg-neutral-50"
+                className="block px-4 py-3 hover:bg-neutral-50"
               >
                 <span className="block truncate text-sm font-medium text-neutral-900">
                   {item.title}

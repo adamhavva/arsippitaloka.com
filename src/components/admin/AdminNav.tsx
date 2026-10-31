@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -19,6 +19,8 @@ import {
   ChevronRight,
   ChevronDown,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { ADMIN_MENU, type AdminMenuItem } from "@/lib/admin/entities";
 
@@ -74,8 +76,51 @@ export default function AdminNav({
   const initial = (name || "P").trim().charAt(0).toUpperCase();
   const brandLogo = logoUrl || "/images/logo-pitaloka.png";
 
+  /** Sidebar dibuka/tutup — responsif: mobile drawer (fixed overlay), desktop always-visible. */
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Tutup sidebar ketika viewport melebar → switch dari drawer ke always-visible layout.
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    if (mq.matches) setSidebarOpen(true);
+    const handler = (e: MediaQueryListEvent) => {
+      if (e.matches) setSidebarOpen(true);
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-maroon-dark text-white">
+    <>
+      {/* Tombol hamburger — tampil hanya pada layar kecil (mobile / tablet portrait). */}
+      <button
+        type="button"
+        onClick={() => setSidebarOpen((v) => !v)}
+        className="fixed right-3 top-3 z-40 rounded bg-white p-2 shadow lg:hidden"
+        aria-label="Toggle navigasi admin"
+      >
+        {sidebarOpen ? (
+          <X size={20} className="text-maroon-dark" />
+        ) : (
+          <Menu size={20} className="text-maroon-dark" />
+        )}
+      </button>
+
+      {/* Backdrop gelap untuk drawer di mobile. */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 hidden bg-black/50 lg:block lg:hidden"
+          style={{ display: sidebarOpen ? "block" : "none" }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar drawer — mobile: fixed overlay (slide-in/out); desktop: static panel. */}
+      <aside
+        className={`flex h-full w-64 shrink-0 flex-col overflow-y-auto bg-maroon-dark text-white transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
       {/* Brand */}
       <div className="px-5 py-6">
         <Image
@@ -149,6 +194,7 @@ export default function AdminNav({
         </button>
       </div>
     </aside>
+    </>
   );
 }
 

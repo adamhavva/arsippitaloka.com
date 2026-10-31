@@ -18,7 +18,7 @@ export function LogoMark({ ring = false }: { ring?: boolean }) {
 
 export function Heading({ children }: { children: ReactNode }) {
   return (
-    <h1 className="text-[44px] font-bold leading-[1.05] tracking-[-0.02em] text-black">
+    <h1 className="break-words text-[32px] font-bold leading-[1.05] tracking-[-0.02em] text-black sm:text-[44px]">
       {children}
     </h1>
   );
@@ -28,22 +28,24 @@ export function SubText({ children }: { children: ReactNode }) {
   return <p className="text-[15px] text-[#606261]">{children}</p>;
 }
 
-export function Field(props: ComponentProps<"input">) {
+export function Field(props: ComponentProps<"input"> & { inputClassName?: string }) {
+  const { inputClassName } = props;
   return (
     <input
       {...props}
-      className="h-[51px] w-full rounded-lg border border-[#f1f2f5] px-5 text-[15px] text-black outline-none placeholder:text-[#b4b6ba] focus:border-[#d6d8dd]"
+      className={`h-[51px] w-full rounded-lg border border-[#f1f2f5] px-5 text-[15px] text-black outline-none placeholder:text-[#b4b6ba] focus:border-[#d6d8dd] ${inputClassName ?? ""}`}
     />
   );
 }
 
-export function PasswordField(props: ComponentProps<"input">) {
+export function PasswordField(props: ComponentProps<"input"> & { inputClassName?: string }) {
+  const { inputClassName } = props;
   return (
     <div className="relative">
       <input
         {...props}
         type="password"
-        className="h-[51px] w-full rounded-lg border border-[#f1f2f5] pl-5 pr-14 text-[15px] text-black outline-none placeholder:text-[#b4b6ba] focus:border-[#d6d8dd]"
+        className={`h-[51px] w-full rounded-lg border border-[#f1f2f5] pl-5 pr-14 text-[15px] text-black outline-none placeholder:text-[#b4b6ba] focus:border-[#d6d8dd] ${inputClassName ?? ""}`}
       />
       <EyeOff className="absolute right-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4b4d52]" />
     </div>
@@ -58,7 +60,7 @@ export function SubmitButton({
     <button
       type="submit"
       {...props}
-      className="h-[47px] w-full rounded-lg bg-[#202124] text-[15px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+      className="h-[50px] w-full rounded-lg bg-[#202124] text-[15px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-60 sm:h-[47px]"
     >
       {children}
     </button>

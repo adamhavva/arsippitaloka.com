@@ -39,6 +39,7 @@ model User {
   lockedUntil    DateTime?
   lastLoginAt    DateTime?
   orders         Order[]
+  cartItems      CartItem[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
@@ -78,6 +79,20 @@ model OrderItem {
   qty     Int     @default(1)
 
   @@unique([orderId, bookId])
+  @@index([bookId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    String
+  createdAt DateTime @default(now())
+
+  // E-book: satu judul maksimal 1x di keranjang (qty selalu 1).
+  @@unique([userId, bookId])
+  @@index([userId])
   @@index([bookId])
 }
 
@@ -135,6 +150,7 @@ model Book {
   categoryId      String?
   category        Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   orderItems      OrderItem[]
+  cartItems       CartItem[]
   socialMedia     SocialMedia[]
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt

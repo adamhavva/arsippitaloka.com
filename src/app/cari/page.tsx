@@ -29,14 +29,14 @@ export default function CariPage({
 /** Placeholder selagi data diambil ( Suspense fallback ). */
 function CariSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-12 md:px-10">
-      <div className="h-8 w-48 animate-pulse rounded bg-neutral-100" />
-      <div className="mt-6 h-14 w-full animate-pulse rounded-full bg-neutral-100" />
-      <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 lg:py-12">
+      <div className="h-7 w-40 animate-pulse rounded bg-neutral-100 sm:h-8 sm:w-48" />
+      <div className="mt-5 h-11 w-full animate-pulse rounded-full bg-neutral-100 sm:h-14" />
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
           <div
             key={index}
-            className="h-72 animate-pulse rounded-xl bg-neutral-100"
+            className="h-64 animate-pulse rounded-xl bg-neutral-100 sm:h-72"
           />
         ))}
       </div>

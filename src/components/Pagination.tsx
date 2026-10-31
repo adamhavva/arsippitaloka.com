@@ -47,22 +47,22 @@ export default function Pagination({
   const { from, to } = pageRange(page, perPage, total);
 
   const linkClass = (active: boolean) =>
-    `inline-flex h-9 min-w-9 items-center justify-center rounded-full border px-3 text-sm transition ${
+    `inline-flex h-8 min-w-[36px] items-center justify-center rounded-full border px-2 text-xs transition ${
       active
         ? "border-maroon-dark bg-maroon-dark text-white"
-        : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50"
+        : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 active:scale-95"
     }`;
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-neutral-500">
+      <p className="text-xs sm:text-sm text-neutral-500">
         Menampilkan <span className="font-medium text-neutral-800">{from}</span>–
         <span className="font-medium text-neutral-800">{to}</span> dari{" "}
         <span className="font-medium text-neutral-800">{total}</span> {label}.
       </p>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-sm text-neutral-500">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <label className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
           Baris:
           <select
             value={perPage}
@@ -74,7 +74,7 @@ export default function Pagination({
                 }),
               )
             }
-            className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-sm text-neutral-800"
+            className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-800 focus:border-maroon sm:text-sm"
           >
             {PER_PAGE_OPTIONS.map((option) => (
               <option key={option} value={option}>
@@ -84,13 +84,13 @@ export default function Pagination({
           </select>
         </label>
 
-        <nav className="flex items-center gap-1.5" aria-label="Paginasi">
+        <nav className="flex items-center gap-1 overflow-x-auto self-start pb-1 sm:self-center sm:block sm:overflow-visible" aria-label="Paginasi">
           <Link
             href={buildHref(basePath, params, {
               page: String(Math.max(1, page - 1)),
             })}
             aria-disabled={page <= 1}
-            className={`${linkClass(false)} ${
+            className={`${linkClass(false)} whitespace-nowrap ${
               page <= 1 ? "pointer-events-none opacity-40" : ""
             }`}
           >
@@ -119,7 +119,7 @@ export default function Pagination({
               page: String(Math.min(pages, page + 1)),
             })}
             aria-disabled={page >= pages}
-            className={`${linkClass(false)} ${
+            className={`${linkClass(false)} whitespace-nowrap ${
               page >= pages ? "pointer-events-none opacity-40" : ""
             }`}
           >

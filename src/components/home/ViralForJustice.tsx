@@ -48,18 +48,18 @@ export default async function ViralForJustice() {
 
   return (
     <section className="bg-neutral-50 py-16">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 md:grid-cols-2 md:px-10">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-8 px-4 md:grid-cols-2 md:gap-10 md:px-10">
         <div>
-          <p className="text-sm font-medium text-maroon">
+          <p className="text-xs font-medium text-maroon sm:text-sm">
             {settings["home.viral.eyebrow"]}
           </p>
-          <h2 className="font-heading mt-2 text-3xl font-bold text-black md:text-4xl">
+          <h2 className="font-heading mt-2 text-xl font-bold text-black md:mt-2 md:text-3xl lg:text-4xl">
             {settings["home.viral.title"]}
             <br />
             {settings["home.viral.subtitle"]}
           </h2>
           <div
-            className={`mt-5 text-sm leading-relaxed text-neutral-600 ${RICH_TEXT_CLASS}`}
+            className={`mt-4 text-sm leading-relaxed text-neutral-600 sm:mt-5 ${RICH_TEXT_CLASS}`}
             dangerouslySetInnerHTML={{
               __html: sanitizeRichText(settings["home.viral.body"]),
             }}

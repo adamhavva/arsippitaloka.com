@@ -1,18 +1,14 @@
+import Link from "next/link";
+
 /**
  * Band statistik di halaman `/about`.
  *
  * Di PDF `references/layouts/split/MENU ABOUT.pdf` band ini ada di
- * y = 1464–1628 pt dengan latar abu rgb(217,216,215) dan inset 78,24 pt
- * dari kiri/kanan. Teksnya sengaja TIDAK ikut dirender sebagai gambar,
- * jadi di sini dibangun sebagai HTML asli.
+ * y = 1464–1628 pt dengan latar abu rgb(217,216,215).
  *
- * Ukuran dalam PDF (kanvas 1920 pt) dikonversi ke `vw` supaya proporsinya
- * tetap sama di lebar layar apa pun:
- *   1 pt = 100/1920 vw = 0,0520833 vw
- *
- * Posisi ink di PDF (hasil pengukuran piksel, penyesuaian font):
- *   - angka : ink 68,6 pt (tinggi) mulai 1500,5 pt
- *   - label : ink 32,6 pt (tinggi) mulai 1573,4 pt
+ * Sejak 2026-10-31 semua ukuran `vw` diganti responsif:
+ * - mobile: grid vertikal (1 kolom), angka h-12, label sm
+ * - tablet/desktop: grid 4 kolom, angka sesuai PDF rasio (~text-5xl/md:text-6xl)
  */
 
 const COLUMNS = [
@@ -25,26 +21,26 @@ const COLUMNS = [
 export default function AboutStats() {
   return (
     <section className="w-full">
-      {/* Jarak putih antara hero (selesai di 1385,6 pt) dan band (1464 pt). */}
-      <div className="h-[4.083vw]" aria-hidden />
-      <div className="mx-[4.075%] flex h-[8.542vw] items-start justify-center bg-[#d9d8d7] pt-[1.391vw]">
-        <dl className="grid w-full grid-cols-4 text-center text-[#231f20]">
+      {/* Jarak putih antar section (desktop ~68pt ≈ 8.5rem, mobile ~40px) */}
+      <div className="h-10 md:h-[5rem]" aria-hidden />
+
+      <div className="bg-[#d9d8d7] px-4 py-6 md:mx-[4.075%] md:flex md:h-auto md:items-center md:justify-center md:py-10">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-4 md:gap-x-0 md:gap-y-0 md:text-center md:text-[#231f20]">
           {COLUMNS.map((col) => (
             <div key={col.label} className="flex flex-col items-center">
-              {/* Angka: ink 68,6 pt di PDF → font-size ±4,27vw (font heading). */}
-              <dt className="font-heading text-[4.27vw] leading-none font-bold">
+              <dt className="font-heading text-xl font-bold leading-none md:text-5xl lg:text-6xl">
                 {col.number}
               </dt>
-              {/* Label: ink 32,6 pt di PDF → font-size ±2,26vw. */}
-              <dd className="mt-[-0.188vw] font-sans text-[2.26vw] leading-none font-medium">
+              <dd className="mt-1 font-sans text-xs font-medium leading-none md:mt-0 md:text-lg">
                 {col.label}
               </dd>
             </div>
           ))}
         </dl>
       </div>
-      {/* Jarak putih antara band (1628 pt) dan gambar profil (1871 pt). */}
-      <div className="h-[12.656vw]" aria-hidden />
+
+      {/* Jarak putih antar section (desktop ~143pt ≈ 18rem, mobile ~60px) */}
+      <div className="h-14 md:h-[10rem]" aria-hidden />
     </section>
   );
 }

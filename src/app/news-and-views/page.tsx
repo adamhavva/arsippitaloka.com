@@ -40,8 +40,8 @@ export default function NewsAndViewsPage() {
 
       {/* Pencarian global — navbar PDF tidak punya kotak search, jadi
           elemennya ditaruh di bawah hero. */}
-      <div className="mx-auto w-full max-w-6xl px-6 py-8">
-        <SearchBar size="lg" placeholder="Cari buku di Pitaloka…" />
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <SearchBar size="md" placeholder="Cari buku di Pitaloka…" />
       </div>
 
       <BeritaTerkini />

@@ -29,6 +29,7 @@ export default function AuthShell({
 }: Props) {
   return (
     <div className="flex min-h-screen w-full bg-white">
+      {/* Foto dekoratif kolom kiri — tampil hanya pada layar besar. */}
       <div
         className="relative hidden shrink-0 lg:block"
         style={{ width: `${imagePercent}%` }}
@@ -43,16 +44,20 @@ export default function AuthShell({
         />
       </div>
 
+      {/* Panel konten autentikasi — full-width di mobile, adaptif di desktop. */}
       <div
-        className="relative min-h-screen flex-1 pb-16"
+        className="relative min-h-[92vh] flex-1 px-4 pb-12 pt-8 sm:min-h-screen sm:px-6 md:pt-10 lg:pt-0"
         style={{
-          paddingTop: `min(${contentTop}px, 34vh)`,
           paddingLeft: `min(${contentLeft}px, 6vw)`,
           paddingRight: `min(${contentRight}px, 6vw)`,
         }}
       >
         {topSlot}
-        <div className="w-full max-w-[704px]">{children}</div>
+        <div className="w-full max-w-md mx-auto sm:max-w-xl lg:max-w-none lg:max-w-[704px]">
+          <div style={{ marginTop: `min(${contentTop}px, 32vh)` }}>
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

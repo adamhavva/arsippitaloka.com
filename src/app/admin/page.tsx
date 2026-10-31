@@ -109,15 +109,15 @@ async function AdminDashboardContent() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2 sm:px-0">
       <header>
-        <h1 className="font-heading text-2xl font-bold text-black">Dashboard</h1>
+        <h1 className="font-heading text-xl font-bold text-black sm:text-2xl">Dashboard</h1>
         <p className="text-sm text-neutral-500">
           Ringkasan isi situs dan transaksi. Halo, {admin.name}.
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
           <Link
             key={card.label}
@@ -128,19 +128,17 @@ async function AdminDashboardContent() {
             <p className="font-heading mt-1 text-3xl font-bold text-black">
               {card.value}
             </p>
-            {card.detail ? (
-              <p className="mt-1 text-xs text-neutral-500">{card.detail}</p>
-            ) : null}
+            <p className="text-[10px] text-neutral-500 sm:text-xs">{card.detail}</p>
           </Link>
         ))}
       </div>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-5">
-        <h2 className="font-heading text-lg font-bold text-black">Pendapatan</h2>
-        <p className="font-heading mt-2 text-3xl font-bold text-maroon">
+      <section className="rounded-xl border border-neutral-200 bg-white p-4 sm:p-5">
+        <h2 className="font-heading text-base font-bold text-black sm:text-lg">Pendapatan</h2>
+        <p className="font-heading mt-2 text-2xl font-bold text-maroon sm:text-3xl">
           {rupiah(revenue._sum.total)}
         </p>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-[10px] text-neutral-500 sm:text-xs">
           Total order berstatus PAID dan COMPLETED.
         </p>
       </section>

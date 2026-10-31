@@ -75,10 +75,10 @@ export default async function BookDetailView({
   const sumCls = "cursor-pointer py-3 text-sm font-semibold text-black";
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-6 py-10 md:px-10">
+    <div className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 md:py-10">
 
-      <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
-        <div>
+      <div className="mt-6 grid gap-6 md:grid-cols-[2fr_3fr]">
+        <div className="w-full max-w-sm mx-auto md:max-w-none">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#3d2b2e]">
             {book.coverUrl ? (
               <Image
@@ -93,26 +93,26 @@ export default async function BookDetailView({
         </div>
 
         <div>
-          <nav className="mb-2 text-xs text-neutral-500">
-        <Link href="/buku" className="hover:underline">
-          Katalog
-        </Link>
-        {" · "}
-        <Link href={`/buku/${book.tab.slug}`} className="hover:underline">
-          {book.tab.label}
-        </Link>
-        {book.category ? (
-          <>
-            {" · "}
-            <Link
-              href={`/buku/kategori/${book.category.slug}`}
-              className="hover:underline"
-            >
-              {book.category.name}
-            </Link>
-          </>
-        ) : null}
-      </nav>
+          <div className="flex items-center gap-2 overflow-x-auto text-xs text-neutral-500 sm:text-sm">
+          <Link href="/buku" className="shrink-0 hover:underline">
+            Katalog
+          </Link>
+          {" · "}
+          <Link href={`/buku/${book.tab.slug}`} className="shrink-0 truncate hover:underline">
+            {book.tab.label}
+          </Link>
+          {book.category ? (
+            <>
+              {" · "}
+              <Link
+                href={`/buku/kategori/${book.category.slug}`}
+                className="shrink-0 truncate hover:underline"
+              >
+                {book.category.name}
+              </Link>
+            </>
+          ) : null}
+        </div>
           <h1 className="font-heading text-2xl font-bold text-black md:text-3xl">
             {book.title}
           </h1>

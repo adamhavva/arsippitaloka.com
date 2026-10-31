@@ -99,9 +99,9 @@ async function AccountLibraryPageContent({
   const visible = filtered.slice((page - 1) * perPage, page * perPage);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 px-2 sm:px-0">
       <header>
-        <h1 className="font-heading text-2xl font-bold text-black">
+        <h1 className="font-heading text-xl font-bold text-black sm:text-2xl">
           Pustaka Saya
         </h1>
         <p className="text-sm text-neutral-500">
@@ -110,7 +110,7 @@ async function AccountLibraryPageContent({
         </p>
       </header>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+      <section className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 lg:grid-cols-7">
         <Stat label="Total koleksi" value={String(summary.total)} />
         <Stat label="Dibeli" value={String(summary.dibeli)} />
         <Stat label="Gratis" value={String(summary.gratis)} />
@@ -138,7 +138,7 @@ async function AccountLibraryPageContent({
             href={`/akun?filter=${item.key}${
               q ? `&q=${encodeURIComponent(q)}` : ""
             }`}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium active:scale-95 sm:px-4 sm:py-1.5 sm:text-sm ${
               filter === item.key
                 ? "bg-maroon-dark text-white"
                 : "bg-white text-neutral-700 hover:bg-neutral-200"
@@ -164,11 +164,11 @@ async function AccountLibraryPageContent({
           defaultValue={q}
           placeholder="Cari judul atau penulis buku…"
           aria-label="Cari buku di Pustaka Saya"
-          className="min-w-64 flex-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm outline-none placeholder:text-neutral-400 focus:border-maroon"
+          className="min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm outline-none placeholder:text-neutral-400 focus:border-maroon sm:min-w-64"
         />
         <button
           type="submit"
-          className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+          className="shrink-0 rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
         >
           Cari
         </button>
@@ -180,7 +180,7 @@ async function AccountLibraryPageContent({
       </form>
 
       {total === 0 ? (
-        <div className="rounded-xl border border-neutral-200 bg-white p-10 text-center">
+        <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center sm:p-10">
           <p className="font-medium text-black">
             {entries.length === 0
               ? "Belum ada buku di pustaka Anda"

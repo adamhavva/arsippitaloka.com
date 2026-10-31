@@ -59,13 +59,14 @@ export default function LoginForm() {
   }
 
   return (
-    <form className="mt-[39px]" onSubmit={handleSubmit}>
+    <form className="mt-[39px] sm:mt-10" onSubmit={handleSubmit}>
       <Field
         type="email"
         name="email"
         placeholder="Email address"
         autoComplete="email"
         required
+        inputClassName="py-3 text-sm active:bg-white focus:ring-maroon"
       />
       <div className="mt-[24px]">
         <PasswordField
@@ -73,6 +74,7 @@ export default function LoginForm() {
           placeholder="Password"
           autoComplete="current-password"
           required
+          inputClassName="py-3 text-sm active:bg-white focus:ring-maroon"
         />
       </div>
 

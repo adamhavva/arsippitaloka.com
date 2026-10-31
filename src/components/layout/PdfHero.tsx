@@ -1,6 +1,7 @@
 import Image from "next/image";
 import OverlayLinks, { type Zone } from "./OverlayLinks";
 import NavAuthChip from "./NavAuthChip";
+import CartNavButton from "@/components/cart/CartNavButton";
 
 /**
  * Aset hasil konversi `references/layouts/split` dirender pada lebar
@@ -52,6 +53,18 @@ export default function PdfHero({
         }
       : null;
 
+  // Ikon tas belanja tercetak di gambar tepat setelah "Join Us" (~1715 pt pada
+  // kanvas 1920 pt). Zona tautan + badge keranjang dipasang di atasnya, sejajar
+  // baris navbar (y/tinggi mengikuti "Sign In").
+  const cartStyle = signIn
+    ? {
+        top: `${((signIn.y - originY) / originHeight) * 100}%`,
+        left: `${(1715 / 1920) * 100}%`,
+        width: `${(46 / 1920) * 100}%`,
+        height: `${(signIn.h / originHeight) * 100}%`,
+      }
+    : null;
+
   return (
     <section className={`relative w-full ${className}`}>
       <Image
@@ -72,6 +85,7 @@ export default function PdfHero({
             originHeight={originHeight}
           />
           {authChipStyle ? <NavAuthChip style={authChipStyle} /> : null}
+          {cartStyle ? <CartNavButton style={cartStyle} /> : null}
         </div>
       ) : null}
     </section>

@@ -41,8 +41,8 @@ async function SosmedList() {
 
 export default function SosmedPage() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
-      <h1 className="mb-8 font-heading text-3xl font-bold text-black">Media Sosial</h1>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+      <h1 className="mb-6 font-heading text-2xl font-bold text-black sm:mb-8 sm:text-3xl">Media Sosial</h1>
       <Suspense fallback={<p className="py-20 text-center text-neutral-400">Memuat…</p>}>
         <SosmedList />
       </Suspense>

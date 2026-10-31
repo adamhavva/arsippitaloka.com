@@ -109,38 +109,38 @@ export default async function CariContent({
   // Tanpa kata kunci → halaman ramah, bukan error.
   if (!query) {
     return (
-      <div className="mx-auto w-full max-w-4xl px-6 py-16 md:px-10">
+      <div className="mx-auto w-full max-w-4xl px-4 py-12 md:px-6 lg:py-16">
         <div className="text-center">
-          <p className="text-sm font-medium text-maroon">Pencarian</p>
-          <h1 className="font-heading mt-1 text-3xl font-bold text-black md:text-4xl">
+          <p className="text-xs font-medium text-maroon sm:text-sm">Pencarian</p>
+          <h1 className="font-heading mt-1 text-2xl font-bold text-black sm:text-3xl md:text-4xl">
             Cari Buku
           </h1>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-neutral-500">
+          <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-500 sm:max-w-lg">
             Cari berdasarkan judul, penulis, atau isi deskripsi buku di arsip
             Pitaloka.
           </p>
 
           <SearchBar
-            size="lg"
+            size="md"
             autoFocus
             placeholder="Ketik judul atau nama penulis…"
-            className="mx-auto mt-6 max-w-2xl text-left"
+            className="mx-auto mt-4 max-w-2xl sm:mt-6 text-left"
           />
         </div>
 
         {categories.length > 0 || tabs.length > 0 ? (
-          <div className="mt-12 space-y-6">
+          <div className="mt-8 space-y-5 sm:mt-12 sm:space-y-6">
             {categories.length > 0 ? (
               <section>
-                <h2 className="text-xs uppercase tracking-wide text-neutral-400">
+                <h2 className="text-[11px] uppercase tracking-wide text-neutral-400 sm:text-xs">
                   Jelajahi kategori
                 </h2>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-2 sm:mt-3">
                   {categories.map((category) => (
                     <Link
                       key={category.slug}
                       href={`/buku/kategori/${category.slug}`}
-                      className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+                      className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
                     >
                       {category.name}
                     </Link>
@@ -151,15 +151,15 @@ export default async function CariContent({
 
             {tabs.length > 0 ? (
               <section>
-                <h2 className="text-xs uppercase tracking-wide text-neutral-400">
+                <h2 className="text-[11px] uppercase tracking-wide text-neutral-400 sm:text-xs">
                   Jelajahi tab
                 </h2>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-2 sm:mt-3">
                   {tabs.map((tab) => (
                     <Link
                       key={tab.slug}
                       href={`/buku/${tab.slug}`}
-                      className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+                      className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
                     >
                       {tab.label}
                     </Link>
@@ -174,26 +174,26 @@ export default async function CariContent({
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-10 md:px-10">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
       <header>
-        <p className="text-sm font-medium text-maroon">Pencarian</p>
-        <h1 className="font-heading mt-1 text-2xl font-bold text-black md:text-3xl">
+        <p className="text-xs font-medium text-maroon sm:text-sm">Pencarian</p>
+        <h1 className="font-heading mt-1 text-xl font-bold text-black sm:text-2xl md:text-3xl">
           Hasil pencarian untuk &quot;{query}&quot;
         </h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-xs text-neutral-500 sm:text-sm">
           {total} buku ditemukan.
         </p>
       </header>
 
-      <div className="mt-6">
-        <SearchBar defaultValue={query} size="md" />
+      <div className="mt-4 sm:mt-6">
+        <SearchBar defaultValue={query} size="sm" />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <SortBar basePath="/cari" params={linkParams} sort={filters.sort} />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         {items.length === 0 ? (
           <SearchEmptyState
             query={query}
@@ -206,7 +206,7 @@ export default async function CariContent({
       </div>
 
       {total > 0 ? (
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <Pagination
             basePath="/cari"
             page={currentPage}

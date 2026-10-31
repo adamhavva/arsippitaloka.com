@@ -38,16 +38,16 @@ export default async function FeatureCategories() {
               <Link
                 key={category.id}
                 href={`/buku/kategori/${category.slug}`}
-                className="flex flex-col items-center justify-center gap-3 rounded-xl bg-maroon-dark py-8 text-center transition hover:opacity-90"
+                className="flex flex-col items-center justify-center gap-2 rounded-xl bg-maroon-dark py-6 text-center transition hover:opacity-90 sm:py-8"
               >
-                <span className="text-lg font-black leading-none text-yellow-400">
+                <span className="text-[11px] font-black leading-tight text-yellow-400 sm:text-lg">
                   #VIRAL
                   <br />
                   FOR
                   <br />
                   JUSTICE
                 </span>
-                <span className="text-sm font-medium text-white">
+                <span className="text-xs font-medium text-white sm:text-sm">
                   {category.name}
                 </span>
               </Link>

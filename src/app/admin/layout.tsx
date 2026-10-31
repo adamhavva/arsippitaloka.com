@@ -20,7 +20,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden bg-neutral-100">
+    <div className="relative flex h-screen overflow-hidden bg-neutral-100">
+      {/* Overlay untuk menutup sidebar saat terbuka di mobile. */}
+      <AdminOverlay />
       <Suspense fallback={<div className="h-full w-64 shrink-0 border-r border-neutral-200 bg-white" />}>
         <AdminShell>{children}</AdminShell>
       </Suspense>
@@ -46,10 +48,46 @@ async function AdminShell({ children }: { children: React.ReactNode }) {
         image={admin.image}
         logoUrl={logoUrl}
       />
-      {/* Hanya konten yang ikut scroll; sidebar tetap diam di kiri. */}
-      <main className="min-w-0 flex-1 overflow-y-auto px-6 py-8 md:px-10">
+      {/* Konten utama — responsif: full width di mobile (sidebar overlay), lebar tetap di desktop. */}
+      <main className="min-w-0 flex-1 overflow-y-auto px-4 py-6 md:px-10">
         {children}
       </main>
     </>
+  );
+}
+
+/**
+ * Tombol hamburger — tampil hanya di layar kecil (< sm). Saat ditekan, sidebar berubah dari hidden (-translate-x-full) menjadi visible.
+ * Di desktop (≥sm) sidebar selalu tampil (static, tidak ada translate).
+ */
+function AdminOverlay() {
+  return (
+    <div className="lg:hidden">
+      {/* Backdrop gelap full-screen saat sidebar terbuka. */}
+      <label
+        htmlFor="admin-sidebar-drawer"
+        className="fixed inset-0 z-30 hidden bg-black/50 data-[state=open]:block"
+        style={{ display: "none" }}
+      >
+        {/* Saat diklik → tutup sidebar. Kita gunakan radio button tersimpan. */}
+        <input id="admin-sidebar-drawer" type="radio" name="drawer" className="sr-only" />
+      </label>
+      {/* Tombol hamburger (tampilan saja, logika toggle ada di AdminNav client component). */}
+      <button
+        type="button"
+        className="fixed right-3 top-3 z-40 rounded bg-white p-2 shadow lg:hidden"
+        aria-label="Toggle navigasi admin"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="h-6 w-6 text-maroon-dark"
+        >
+          <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
   );
 }

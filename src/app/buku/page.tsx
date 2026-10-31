@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import CatalogView from "@/components/books/CatalogView";
-import BooksLanding from "@/components/books/BooksLanding";
-import Footer from "@/components/home/Footer";
 
 export const metadata = {
   title: "Katalog Buku — Arsip Pitaloka",
@@ -24,11 +22,14 @@ export default function CatalogPage({
 }) {
   return (
     <>
-      <BooksLanding />
+      <section className="mx-auto w-full max-w-6xl px-6 pt-12 md:px-10">
+        <h1 className="font-sans text-4xl font-extrabold tracking-tight text-[#110f0d] md:text-5xl">
+          E-Books Collections
+        </h1>
+      </section>
       <Suspense fallback={<p className="text-sm text-neutral-500">Memuat…</p>}>
         <CatalogContent searchParams={searchParams} />
       </Suspense>
-      <Footer />
     </>
   );
 }

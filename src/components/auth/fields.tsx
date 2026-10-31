@@ -28,8 +28,10 @@ export function SubText({ children }: { children: ReactNode }) {
   return <p className="text-[15px] text-[#606261]">{children}</p>;
 }
 
-export function Field(props: ComponentProps<"input"> & { inputClassName?: string }) {
-  const { inputClassName } = props;
+export function Field({
+  inputClassName,
+  ...props
+}: ComponentProps<"input"> & { inputClassName?: string }) {
   return (
     <input
       {...props}
@@ -38,8 +40,10 @@ export function Field(props: ComponentProps<"input"> & { inputClassName?: string
   );
 }
 
-export function PasswordField(props: ComponentProps<"input"> & { inputClassName?: string }) {
-  const { inputClassName } = props;
+export function PasswordField({
+  inputClassName,
+  ...props
+}: ComponentProps<"input"> & { inputClassName?: string }) {
   return (
     <div className="relative">
       <input

@@ -8,6 +8,7 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env.DATABASE_URL,
+    // Migrate butuh koneksi session/direct (port 5432), bukan pooler transaction (6543).
+    url: process.env.DIRECT_URL,
   },
 });

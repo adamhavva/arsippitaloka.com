@@ -116,7 +116,7 @@ async function CartPageContent() {
                     ) : null}
                     <div className="mt-auto flex items-center justify-between pt-2">
                       <span className="text-sm font-semibold text-black">
-                        {book.isFree ? "Gratis" : `$${book.priceUsd}`}
+                        {book.isFree ? "Gratis" : formatIdr(Number(book.priceUsd))}
                       </span>
                       <RemoveFromCartButton bookId={book.id} />
                     </div>

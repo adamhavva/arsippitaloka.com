@@ -3,9 +3,11 @@ import { getSettings } from "@/lib/site-settings";
 /**
  * Perhitungan harga order.
  *
- * Buku disimpan dengan harga USD; penagihan ke Midtrans memakai IDR.
- * Kurs dan aturan pajak diambil dari pengaturan admin dan di-snapshot
- * ke order supaya harga historis tidak berubah setelah pengaturan diubah.
+ * Harga buku disimpan langsung dalam Rupiah (IDR) — Midtrans tidak mendukung
+ * USD, jadi tidak ada konversi lagi. Field `rate` tetap ada di breakdown
+ * (selalu 1) agar snapshot `Order.usdToIdrRate` & tipe data tetap kompatibel.
+ * Aturan pajak diambil dari pengaturan admin dan di-snapshot ke order supaya
+ * harga historis tidak berubah setelah pengaturan diubah.
  */
 export type PriceBreakdown = {
   rate: number;
@@ -47,11 +49,12 @@ function computeTax(
   };
 }
 
-export async function calculatePrice(priceUsd: number): Promise<PriceBreakdown> {
+export async function calculatePrice(priceIdr: number): Promise<PriceBreakdown> {
   const settings = await getSettings();
 
-  const rate = Number(settings["payment.usdToIdr"]) || 16000;
-  const subtotal = Math.round(priceUsd * rate);
+  // Harga sudah dalam Rupiah → tidak ada konversi (rate = 1).
+  const rate = 1;
+  const subtotal = Math.round(priceIdr);
   const { taxType, taxAmount } = computeTax(subtotal, settings);
 
   return {
@@ -66,16 +69,17 @@ export async function calculatePrice(priceUsd: number): Promise<PriceBreakdown> 
 /**
  * Perhitungan harga untuk banyak buku (checkout keranjang).
  *
- * Subtotal = jumlah subtotal IDR tiap buku (dibulatkan per buku agar cocok
+ * Subtotal = jumlah harga IDR tiap buku (dibulatkan per buku agar cocok
  * dengan `item_details` Midtrans), pajak dihitung sekali atas total subtotal.
  */
 export async function calculateCartPrice(
-  priceUsds: number[],
+  priceIdrs: number[],
 ): Promise<CartPriceBreakdown> {
   const settings = await getSettings();
 
-  const rate = Number(settings["payment.usdToIdr"]) || 16000;
-  const lines = priceUsds.map((usd) => Math.round(usd * rate));
+  // Harga sudah dalam Rupiah → tidak ada konversi (rate = 1).
+  const rate = 1;
+  const lines = priceIdrs.map((idr) => Math.round(idr));
   const subtotal = lines.reduce((sum, line) => sum + line, 0);
   const { taxType, taxAmount } = computeTax(subtotal, settings);
 

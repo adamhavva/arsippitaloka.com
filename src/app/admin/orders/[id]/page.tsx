@@ -146,8 +146,8 @@ async function AdminOrderDetailPageContent({
             <tr>
               <th className="px-4 py-3 font-medium">Buku</th>
               <th className="px-4 py-3 font-medium">Qty</th>
-              <th className="px-4 py-3 font-medium">Harga (USD)</th>
-              <th className="px-4 py-3 font-medium">Subtotal (USD)</th>
+              <th className="px-4 py-3 font-medium">Harga (Rp)</th>
+              <th className="px-4 py-3 font-medium">Subtotal (Rp)</th>
             </tr>
           </thead>
           <tbody>
@@ -159,10 +159,10 @@ async function AdminOrderDetailPageContent({
                 <td className="px-4 py-3 text-neutral-800">{item.title}</td>
                 <td className="px-4 py-3 text-neutral-600">{item.qty}</td>
                 <td className="px-4 py-3 text-neutral-600">
-                  ${String(item.priceUsd)}
+                  {rupiah(item.priceUsd)}
                 </td>
                 <td className="px-4 py-3 text-neutral-800">
-                  ${(Number(item.priceUsd) * item.qty).toFixed(2)}
+                  {rupiah(Number(item.priceUsd) * item.qty)}
                 </td>
               </tr>
             ))}
@@ -182,12 +182,8 @@ async function AdminOrderDetailPageContent({
         <h2 className="font-heading text-lg font-bold text-black">Ringkasan</h2>
         <dl className="mt-3 space-y-1 text-sm">
           <div className="flex justify-between">
-            <dt className="text-neutral-600">Subtotal item (USD)</dt>
-            <dd className="text-neutral-800">${subtotal.toFixed(2)}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-neutral-600">Kurs USD → IDR</dt>
-            <dd className="text-neutral-800">{String(order.usdToIdrRate)}</dd>
+            <dt className="text-neutral-600">Subtotal item</dt>
+            <dd className="text-neutral-800">{rupiah(subtotal)}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-neutral-600">Pajak ({order.taxType ?? "—"})</dt>

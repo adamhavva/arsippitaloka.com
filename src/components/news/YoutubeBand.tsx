@@ -1,22 +1,72 @@
-import { cacheTag } from "next/cache";
+import { Suspense } from "react";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import SocialEmbedPlayer from "@/components/social/SocialEmbedPlayer";
+import { BandPagination } from "@/components/news/BeritaTerkini";
+import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
+
+/** Nama query khusus band ini — terpisah dari band Berita Terkini. */
+const PAGE_PARAM = "ytPage";
+const PER_PARAM = "ytPer";
+
+type NewsSearchParams = {
+  beritaPage?: string;
+  beritaPer?: string;
+  ytPage?: string;
+  ytPer?: string;
+};
 
 /**
  * Band video YouTube di halaman News & Views.
  *
  * Menampilkan postingan media sosial berplatform `youtube` yang tayang.
- * `"use cache"` + `cacheTag("content")` supaya ikut ter-invalidate saat admin
- * menyimpan konten. Kalau belum ada video YouTube, band ini tidak dirender.
+ * Komponen luar (sinkron) membungkus `<Suspense>`; isi dinamis (baca
+ * `searchParams` untuk pagination) dipindah ke komponen async + `connection()`.
+ * Karena membaca query string, band ini TIDAK bisa `"use cache"`.
  */
-export default async function YoutubeBand() {
-  "use cache";
-  cacheTag("content");
+export default function YoutubeBand({
+  searchParams,
+}: {
+  searchParams: Promise<NewsSearchParams>;
+}) {
+  return (
+    <Suspense fallback={<YoutubeBandFallback />}>
+      <YoutubeBandContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+function YoutubeBandFallback() {
+  return (
+    <section className="mx-auto w-full max-w-6xl px-6 py-12 md:px-10">
+      <p className="text-sm text-neutral-500">Memuat video…</p>
+    </section>
+  );
+}
+
+async function YoutubeBandContent({
+  searchParams,
+}: {
+  searchParams: Promise<NewsSearchParams>;
+}) {
+  await connection();
+
+  const sp = await searchParams;
+  const perPage = parsePerPage(sp.ytPer);
+
+  const where = { published: true, platform: "youtube" } as const;
+  const total = await prisma.socialMedia.count({ where });
+
+  // Kalau belum ada video YouTube, band ini tidak dirender (seperti semula).
+  if (total === 0) return null;
+
+  const page = clampPage(parsePage(sp.ytPage), total, perPage);
 
   const posts = await prisma.socialMedia.findMany({
-    where: { published: true, platform: "youtube" },
+    where,
     orderBy: { createdAt: "desc" },
-    take: 6,
+    skip: (page - 1) * perPage,
+    take: perPage,
     select: {
       id: true,
       title: true,
@@ -28,8 +78,6 @@ export default async function YoutubeBand() {
       author: true,
     },
   });
-
-  if (posts.length === 0) return null;
 
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-12 md:px-10">
@@ -62,6 +110,20 @@ export default async function YoutubeBand() {
             ) : null}
           </div>
         ))}
+      </div>
+
+      <div className="mt-8">
+        <BandPagination
+          basePath="/news-and-views"
+          pageParam={PAGE_PARAM}
+          perParam={PER_PARAM}
+          page={page}
+          perPage={perPage}
+          total={total}
+          label="video"
+          // Bawa query band Berita Terkini supaya tidak hilang saat pindah halaman.
+          carry={{ beritaPage: sp.beritaPage, beritaPer: sp.beritaPer }}
+        />
       </div>
     </section>
   );

@@ -218,7 +218,7 @@ export const ENTITIES: Record<string, EntityDef> = {
         defaultValue: 0,
         help: "Terisi otomatis.",
       },
-      { name: "priceUsd", label: "Harga (USD)", type: "number", step: "0.01", list: true },
+      { name: "priceUsd", label: "Harga (Rp)", type: "number", step: "1", list: true },
       { name: "isFree", label: "Gratis", type: "boolean", list: true },
       { name: "isNew", label: "Baru", type: "boolean", list: true },
       { name: "archived", label: "Arsip", type: "boolean", list: true },

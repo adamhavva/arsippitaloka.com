@@ -1,21 +1,25 @@
+import { Suspense } from "react";
+import { connection } from "next/server";
 import Link from "next/link";
-import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import BookCard from "@/components/books/BookCard";
 import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
+import {
+  PER_PAGE_OPTIONS,
+  clampPage,
+  countPages,
+  pageRange,
+  pageWindow,
+  parsePage,
+  parsePerPage,
+} from "@/lib/pagination";
 
 /**
  * Slug tab konten yang dipakai sebagai sumber berita/artikel.
  * Sama dengan tab "Berita Terkini" di katalog (`/buku/berita-terkini`).
  */
 const TAB_SLUG = "berita-terkini";
-
-/**
- * Jumlah kartu yang ditampilkan. Grid 4 kolom (sesuai desain PDF:
- * 4 kolom × 2 baris kartu berita).
- */
-const LIMIT = 8;
 
 const BOOK_SELECT = {
   id: true,
@@ -33,16 +37,59 @@ const BOOK_SELECT = {
   tab: { select: { slug: true } },
 } as const;
 
+/** Nama query khusus band ini — terpisah dari band YouTube agar independen. */
+const PAGE_PARAM = "beritaPage";
+const PER_PARAM = "beritaPer";
+
+type NewsSearchParams = {
+  beritaPage?: string;
+  beritaPer?: string;
+  ytPage?: string;
+  ytPer?: string;
+};
+
 /**
  * Band "Berita Terkini" pada halaman News & Views.
  *
- * Sumber data nyata: tabel `Book` (dengan relasi `tab` = `ContentTab`).
- * Kalau tab "berita-terkini" belum punya buku, halaman tetap harus tampil
- * berisi — dipakai buku terbaru dari tab lain.
+ * Komponen luar (sinkron) membungkus `<Suspense>`; isi dinamis yang membaca
+ * `searchParams` dipindah ke komponen async di dalamnya. Karena band ini
+ * membaca query string (pagination), ia TIDAK bisa `"use cache"` — pola yang
+ * benar di bawah `cacheComponents` adalah `<Suspense>` + `await connection()`.
  */
-export default async function BeritaTerkini() {
-  "use cache";
-  cacheTag("content");
+export default function BeritaTerkini({
+  searchParams,
+}: {
+  searchParams: Promise<NewsSearchParams>;
+}) {
+  return (
+    <Suspense fallback={<BeritaTerkiniFallback />}>
+      <BeritaTerkiniContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+function BeritaTerkiniFallback() {
+  return (
+    <section className="relative mx-auto w-full max-w-[1440px] px-6 py-16 md:px-10">
+      <p className="text-sm text-neutral-500">Memuat berita…</p>
+    </section>
+  );
+}
+
+/**
+ * Isi band: query dengan skip/take + count. Sumber data nyata tabel `Book`
+ * (relasi `tab` = `ContentTab`). Kalau tab "berita-terkini" belum punya buku,
+ * dipakai buku terbaru dari tab lain (fallback) dengan paginasi konsisten.
+ */
+async function BeritaTerkiniContent({
+  searchParams,
+}: {
+  searchParams: Promise<NewsSearchParams>;
+}) {
+  await connection();
+
+  const sp = await searchParams;
+  const perPage = parsePerPage(sp.beritaPer);
 
   const [settings, tab] = await Promise.all([
     getSettings(),
@@ -52,28 +99,36 @@ export default async function BeritaTerkini() {
     }),
   ]);
 
-  const tabBooks = tab
-    ? await prisma.book.findMany({
-        where: { tabId: tab.id, archived: false },
-        orderBy: [{ order: "asc" }, { createdAt: "desc" }],
-        take: LIMIT,
-        select: BOOK_SELECT,
-      })
-    : [];
+  // Jumlah buku pada tab berita-terkini (kalau tab-nya ada).
+  const tabTotal = tab
+    ? await prisma.book.count({ where: { tabId: tab.id, archived: false } })
+    : 0;
 
-  // Fallback: belum ada buku di tab berita-terkini → pakai buku terbaru.
-  const fallback = tabBooks.length
-    ? []
-    : await prisma.book.findMany({
-        where: { archived: false },
-        orderBy: { createdAt: "desc" },
-        take: LIMIT,
-        select: BOOK_SELECT,
-      });
+  // Fallback: tab tidak ada ATAU tab kosong → pakai semua buku terbaru.
+  const usingFallback = tabTotal === 0;
+  const where = usingFallback
+    ? { archived: false }
+    : { tabId: tab!.id, archived: false };
+  const total = usingFallback
+    ? await prisma.book.count({ where: { archived: false } })
+    : tabTotal;
 
-  const books = tabBooks.length ? tabBooks : fallback;
+  const page = clampPage(parsePage(sp.beritaPage), total, perPage);
+
+  const books =
+    total === 0
+      ? []
+      : await prisma.book.findMany({
+          where,
+          orderBy: usingFallback
+            ? { createdAt: "desc" }
+            : [{ order: "asc" }, { createdAt: "desc" }],
+          skip: (page - 1) * perPage,
+          take: perPage,
+          select: BOOK_SELECT,
+        });
+
   const heading = tab?.label ?? "Berita Terkini";
-  const usingFallback = tabBooks.length === 0 && fallback.length > 0;
 
   return (
     <section className="relative mx-auto w-full max-w-[1440px] px-6 py-16 md:px-10">
@@ -98,7 +153,7 @@ export default async function BeritaTerkini() {
       </header>
 
       <p className="mt-4 text-sm text-neutral-500">
-        {books.length} berita/artikel ditemukan
+        {total} berita/artikel ditemukan
         {tab ? ` pada tab ${tab.label}` : ""}
         {usingFallback ? " · menampilkan buku terbaru" : ""}
         .
@@ -112,19 +167,35 @@ export default async function BeritaTerkini() {
           </p>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {books.map((book) => (
-            <BookCard
-              key={book.id}
-              book={{
-                ...book,
-                rating: String(book.rating),
-                priceUsd: String(book.priceUsd),
-                tabSlug: book.tab.slug,
-              }}
+        <>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {books.map((book) => (
+              <BookCard
+                key={book.id}
+                book={{
+                  ...book,
+                  rating: String(book.rating),
+                  priceUsd: String(book.priceUsd),
+                  tabSlug: book.tab.slug,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="mt-8">
+            <BandPagination
+              basePath="/news-and-views"
+              pageParam={PAGE_PARAM}
+              perParam={PER_PARAM}
+              page={page}
+              perPage={perPage}
+              total={total}
+              label="berita/artikel"
+              // Bawa query band YouTube supaya tidak hilang saat pindah halaman.
+              carry={{ ytPage: sp.ytPage, ytPer: sp.ytPer }}
             />
-          ))}
-        </div>
+          </div>
+        </>
       )}
 
       {/* Label vertikal "#ViralForJustice" — ada di desain PDF di sisi kanan
@@ -137,5 +208,122 @@ export default async function BeritaTerkini() {
         #ViralForJustice
       </span>
     </section>
+  );
+}
+
+/**
+ * Kontrol paginasi server-side untuk band News & Views.
+ *
+ * Komponen `Pagination` standar memakai nama query `page`/`per` yang di-hardcode,
+ * jadi tidak bisa dipakai dua kali di satu halaman (query-nya akan bentrok).
+ * Band ini memakai nama query sendiri (`pageParam`/`perParam`) dan meneruskan
+ * query band lain lewat `carry` agar paginasi tiap band berdiri sendiri.
+ * Semua tautan dirender di server (Link), tidak perlu client component.
+ */
+export function BandPagination({
+  basePath,
+  pageParam,
+  perParam,
+  page,
+  perPage,
+  total,
+  label,
+  carry = {},
+}: {
+  basePath: string;
+  pageParam: string;
+  perParam: string;
+  page: number;
+  perPage: number;
+  total: number;
+  label: string;
+  carry?: Record<string, string | undefined>;
+}) {
+  const pages = countPages(total, perPage);
+  const { from, to } = pageRange(page, perPage, total);
+
+  const href = (overrides: Record<string, string | undefined>): string => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries({ ...carry, ...overrides })) {
+      if (value === undefined || value === "") continue;
+      search.set(key, value);
+    }
+    const qs = search.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  };
+
+  const linkClass = (active: boolean) =>
+    `inline-flex h-8 min-w-[36px] items-center justify-center rounded-full border px-2 text-xs transition ${
+      active
+        ? "border-maroon-dark bg-maroon-dark text-white"
+        : "border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 active:scale-95"
+    }`;
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-xs sm:text-sm text-neutral-500">
+        Menampilkan <span className="font-medium text-neutral-800">{from}</span>–
+        <span className="font-medium text-neutral-800">{to}</span> dari{" "}
+        <span className="font-medium text-neutral-800">{total}</span> {label}.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
+          Baris:
+          {PER_PAGE_OPTIONS.map((option) => (
+            <Link
+              key={option}
+              href={href({ [perParam]: String(option), [pageParam]: "1" })}
+              className={linkClass(option === perPage)}
+              aria-current={option === perPage ? "true" : undefined}
+            >
+              {option}
+            </Link>
+          ))}
+        </div>
+
+        <nav
+          className="flex items-center gap-1 overflow-x-auto self-start pb-1 sm:self-center sm:block sm:overflow-visible"
+          aria-label="Paginasi"
+        >
+          <Link
+            href={href({ [pageParam]: String(Math.max(1, page - 1)) })}
+            aria-disabled={page <= 1}
+            className={`${linkClass(false)} whitespace-nowrap ${
+              page <= 1 ? "pointer-events-none opacity-40" : ""
+            }`}
+          >
+            Sebelumnya
+          </Link>
+
+          {pageWindow(page, pages).map((item, index) =>
+            item === "gap" ? (
+              <span key={`gap-${index}`} className="px-1 text-neutral-400">
+                …
+              </span>
+            ) : (
+              <Link
+                key={item}
+                href={href({ [pageParam]: String(item) })}
+                className={linkClass(item === page)}
+                aria-current={item === page ? "page" : undefined}
+              >
+                {item}
+              </Link>
+            ),
+          )}
+
+          <Link
+            href={href({ [pageParam]: String(Math.min(pages, page + 1)) })}
+            aria-disabled={page >= pages}
+            className={`${linkClass(false)} whitespace-nowrap ${
+              page >= pages ? "pointer-events-none opacity-40" : ""
+            }`}
+          >
+            Berikutnya
+          </Link>
+        </nav>
+      </div>
+    </div>
   );
 }

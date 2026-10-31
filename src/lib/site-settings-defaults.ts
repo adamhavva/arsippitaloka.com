@@ -83,8 +83,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   "payment.midtrans.serverKey": "",
   "payment.midtrans.clientKey": "",
 
-  // Pembayaran & pajak
-  "payment.usdToIdr": "16000",
+  // Pajak
   "tax.enabled": "false",
   "tax.type": "percentage",
   "tax.percentage": "11",

@@ -60,14 +60,15 @@ export function cleanParams(
 }
 
 /**
- * Format harga USD. `priceUsd` di DB berupa Decimal, jadi dirender lewat
- * `Intl.NumberFormat` supaya hasilnya konsisten ("$25.00").
+ * Format harga Rupiah. `priceUsd` di DB berupa Decimal berisi nilai IDR, jadi
+ * dirender lewat `Intl.NumberFormat` supaya konsisten ("Rp150.000").
  */
-export function formatUsd(value: number | string): string {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "$0.00";
-  return new Intl.NumberFormat("en-US", {
+export function formatIdr(value: unknown): string {
+  const n = Number(value ?? 0);
+  if (!Number.isFinite(n)) return "Rp0";
+  return new Intl.NumberFormat("id-ID", {
     style: "currency",
-    currency: "USD",
+    currency: "IDR",
+    maximumFractionDigits: 0,
   }).format(n);
 }

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
-import { formatUsd } from "./market-utils";
+import { formatIdr } from "./market-utils";
 import AddToCartButton from "@/components/cart/AddToCartButton";
 
 export type MarketplaceBook = {
@@ -94,7 +94,7 @@ export default function ProductCard({ book }: { book: MarketplaceBook }) {
 
         <div className="mt-auto pt-2">
           <p className="text-base font-bold text-maroon">
-            {formatUsd(book.priceUsd)}
+            {formatIdr(book.priceUsd)}
           </p>
           <p className="text-[11px] text-neutral-400">
             {book.language} · {book.pages} halaman

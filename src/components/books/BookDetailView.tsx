@@ -9,6 +9,7 @@ import BuyButton from "@/components/books/BuyButton";
 import { getBookRelations } from "@/lib/relations";
 import RelatedSocialMedia from "@/components/relations/RelatedSocialMedia";
 import ShareButtons from "@/components/books/ShareButtons";
+import { formatIdr } from "@/components/books/marketplace/market-utils";
 import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
 import type { Prisma } from "../../../prisma/generated/prisma/client";
 
@@ -129,7 +130,7 @@ export default async function BookDetailView({
               </span>
             ) : (
               <span className="font-semibold text-black">
-                ${String(book.priceUsd)}{" "}
+                {formatIdr(book.priceUsd)}{" "}
                 <span className="font-normal text-neutral-500">/lifetime</span>
               </span>
             )}

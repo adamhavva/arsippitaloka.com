@@ -173,10 +173,6 @@ async function AccountOrdersPageContent({
                     <dd>{rupiah(order.taxAmount)}</dd>
                   </div>
                   <div>
-                    <dt className="text-neutral-400">Kurs USD → IDR</dt>
-                    <dd>{String(order.usdToIdrRate)}</dd>
-                  </div>
-                  <div>
                     <dt className="text-neutral-400">Metode bayar</dt>
                     <dd>
                       {order.paymentMethod ?? "-"}
@@ -237,7 +233,7 @@ async function AccountOrdersPageContent({
                           ) : null}
                         </span>
                         <span className="text-neutral-500">
-                          ${(Number(item.priceUsd) * item.qty).toFixed(2)}
+                          {rupiah(Number(item.priceUsd) * item.qty)}
                         </span>
                       </li>
                     );

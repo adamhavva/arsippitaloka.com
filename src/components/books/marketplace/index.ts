@@ -11,5 +11,5 @@ export {
   parseMarketPer,
   buildMarketHref,
   cleanParams,
-  formatUsd,
+  formatIdr,
 } from "./market-utils";

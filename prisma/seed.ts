@@ -28,12 +28,12 @@ const tabs = [
 ];
 
 const books = [
-  { id: "seed-book-0", slug: "bung-karno-aku-arek-suroboyo", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: "/images/book-cover-bungkarno.jpg", pages: 289, readCount: 100, rating: "4.5", priceUsd: "25", isNew: true, order: 0 },
-  { id: "seed-book-1", slug: "bung-karno-aku-arek-suroboyo-2", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "25", isNew: true, order: 1 },
-  { id: "seed-book-2", slug: "bung-karno-aku-arek-suroboyo-3", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "25", isNew: true, order: 2 },
-  { id: "seed-book-3", slug: "bung-karno-aku-arek-suroboyo-4", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: "/images/book-cover-bungkarno.jpg", pages: 289, readCount: 100, rating: "4.5", priceUsd: "25", isNew: true, order: 3 },
-  { id: "seed-book-4", slug: "bung-karno-aku-arek-suroboyo-5", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "25", isNew: true, order: 4 },
-  { id: "seed-book-5", slug: "bung-karno-aku-arek-suroboyo-6", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "25", isNew: true, order: 5 },
+  { id: "seed-book-0", slug: "bung-karno-aku-arek-suroboyo", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: "/images/book-cover-bungkarno.jpg", pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 0 },
+  { id: "seed-book-1", slug: "bung-karno-aku-arek-suroboyo-2", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 1 },
+  { id: "seed-book-2", slug: "bung-karno-aku-arek-suroboyo-3", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 2 },
+  { id: "seed-book-3", slug: "bung-karno-aku-arek-suroboyo-4", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: "/images/book-cover-bungkarno.jpg", pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 3 },
+  { id: "seed-book-4", slug: "bung-karno-aku-arek-suroboyo-5", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 4 },
+  { id: "seed-book-5", slug: "bung-karno-aku-arek-suroboyo-6", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 5 },
 ];
 
 const settings: Record<string, string> = {

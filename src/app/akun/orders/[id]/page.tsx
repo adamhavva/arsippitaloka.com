@@ -141,10 +141,6 @@ async function AccountOrderDetailContent({
             <dd className="font-semibold">{rupiah(order.total)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-neutral-400">Kurs USD → IDR</dt>
-            <dd>{String(order.usdToIdrRate)}</dd>
-          </div>
-          <div>
             <dt className="text-xs text-neutral-400">Metode bayar</dt>
             <dd>
               {order.paymentMethod ?? "-"}
@@ -220,7 +216,7 @@ async function AccountOrderDetailContent({
                   )}
                 </span>
                 <span className="text-neutral-500">
-                  ${(Number(item.priceUsd) * item.qty).toFixed(2)}
+                  {rupiah(Number(item.priceUsd) * item.qty)}
                 </span>
               </li>
             );

@@ -26,7 +26,16 @@ export const metadata: Metadata = {
  * Badik halaman memakai data nyata: buku/artikel dari tab konten
  * "berita-terkini", dokumentasi, dan video TikTok (#ViralForJustice).
  */
-export default function NewsAndViewsPage() {
+export default function NewsAndViewsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    beritaPage?: string;
+    beritaPer?: string;
+    ytPage?: string;
+    ytPer?: string;
+  }>;
+}) {
   return (
     <>
       <PdfHero
@@ -44,9 +53,9 @@ export default function NewsAndViewsPage() {
         <SearchBar size="md" placeholder="Cari buku di Pitaloka…" />
       </div>
 
-      <BeritaTerkini />
+      <BeritaTerkini searchParams={searchParams} />
 
-      <YoutubeBand />
+      <YoutubeBand searchParams={searchParams} />
 
       <DocumentationSection />
 

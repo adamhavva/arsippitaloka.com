@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      // Thumbnail YouTube (disimpan dari field YouTube di admin).
+      { protocol: "https", hostname: "i.ytimg.com" },
+      { protocol: "https", hostname: "img.youtube.com" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

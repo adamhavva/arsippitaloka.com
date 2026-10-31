@@ -50,6 +50,14 @@ function formatDate(date: Date | null): string {
   });
 }
 
+function rupiah(value: unknown): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value ?? 0));
+}
+
 export default function AccountLibraryPage({
   searchParams,
 }: {
@@ -127,7 +135,7 @@ async function AccountLibraryPageContent({
         <Stat label="Total halaman" value={summary.halaman.toLocaleString("id-ID")} />
         <Stat
           label="Total dibayar"
-          value={`$${summary.totalBayar.toFixed(2)}`}
+          value={rupiah(summary.totalBayar)}
         />
       </section>
 
@@ -383,7 +391,7 @@ function LibraryCard({ entry }: { entry: LibraryEntry }) {
               <p>
                 Diperoleh {formatDate(entry.acquiredAt)}
                 {entry.paidUsd > 0
-                  ? ` · total $${entry.paidUsd.toFixed(2)}`
+                  ? ` · total ${rupiah(entry.paidUsd)}`
                   : ""}
               </p>
               {entry.purchases.map((purchase) => (
@@ -404,7 +412,7 @@ function LibraryCard({ entry }: { entry: LibraryEntry }) {
                   </span>
                   <span>{formatDate(purchase.paidAt ?? purchase.createdAt)}</span>
                   <span>×{purchase.qty}</span>
-                  <span>${(purchase.priceUsd * purchase.qty).toFixed(2)}</span>
+                  <span>{rupiah(purchase.priceUsd * purchase.qty)}</span>
                 </p>
               ))}
             </>

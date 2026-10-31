@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import AddToCartButton from "@/components/cart/AddToCartButton";
+import { formatIdr } from "@/components/books/marketplace/market-utils";
 
 export type BookCardData = {
   id: string;
@@ -84,7 +85,7 @@ export default function BookCard({ book }: { book: BookCardData }) {
         </div>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-sm font-semibold text-black">
-            ${String(book.priceUsd)}
+            {formatIdr(book.priceUsd)}
           </span>
           <Link
             href={href}

@@ -4,6 +4,8 @@ import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
+import { TableKit } from "@tiptap/extension-table";
+import TextAlign from "@tiptap/extension-text-align";
 import { useRef, useState } from "react";
 import {
   Bold,
@@ -15,6 +17,15 @@ import {
   LinkIcon,
   ImageIcon,
   MonitorPlay as YoutubeIcon,
+  Quote,
+  Minus,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Table as TableIcon,
+  Columns3,
+  Rows3,
+  Trash2,
 } from "lucide-react";
 import { fileToDataUrl, FileTooLargeError } from "@/lib/file-to-data-url";
 
@@ -46,9 +57,7 @@ export default function RichTextField({
       StarterKit.configure({
         heading: { levels: [2, 3] },
         strike: false,
-        blockquote: false,
         codeBlock: false,
-        horizontalRule: false,
         code: false,
         link: {
           openOnClick: false,
@@ -56,6 +65,8 @@ export default function RichTextField({
           HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
         },
       }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TableKit.configure({ table: { resizable: true } }),
       Image.configure({
         inline: false,
         HTMLAttributes: { class: "rounded-lg" },
@@ -127,7 +138,7 @@ export default function RichTextField({
         />
         <EditorContent
           editor={editor}
-          className="prose-sm max-w-none px-3 py-2 text-sm [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_a]:text-maroon [&_a]:underline [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-lg [&_iframe]:my-2 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:rounded-lg"
+          className="prose-sm max-w-none px-3 py-2 text-sm [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:outline-none [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_a]:text-maroon [&_a]:underline [&_img]:my-2 [&_img]:max-w-full [&_img]:rounded-lg [&_iframe]:my-2 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:rounded-lg [&_blockquote]:border-l-4 [&_blockquote]:border-neutral-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-neutral-600 [&_hr]:my-4 [&_hr]:border-neutral-300 [&_table]:my-3 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-neutral-300 [&_th]:bg-neutral-100 [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-neutral-300 [&_td]:p-2 [&_.selectedCell]:bg-maroon/10"
         />
       </div>
       {help ? <p className="mt-1 text-xs text-neutral-500">{help}</p> : null}
@@ -188,6 +199,8 @@ function Toolbar({
     editor.commands.setYoutubeVideo({ src: url });
   }
 
+  const inTable = editor.isActive("table");
+
   return (
     <div className="flex flex-wrap items-center gap-1 border-b border-neutral-200 bg-neutral-50 px-2 py-1">
       <ToolbarButton
@@ -245,6 +258,104 @@ function Toolbar({
       <ToolbarButton label="Video YouTube" onClick={addYoutube}>
         <YoutubeIcon size={15} />
       </ToolbarButton>
+
+      <span className="mx-1 h-5 w-px bg-neutral-300" aria-hidden />
+
+      <ToolbarButton
+        label="Kutipan"
+        active={editor.isActive("blockquote")}
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+      >
+        <Quote size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Garis pemisah"
+        onClick={() => editor.chain().focus().setHorizontalRule().run()}
+      >
+        <Minus size={15} />
+      </ToolbarButton>
+
+      <span className="mx-1 h-5 w-px bg-neutral-300" aria-hidden />
+
+      <ToolbarButton
+        label="Rata kiri"
+        active={editor.isActive({ textAlign: "left" })}
+        onClick={() => editor.chain().focus().setTextAlign("left").run()}
+      >
+        <AlignLeft size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Rata tengah"
+        active={editor.isActive({ textAlign: "center" })}
+        onClick={() => editor.chain().focus().setTextAlign("center").run()}
+      >
+        <AlignCenter size={15} />
+      </ToolbarButton>
+      <ToolbarButton
+        label="Rata kanan"
+        active={editor.isActive({ textAlign: "right" })}
+        onClick={() => editor.chain().focus().setTextAlign("right").run()}
+      >
+        <AlignRight size={15} />
+      </ToolbarButton>
+
+      <span className="mx-1 h-5 w-px bg-neutral-300" aria-hidden />
+
+      <ToolbarButton
+        label="Sisip tabel"
+        onClick={() =>
+          editor
+            .chain()
+            .focus()
+            .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+            .run()
+        }
+      >
+        <TableIcon size={15} />
+      </ToolbarButton>
+
+      {inTable ? (
+        <>
+          <ToolbarButton
+            label="Tambah kolom"
+            onClick={() => editor.chain().focus().addColumnAfter().run()}
+          >
+            <span className="flex items-center text-[11px]">
+              <Columns3 size={15} />+
+            </span>
+          </ToolbarButton>
+          <ToolbarButton
+            label="Hapus kolom"
+            onClick={() => editor.chain().focus().deleteColumn().run()}
+          >
+            <span className="flex items-center text-[11px]">
+              <Columns3 size={15} />−
+            </span>
+          </ToolbarButton>
+          <ToolbarButton
+            label="Tambah baris"
+            onClick={() => editor.chain().focus().addRowAfter().run()}
+          >
+            <span className="flex items-center text-[11px]">
+              <Rows3 size={15} />+
+            </span>
+          </ToolbarButton>
+          <ToolbarButton
+            label="Hapus baris"
+            onClick={() => editor.chain().focus().deleteRow().run()}
+          >
+            <span className="flex items-center text-[11px]">
+              <Rows3 size={15} />−
+            </span>
+          </ToolbarButton>
+          <ToolbarButton
+            label="Hapus tabel"
+            onClick={() => editor.chain().focus().deleteTable().run()}
+          >
+            <Trash2 size={15} />
+          </ToolbarButton>
+        </>
+      ) : null}
     </div>
   );
 }

@@ -48,6 +48,17 @@ export function sanitizeRichText(html: string | null | undefined): string {
       "img",
       "iframe",
       "div",
+      "blockquote",
+      "hr",
+      "table",
+      "thead",
+      "tbody",
+      "tfoot",
+      "tr",
+      "th",
+      "td",
+      "colgroup",
+      "col",
     ],
     ALLOWED_ATTR: [
       "href",
@@ -59,6 +70,9 @@ export function sanitizeRichText(html: string | null | undefined): string {
       "width",
       "height",
       "class",
+      "style",
+      "colspan",
+      "rowspan",
       "allow",
       "allowfullscreen",
       "frameborder",
@@ -71,4 +85,4 @@ export function sanitizeRichText(html: string | null | undefined): string {
 
 /** Class Tailwind arbitrary-variant untuk styling elemen rich-text yang dirender. */
 export const RICH_TEXT_CLASS =
-  "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_strong]:font-semibold [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_p+p]:mt-3 [&_img]:my-3 [&_img]:max-w-full [&_img]:rounded-lg [&_iframe]:my-3 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:rounded-lg [&_div[data-youtube-video]]:my-3";
+  "[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_strong]:font-semibold [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_p+p]:mt-3 [&_img]:my-3 [&_img]:max-w-full [&_img]:rounded-lg [&_iframe]:my-3 [&_iframe]:aspect-video [&_iframe]:w-full [&_iframe]:rounded-lg [&_div[data-youtube-video]]:my-3 [&_blockquote]:my-3 [&_blockquote]:border-l-4 [&_blockquote]:border-maroon/30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-neutral-600 [&_hr]:my-5 [&_hr]:border-neutral-300 [&_table]:my-4 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_th]:border [&_th]:border-neutral-300 [&_th]:bg-neutral-100 [&_th]:p-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-neutral-300 [&_td]:p-2 [&_td]:align-top";

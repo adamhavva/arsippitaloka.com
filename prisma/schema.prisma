@@ -175,6 +175,11 @@ model SocialMedia {
   published Boolean  @default(true)
   order     Int      @default(0)
 
+  /// Angka tampilan kosmetik di homepage (opsional, boleh kosong).
+  likeCount     Int?
+  commentCount  Int?
+  bookmarkCount Int?
+
   bookId        String?
   book          Book?         @relation(fields: [bookId], references: [id], onDelete: Cascade)
   documentationId String?

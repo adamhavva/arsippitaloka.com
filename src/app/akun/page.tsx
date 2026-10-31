@@ -6,6 +6,7 @@ import { requireUser, getLibrary, summarizeLibrary } from "@/lib/library";
 import type { LibraryEntry } from "@/lib/library";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
+import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
 
 export const metadata = {
   title: "Pustaka Saya — Arsip Pitaloka",
@@ -299,9 +300,12 @@ function LibraryCard({ entry }: { entry: LibraryEntry }) {
         ) : null}
 
         {book.description ? (
-          <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-neutral-600">
-            {book.description}
-          </p>
+          <div
+            className={`mt-2 line-clamp-3 text-xs leading-relaxed text-neutral-600 ${RICH_TEXT_CLASS}`}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeRichText(book.description),
+            }}
+          />
         ) : null}
 
         <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-neutral-600">

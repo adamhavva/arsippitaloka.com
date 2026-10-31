@@ -50,6 +50,12 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   "home.documentation.eyebrow": "Dokumentasi & Arsip Digital",
   "home.documentation.signature": "Rieke Diah Pitaloka,",
 
+  // Katalog media sosial (/buku/kategori/social-media)
+  "social.catalog.eyebrow": "Media Sosial",
+  "social.catalog.title": "Sorotan Media Sosial",
+  "social.catalog.subtitle":
+    "Cuplikan konten TikTok, YouTube, dan Instagram terbaru dari Arsip Pitaloka — tiap video bisa terhubung ke e-book, dokumentasi, dan tab konten terkait.",
+
   // Footer
   "footer.browse.title": "Browse",
   "footer.browse.links":

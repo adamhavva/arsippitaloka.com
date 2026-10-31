@@ -20,6 +20,8 @@ export type FieldType =
   | "icon"
   /** Tempel share link / kode embed TikTok, ada pratinjau. */
   | "tiktok"
+  /** Editor teks kaya (bold/italic/heading/list/link) berbasis Tiptap. */
+  | "richtext"
   /** Pilih satu kategori (dengan ikon) dari daftar kategori. */
   | "category";
 
@@ -56,7 +58,7 @@ export type EntityDef = {
   label: string;
   singular: string;
   /** Nama delegate Prisma — harus ada di ENTITY_MODELS. */
-  model: "category" | "contentTab" | "book" | "documentation" | "tiktokPost";
+  model: "category" | "contentTab" | "book" | "documentation" | "tiktokPost" | "socialMedia";
   titleField: string;
   orderBy?: { field: string; dir: "asc" | "desc" };
   fields: FieldDef[];
@@ -147,7 +149,7 @@ export const ENTITIES: Record<string, EntityDef> = {
         slugFrom: "title",
         help: "Dibuat otomatis dari judul. Kalau slug sama, ditambahkan angka unik.",
       },
-      { name: "description", label: "Deskripsi", type: "textarea" },
+      { name: "description", label: "Deskripsi", type: "richtext" },
       {
         name: "tabId",
         label: "Tab Konten",
@@ -245,7 +247,7 @@ export const ENTITIES: Record<string, EntityDef> = {
     titleField: "title",
     fields: [
       { name: "title", label: "Judul", type: "text", required: true, list: true },
-      { name: "lead", label: "Lead", type: "textarea" },
+      { name: "lead", label: "Lead", type: "richtext" },
       { name: "photoUrl", label: "Foto", type: "image" },
       { name: "eventDate", label: "Tanggal", type: "date", required: true, list: true },
       {
@@ -293,6 +295,79 @@ export const ENTITIES: Record<string, EntityDef> = {
       { name: "published", label: "Tayang", type: "boolean", list: true },
     ],
   },
+
+  social: {
+    key: "social",
+    label: "Media Sosial",
+    singular: "postingan media sosial",
+    model: "socialMedia",
+    titleField: "title",
+    orderBy: { field: "order", dir: "asc" },
+    fields: [
+      {
+        name: "embedUrl",
+        label: "Link / Embed",
+        type: "tiktok",
+        required: true,
+        help: "Tempel share link TikTok/YouTube/Instagram atau kode embed.",
+      },
+      { name: "title", label: "Judul", type: "text", required: true, list: true },
+      { name: "caption", label: "Caption", type: "textarea" },
+      { name: "author", label: "Autor", type: "text", list: true },
+      {
+        name: "platform",
+        label: "Platform",
+        type: "select",
+        required: true,
+        list: true,
+        options: [
+          { value: "tiktok", label: "TikTok" },
+          { value: "youtube", label: "YouTube" },
+          { value: "instagram", label: "Instagram" },
+        ],
+      },
+      { name: "videoId", label: "Video ID", type: "text", required: true },
+      { name: "coverUrl", label: "Cover", type: "image" },
+      {
+        name: "bookId",
+        label: "Buku Terkait",
+        type: "select",
+        source: { entity: "book", labelField: "title" },
+      },
+      {
+        name: "documentationId",
+        label: "Dokumentasi Terkait",
+        type: "select",
+        source: { entity: "documentation", labelField: "title" },
+      },
+      {
+        name: "contentTabId",
+        label: "Tab Konten Terkait",
+        type: "select",
+        source: { entity: "tab", labelField: "label" },
+      },
+      { name: "published", label: "Tayang", type: "boolean", list: true },
+      { name: "order", label: "Urutan", type: "number", list: true, defaultValue: 0 },
+      {
+        name: "likeCount",
+        label: "Jumlah Suka",
+        type: "number",
+        help: "Angka kosmetik yang ditampilkan di homepage (boleh kosong).",
+      },
+      {
+        name: "commentCount",
+        label: "Jumlah Komentar",
+        type: "number",
+        help: "Angka kosmetik yang ditampilkan di homepage (boleh kosong).",
+      },
+      {
+        name: "bookmarkCount",
+        label: "Jumlah Simpan",
+        type: "number",
+        help: "Angka kosmetik yang ditampilkan di homepage (boleh kosong).",
+      },
+    ],
+  },
 };
 
 /** Allowlist model → delegate Prisma. */
@@ -302,6 +377,7 @@ export const ENTITY_MODELS = {
   book: "book",
   documentation: "documentation",
   tiktokPost: "tiktokPost",
+  socialMedia: "socialMedia",
 } as const;
 
 export const ENTITY_KEYS = Object.keys(ENTITIES);
@@ -318,6 +394,7 @@ export const ADMIN_MENU: { href: string; label: string; icon: string }[] = [
   { href: "/admin/tab", label: "Tab Konten", icon: "PanelsTopLeft" },
   { href: "/admin/documentation", label: "Dokumentasi", icon: "FileText" },
   { href: "/admin/tiktok", label: "TikTok", icon: "Music2" },
+  { href: "/admin/social", label: "Media Sosial", icon: "Video" },
   { href: "/admin/orders", label: "Order", icon: "ShoppingCart" },
   { href: "/admin/users", label: "User", icon: "Users" },
   { href: "/admin/profile", label: "Profil Perusahaan", icon: "Settings" },

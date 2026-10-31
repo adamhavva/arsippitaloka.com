@@ -7,7 +7,7 @@ export { DEFAULT_SETTINGS };
 export type SettingField = {
   key: string;
   label: string;
-  type: "text" | "textarea" | "boolean" | "lines" | "secret" | "select";
+  type: "text" | "textarea" | "boolean" | "lines" | "secret" | "select" | "richtext";
   group: string;
   help?: string;
   options?: string[];
@@ -21,7 +21,7 @@ export type SettingField = {
 export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "company.name", label: "Nama perusahaan", type: "text", group: "Profil" },
   { key: "company.tagline", label: "Tagline", type: "text", group: "Profil" },
-  { key: "company.description", label: "Deskripsi singkat", type: "textarea", group: "Profil" },
+  { key: "company.description", label: "Deskripsi singkat", type: "richtext", group: "Profil" },
   { key: "company.address", label: "Alamat", type: "text", group: "Profil" },
   { key: "company.phone", label: "Telepon", type: "text", group: "Profil" },
   { key: "company.email", label: "Email", type: "text", group: "Profil" },
@@ -39,10 +39,14 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "home.viral.eyebrow", label: "Judul kecil #ViralForJustice", type: "text", group: "Halaman Utama" },
   { key: "home.viral.title", label: "Judul #ViralForJustice", type: "text", group: "Halaman Utama" },
   { key: "home.viral.subtitle", label: "Nama di #ViralForJustice", type: "text", group: "Halaman Utama" },
-  { key: "home.viral.body", label: "Paragraf #ViralForJustice", type: "textarea", group: "Halaman Utama" },
+  { key: "home.viral.body", label: "Paragraf #ViralForJustice", type: "richtext", group: "Halaman Utama" },
   { key: "home.viral.image", label: "Gambar #ViralForJustice", type: "text", group: "Halaman Utama" },
   { key: "home.documentation.eyebrow", label: "Judul kecil dokumentasi", type: "text", group: "Halaman Utama" },
   { key: "home.documentation.signature", label: "Nama penanda dokumentasi", type: "text", group: "Halaman Utama" },
+
+  { key: "social.catalog.eyebrow", label: "Judul kecil media sosial", type: "text", group: "Media Sosial" },
+  { key: "social.catalog.title", label: "Judul media sosial", type: "text", group: "Media Sosial" },
+  { key: "social.catalog.subtitle", label: "Subjudul media sosial", type: "textarea", group: "Media Sosial" },
 
   { key: "footer.browse.title", label: "Judul kolom Browse", type: "text", group: "Footer" },
   { key: "footer.browse.links", label: "Tautan Browse (satu per baris)", type: "lines", group: "Footer" },
@@ -55,8 +59,8 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "footer.legal.terms", label: "Tautan Terms of Service", type: "text", group: "Footer" },
   { key: "footer.legal.cookies", label: "Tautan Cookies Settings", type: "text", group: "Footer" },
 
-  { key: "company.vision", label: "Visi", type: "textarea", group: "Copy Landing Page" },
-  { key: "company.mission", label: "Misi", type: "textarea", group: "Copy Landing Page" },
+  { key: "company.vision", label: "Visi", type: "richtext", group: "Copy Landing Page" },
+  { key: "company.mission", label: "Misi", type: "richtext", group: "Copy Landing Page" },
   { key: "company.social.tiktok", label: "Tautan TikTok", type: "text", group: "Copy Landing Page" },
   { key: "company.social.youtube", label: "Tautan YouTube", type: "text", group: "Copy Landing Page" },
   { key: "company.social.instagram", label: "Tautan Instagram", type: "text", group: "Copy Landing Page" },
@@ -102,6 +106,7 @@ export const SETTINGS_SCHEMA: SettingField[] = [
 export const SETTING_GROUPS = [
   "Profil",
   "Halaman Utama",
+  "Media Sosial",
   "Footer",
   "Copy Landing Page",
   "Pembayaran",

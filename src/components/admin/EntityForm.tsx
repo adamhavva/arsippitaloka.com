@@ -9,6 +9,7 @@ import ImageField from "./ImageField";
 import IconPicker from "./IconPicker";
 import TikTokField from "./TikTokField";
 import CategoryPicker, { type CategoryOption } from "./CategoryPicker";
+import RichTextField from "./RichTextField";
 
 type Props = {
   def: EntityDef;
@@ -232,6 +233,20 @@ export default function EntityForm({
                   name={field.name}
                   label={field.label}
                   options={categoryOptions2}
+                  value={(raw as string) ?? null}
+                  help={field.help}
+                />
+                {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
+              </div>
+            );
+          }
+
+          if (field.type === "richtext") {
+            return (
+              <div key={field.name} className="md:col-span-2">
+                <RichTextField
+                  name={field.name}
+                  label={field.label}
                   value={(raw as string) ?? null}
                   help={field.help}
                 />

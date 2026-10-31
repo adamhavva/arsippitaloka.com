@@ -59,16 +59,6 @@ function aspectClass(platform: SocialPlatform): string {
   return platform === "youtube" ? "aspect-video" : "aspect-[9/16]";
 }
 
-const PLATFORM_LABEL: Record<string, string> = {
-  tiktok: "TikTok",
-  youtube: "YouTube",
-  instagram: "Instagram",
-};
-
-export function platformLabel(platform: string): string {
-  return PLATFORM_LABEL[platform] ?? platform;
-}
-
 /**
  * Pemutar media sosial (TikTok / YouTube / Instagram).
  *

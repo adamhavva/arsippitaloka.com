@@ -3,6 +3,7 @@ import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import { tiktokEmbedUrl, tiktokVideoUrl } from "@/lib/tiktok";
+import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
 
 /**
  * Slot kartu miring pada section #ViralForJustice (sesuai desain PDF).
@@ -56,9 +57,12 @@ export default async function ViralForJustice() {
             <br />
             {settings["home.viral.subtitle"]}
           </h2>
-          <p className="mt-5 text-sm leading-relaxed text-neutral-600">
-            {settings["home.viral.body"]}
-          </p>
+          <div
+            className={`mt-5 text-sm leading-relaxed text-neutral-600 ${RICH_TEXT_CLASS}`}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeRichText(settings["home.viral.body"]),
+            }}
+          />
           <div className="mt-6 flex items-center gap-4 text-sm font-medium text-black">
             {socials.map((social) =>
               social.href ? (

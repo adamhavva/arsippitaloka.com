@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExternalLink, FileText, Library, PanelsTopLeft } from "lucide-react";
-import SocialEmbedPlayer, { platformLabel } from "./SocialEmbedPlayer";
+import { platformLabel } from "@/lib/social";
+import SocialEmbedPlayer from "./SocialEmbedPlayer";
 import type {
   SocialBookLink,
   SocialDocLink,

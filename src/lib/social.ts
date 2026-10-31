@@ -24,6 +24,13 @@ export const SOCIAL_PLATFORMS: { value: SocialPlatform; label: string }[] = [
   { value: "instagram", label: "Instagram" },
 ];
 
+/** Label platform untuk ditampilkan (server-safe, bisa dipakai Server Component). */
+export function platformLabel(platform: string): string {
+  return (
+    SOCIAL_PLATFORMS.find((p) => p.value === platform)?.label ?? platform
+  );
+}
+
 /** Atribut `allow` untuk iframe — mengikuti iframe TikTok pada referensi. */
 export const SOCIAL_IFRAME_ALLOW =
   "accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share";

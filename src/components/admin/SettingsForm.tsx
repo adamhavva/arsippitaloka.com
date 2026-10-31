@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { saveSettings } from "@/app/admin/profile/actions";
 import type { SettingField } from "@/lib/site-settings";
 import { SECRET_MASK } from "@/lib/site-settings-defaults";
+import RichTextField from "./RichTextField";
 
 export default function SettingsForm({
   fields,
@@ -58,7 +59,14 @@ export default function SettingsForm({
                     <label className="mb-1 block text-sm font-medium text-neutral-700">
                       {field.label}
                     </label>
-                    {field.type === "textarea" || field.type === "lines" ? (
+                    {field.type === "richtext" ? (
+                      <RichTextField
+                        name={field.key}
+                        label={field.label}
+                        value={value}
+                        hideLabel
+                      />
+                    ) : field.type === "textarea" || field.type === "lines" ? (
                       <textarea
                         name={field.key}
                         defaultValue={value}

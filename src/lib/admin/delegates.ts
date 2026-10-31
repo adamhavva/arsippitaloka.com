@@ -21,6 +21,7 @@ export const DELEGATES: Record<string, LooseDelegate> = {
   book: prisma.book as unknown as LooseDelegate,
   documentation: prisma.documentation as unknown as LooseDelegate,
   tiktokPost: prisma.tiktokPost as unknown as LooseDelegate,
+  socialMedia: prisma.socialMedia as unknown as LooseDelegate,
 };
 
 export function getDelegate(model: string): LooseDelegate | undefined {

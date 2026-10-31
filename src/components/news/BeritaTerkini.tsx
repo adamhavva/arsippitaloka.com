@@ -3,6 +3,7 @@ import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/site-settings";
 import BookCard from "@/components/books/BookCard";
+import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
 
 /**
  * Slug tab konten yang dipakai sebagai sumber berita/artikel.
@@ -81,9 +82,12 @@ export default async function BeritaTerkini() {
           <h2 className="font-heading text-3xl font-bold text-black md:text-4xl">
             {heading}
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-600">
-            {settings["company.description"]}
-          </p>
+          <div
+            className={`mt-3 max-w-2xl text-sm leading-relaxed text-neutral-600 ${RICH_TEXT_CLASS}`}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeRichText(settings["company.description"]),
+            }}
+          />
         </div>
         <Link
           href={`/buku/${tab?.slug ?? TAB_SLUG}`}

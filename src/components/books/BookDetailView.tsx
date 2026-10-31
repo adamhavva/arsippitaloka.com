@@ -6,6 +6,10 @@ import { canAccessBook } from "@/lib/library";
 import { getSettings } from "@/lib/site-settings";
 import { getMidtransConfig, isMidtransConfigured } from "@/lib/midtrans";
 import BuyButton from "@/components/books/BuyButton";
+import { getBookRelations } from "@/lib/relations";
+import RelatedSocialMedia from "@/components/relations/RelatedSocialMedia";
+import ShareButtons from "@/components/books/ShareButtons";
+import { sanitizeRichText, RICH_TEXT_CLASS } from "@/lib/sanitize-html";
 import type { Prisma } from "../../../prisma/generated/prisma/client";
 
 export type BookWithRelations = Prisma.BookGetPayload<{
@@ -34,15 +38,18 @@ export default async function BookDetailView({
   const midtrans = await getMidtransConfig();
   const midtransAktif = midtrans.enabled && isMidtransConfigured(midtrans);
   const midtransMode = midtrans.mode;
+  const { socialMedia } = await getBookRelations(book.id);
 
   const bookPath = `/buku/${book.tab.slug}/${book.slug}`;
 
-  const meta: { label: string; value: string }[] = [
+  const fitur: { label: string; value: string }[] = [
     { label: "Bahasa", value: book.language },
     { label: "Halaman", value: String(book.pages) },
     { label: "Jumlah kata", value: book.wordCount ? String(book.wordCount) : "-" },
     { label: "Format file", value: book.fileFormat ?? "-" },
     { label: "Ukuran file", value: formatBytes(book.fileSize) },
+  ];
+  const info: { label: string; value: string }[] = [
     { label: "Penerbit", value: book.publisher ?? "-" },
     { label: "Tahun terbit", value: book.publishedYear ? String(book.publishedYear) : "-" },
     { label: "Edisi", value: book.edition ?? "-" },
@@ -55,9 +62,38 @@ export default async function BookDetailView({
     { label: "Kategori", value: book.category?.name ?? "-" },
   ];
 
+  const renderList = (items: { label: string; value: string }[]) => (
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 text-sm">
+      {items.map((item) => (
+        <div key={item.label}>
+          <dt className="text-xs text-neutral-400">{item.label}</dt>
+          <dd className="mt-0.5 text-neutral-800">{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+  const sumCls = "cursor-pointer py-3 text-sm font-semibold text-black";
+
   return (
     <div className="mx-auto min-h-screen max-w-6xl px-6 py-10 md:px-10">
-      <nav className="text-xs text-neutral-500">
+
+      <div className="mt-6 grid gap-8 md:grid-cols-[2fr_3fr]">
+        <div>
+          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#3d2b2e]">
+            {book.coverUrl ? (
+              <Image
+                src={book.coverUrl}
+                alt={book.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 40vw"
+                className="object-cover"
+              />
+            ) : null}
+          </div>
+        </div>
+
+        <div>
+          <nav className="mb-2 text-xs text-neutral-500">
         <Link href="/buku" className="hover:underline">
           Katalog
         </Link>
@@ -77,24 +113,7 @@ export default async function BookDetailView({
           </>
         ) : null}
       </nav>
-
-      <div className="mt-6 grid gap-10 md:grid-cols-[320px_1fr]">
-        <div>
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#3d2b2e]">
-            {book.coverUrl ? (
-              <Image
-                src={book.coverUrl}
-                alt={book.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 320px"
-                className="object-cover"
-              />
-            ) : null}
-          </div>
-        </div>
-
-        <div>
-          <h1 className="font-heading text-3xl font-bold text-black">
+          <h1 className="font-heading text-2xl font-bold text-black md:text-3xl">
             {book.title}
           </h1>
           <p className="mt-1 text-sm text-neutral-500">by {book.author}</p>
@@ -122,9 +141,12 @@ export default async function BookDetailView({
           </div>
 
           {book.description ? (
-            <p className="mt-5 text-sm leading-relaxed text-neutral-700">
-              {book.description}
-            </p>
+            <div
+              className={`mt-5 text-sm leading-relaxed text-neutral-700 ${RICH_TEXT_CLASS}`}
+              dangerouslySetInnerHTML={{
+                __html: sanitizeRichText(book.description),
+              }}
+            />
           ) : null}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -155,7 +177,7 @@ export default async function BookDetailView({
               </>
             ) : userId ? (
               midtransAktif ? (
-                <div className="space-y-2">
+                <div className="w-full space-y-2">
                   <BuyButton
                     bookId={book.id}
                     loginUrl={`/login?callbackUrl=${bookPath}`}
@@ -176,10 +198,10 @@ export default async function BookDetailView({
                 </div>
               )
             ) : (
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex w-full flex-wrap items-center gap-3">
                 <Link
                   href={`/login?callbackUrl=${bookPath}`}
-                  className="rounded-full bg-maroon-dark px-5 py-2 text-sm font-medium text-white"
+                  className="block w-full rounded-full bg-maroon-dark px-5 py-2 text-center text-sm font-medium text-white"
                 >
                   Beli Sekarang
                 </Link>
@@ -191,16 +213,35 @@ export default async function BookDetailView({
             )}
           </div>
 
-          <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-neutral-200 pt-6 text-sm sm:grid-cols-3">
-            {meta.map((item) => (
-              <div key={item.label}>
-                <dt className="text-xs text-neutral-400">{item.label}</dt>
-                <dd className="mt-0.5 text-neutral-800">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="mt-4">
+            <ShareButtons url={bookPath} title={book.title} />
+          </div>
+
+          <div className="mt-6 border-t border-neutral-200">
+            <details className="border-b border-neutral-200" open>
+              <summary className={sumCls}>Fitur</summary>
+              {renderList(fitur)}
+            </details>
+            <details className="border-b border-neutral-200">
+              <summary className={sumCls}>Informasi Buku</summary>
+              {renderList(info)}
+            </details>
+            <details className="border-b border-neutral-200">
+              <summary className={sumCls}>Cara Baca</summary>
+              <p className="pb-4 text-sm text-neutral-700">
+                Setelah membeli, buku bisa dibaca langsung di browser atau diunduh dalam format PDF.
+              </p>
+            </details>
+            <details className="border-b border-neutral-200">
+              <summary className={sumCls}>Pengembalian</summary>
+              <p className="pb-4 text-sm text-neutral-700">
+                Produk digital tidak dapat dikembalikan setelah dibeli.
+              </p>
+            </details>
+          </div>
         </div>
       </div>
+      <RelatedSocialMedia posts={socialMedia} />
     </div>
   );
 }

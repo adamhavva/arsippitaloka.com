@@ -3,8 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { calculateCartPrice } from "@/lib/pricing";
 import { canAccessBook } from "@/lib/library";
 import { getCart, clearCartBooks, removeFromCart } from "@/lib/cart";
+import { siteUrl } from "@/lib/site-url";
 import {
   createSnapTransaction,
+  splitName,
   getMidtransConfig,
   isMidtransConfigured,
 } from "@/lib/midtrans";
@@ -90,7 +92,7 @@ export async function POST() {
     });
   }
 
-  const config = await getMidtransConfig();
+  const config = getMidtransConfig();
   if (!config.enabled) {
     return Response.json(
       {
@@ -133,9 +135,7 @@ export async function POST() {
     },
   });
 
-  const base =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000";
+  const base = siteUrl();
 
   // Midtrans mewajibkan Σ item_details == gross_amount. Satu baris per buku
   // (harga IDR per buku dari price.lines), pajak sebagai item terpisah.
@@ -159,10 +159,12 @@ export async function POST() {
     grossAmount: price.total,
     items,
     customer: {
-      firstName: session?.user?.name ?? "Pembeli",
+      ...splitName(session?.user?.name),
       email: session?.user?.email ?? undefined,
     },
-    finishUrl: `${base}/akun/orders/${order.id}`,
+    finishUrl: `${base}/api/payment/callback/finish`,
+    cancelUrl: `${base}/api/payment/callback/cancel`,
+    errorUrl: `${base}/api/payment/callback/error`,
   });
 
   if (!snap.ok) {

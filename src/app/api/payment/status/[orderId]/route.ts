@@ -39,7 +39,7 @@ export async function GET(
     return Response.json({ status: order.status, transactionStatus: null });
   }
 
-  const config = await getMidtransConfig();
+  const config = getMidtransConfig();
   const remote = await fetchTransactionStatus(config, order.id);
 
   if (!remote) {
@@ -54,6 +54,7 @@ export async function GET(
     order.id,
     remote.transaction_status,
     remote.gross_amount,
+    remote.fraud_status,
   );
 
   return Response.json({

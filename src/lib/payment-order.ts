@@ -12,6 +12,7 @@ export async function applyTransactionStatus(
   orderId: string,
   transactionStatus: string | undefined,
   grossAmount?: string,
+  fraudStatus?: string,
 ): Promise<
   | { ok: true; orderStatus: string; paid: boolean }
   | { ok: false; error: string }
@@ -40,12 +41,18 @@ export async function applyTransactionStatus(
 
   const mapped = mapTransactionStatus(transactionStatus);
 
+  // Best practice Midtrans: transaksi sukses hanya dianggap sah kalau
+  // `fraud_status` = accept. Status lain (challenge/reject) berarti masih
+  // perlu verifikasi → jangan tandai lunas.
+  const fraud = (fraudStatus ?? "").trim().toLowerCase();
+  const fraudOk = fraud === "" || fraud === "accept";
+
   // Sudah lunas → tidak diubah lagi (mis. refund/void menyusul).
   if (order.status === "PAID" || order.status === "COMPLETED") {
     return { ok: true, orderStatus: order.status, paid: true };
   }
 
-  if (mapped.paid) {
+  if (mapped.paid && fraudOk) {
     await prisma.order.update({
       where: { id: order.id },
       data: {

@@ -17,12 +17,17 @@
     "test:pagination": "npx tsx scripts/test-pagination.mts",
     "db:fixture-buyer": "npx tsx scripts/buyer-library-fixture.ts",
     "db:check:midtrans": "npx tsx scripts/check-midtrans-settings.ts",
+    "probe:midtrans": "npx tsx scripts/probe-midtrans.ts",
+    "probe:midtrans:auth": "npx tsx scripts/probe-midtrans-auth.ts",
     "db:check:smtp": "npx tsx scripts/check-smtp-settings.ts",
     "smtp:probe": "node scripts/smtp-probe.mjs",
     "db:backfill:newsletter": "npx tsx scripts/backfill-newsletter.ts",
     "test:newsletter": "npx tsx scripts/newsletter-smoke.ts",
     "test:otp": "npx tsx scripts/otp-flow-test.ts",
-    "test:midtrans": "npx tsx scripts/midtrans-smoke.ts"
+    "test:midtrans": "npx tsx scripts/midtrans-smoke.ts",
+    "test:midtrans:mock": "npx tsx scripts/midtrans-mock-flow.ts",
+    "test:midtrans:browser": "bash scripts/pw-payment-sim.sh",
+    "test:midtrans:server": "npx tsx scripts/midtrans-mock-server.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

@@ -1,15 +1,20 @@
 import { createHash } from "node:crypto";
-import { getSettings } from "@/lib/site-settings";
-import { SECRET_MASK } from "@/lib/site-settings-defaults";
-
-export { SECRET_MASK };
+import { siteUrl } from "@/lib/site-url";
 
 /**
  * Integrasi Midtrans Snap (REST, tanpa SDK).
  *
- * Konfigurasi dibaca dari pengaturan admin (group "Midtrans") dengan fallback
- * ke environment variable. Nilai di DB (yang diubah admin) menang; kalau
- * dikosongkan, environment variable yang dipakai.
+ * Konfigurasi dibaca **hanya dari environment variable (.env)** — itu satu
+ *-satunya sumber kebenaran. Tidak ada lagi pengaturan Midtrans di database
+ * maupun form /admin/profile, jadi admin tidak bisa mengunci/mematikan
+ * pembayaran dengan nilai basi yang tersimpan di DB.
+ *
+ * | Env                 | Arti                                  |
+ * | ------------------- | ------------------------------------- |
+ * | `MIDTRANS_ENABLED`  | `true` / `1` → pembayaran online aktif |
+ * | `MIDTRANS_MODE`     | `sandbox` (default) atau `production`  |
+ * | `MIDTRANS_SERVER_KEY` | Rahasia, hanya di server              |
+ * | `MIDTRANS_CLIENT_KEY` | Diboleh tampil di browser            |
  *
  * Server key TIDAK PERNAH dikirim ke browser — hanya dipakai di server.
  */
@@ -34,33 +39,27 @@ const ENDPOINTS: Record<MidtransMode, { snap: string; api: string }> = {
   },
 };
 
-/** Nilai dummy untuk field bertipe secret yang sudah tersimpan di DB. */
+/**
+ * Baca konfigurasi Midtrans dari environment variable.
+ *
+ * Sengaja sinkron dan tanpa query DB — konfigurasi pembayaran hanya boleh
+ * diubah lewat file .env (source of truth) supaya tidak ada dua sumber
+ * kebenaran yang saling bertabrakan.
+ */
+export function getMidtransConfig(): MidtransConfig {
+  const mode: MidtransMode =
+    process.env.MIDTRANS_MODE?.trim().toLowerCase() === "production"
+      ? "production"
+      : "sandbox";
 
-export function getMidtransConfig(): Promise<MidtransConfig> {
-  return getSettings().then((settings) => {
-    const mode: MidtransMode =
-      settings["payment.midtrans.mode"] === "production" ? "production" : "sandbox";
+  const enabledRaw = process.env.MIDTRANS_ENABLED?.trim().toLowerCase();
 
-    const serverKey =
-      settings["payment.midtrans.serverKey"]?.trim() ||
-      process.env.MIDTRANS_SERVER_KEY?.trim() ||
-      "";
-
-    const clientKey =
-      settings["payment.midtrans.clientKey"]?.trim() ||
-      process.env.MIDTRANS_CLIENT_KEY?.trim() ||
-      "";
-
-    const enabledRaw =
-      settings["payment.midtrans.enabled"] || process.env.MIDTRANS_ENABLED || "false";
-
-    return {
-      enabled: enabledRaw === "true" || enabledRaw === "1",
-      mode,
-      serverKey,
-      clientKey,
-    };
-  });
+  return {
+    enabled: enabledRaw === "true" || enabledRaw === "1",
+    mode,
+    serverKey: process.env.MIDTRANS_SERVER_KEY?.trim() ?? "",
+    clientKey: process.env.MIDTRANS_CLIENT_KEY?.trim() ?? "",
+  };
 }
 
 export function isMidtransConfigured(config: MidtransConfig): boolean {
@@ -68,15 +67,27 @@ export function isMidtransConfigured(config: MidtransConfig): boolean {
 }
 
 function baseUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-    process.env.AUTH_URL?.replace(/\/$/, "") ||
-    "http://localhost:3000"
-  );
+  return siteUrl();
 }
 
 function authHeader(serverKey: string): string {
   return `Basic ${Buffer.from(`${serverKey}:`).toString("base64")}`;
+}
+
+/**
+ * Pecah nama pengguna jadi `first_name` + `last_name` untuk
+ * `customer_details` Midtrans (sampel resmi memakai keduanya).
+ */
+export function splitName(fullName?: string | null): {
+  firstName: string;
+  lastName?: string;
+} {
+  const parts = (fullName ?? "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "Pembeli" };
+  return {
+    firstName: parts[0],
+    lastName: parts.length > 1 ? parts.slice(1).join(" ") : undefined,
+  };
 }
 
 export type SnapItem = {
@@ -92,10 +103,15 @@ export type SnapTransactionInput = {
   items: SnapItem[];
   customer?: {
     firstName?: string;
+    lastName?: string;
     email?: string;
     phone?: string;
   };
+  /** URL setelah pembayaran berhasil (Midtrans menambah query status). */
   finishUrl?: string;
+  /** URL kalau pembayaran dibatalkan / gagal. */
+  cancelUrl?: string;
+  errorUrl?: string;
 };
 
 export type SnapTransactionResult =
@@ -122,18 +138,39 @@ export async function createSnapTransaction(
       quantity: item.quantity,
       name: item.name.slice(0, 50),
     })),
+    // 3DS untuk kartu (sampel resmi Midtrans).
+    credit_card: {
+      secure: true,
+    },
     customer_details: {
       first_name: input.customer?.firstName?.slice(0, 40) || "Pembeli",
+      last_name: input.customer?.lastName?.slice(0, 40) || undefined,
       email: input.customer?.email || undefined,
       phone: input.customer?.phone || undefined,
     },
     callbacks: {
       finish: input.finishUrl || `${baseUrl()}/akun/orders`,
+      cancel: input.cancelUrl || input.finishUrl || `${baseUrl()}/keranjang`,
+      error: input.errorUrl || input.finishUrl || `${baseUrl()}/keranjang`,
     },
   };
 
   try {
-    const res = await fetch(ENDPOINTS[config.mode].snap, {
+    // MIDTRANS_DEBUG=1 → simpan request (tanpa server key) ke file supaya
+    // bisa dibandingkan langsung dengan sampel resmi Midtrans.
+    if (process.env.MIDTRANS_DEBUG === "1") {
+      try {
+        const { writeFileSync } = await import("node:fs");
+        writeFileSync(
+          process.env.MIDTRANS_DEBUG_FILE ?? "/tmp/midtrans-request.json",
+          JSON.stringify(body, null, 2),
+        );
+      } catch {
+        // debug saja — jangan gagalkan transaksi
+      }
+    }
+
+    const res = await fetch(endpoints(config).snap, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -147,9 +184,22 @@ export async function createSnapTransaction(
 
     if (!res.ok) {
       const messages = (data as { error_messages?: string[] }).error_messages;
+      const detail = messages?.join(" ");
+      // 401/403 = kredensial ditolak → itu masalah konfigurasi, bukan
+      // pembeli. Jangan tampilkan "kesalahan pembayaran" ke user.
+      if (res.status === 401 || res.status === 403) {
+        console.error(
+          `Midtrans menolak kredensial (HTTP ${res.status}) — periksa MIDTRANS_SERVER_KEY di .env (npm run probe:midtrans)`,
+        );
+        return {
+          ok: false,
+          error:
+            "Pembayaran online sedang tidak dapat dipakai (konfigurasi Midtrans ditolak). Silakan hubungi kami untuk pembelian manual.",
+        };
+      }
       return {
         ok: false,
-        error: messages?.join(" ") || `Midtrans menolak transaksi (HTTP ${res.status}).`,
+        error: detail || `Midtrans menolak transaksi (HTTP ${res.status}).`,
       };
     }
 
@@ -183,7 +233,7 @@ export async function fetchTransactionStatus(
   if (!config.serverKey) return null;
 
   try {
-    const res = await fetch(`${ENDPOINTS[config.mode].api}/${encodeURIComponent(orderId)}/status`, {
+    const res = await fetch(`${endpoints(config).api}/${encodeURIComponent(orderId)}/status`, {
       headers: {
         Accept: "application/json",
         Authorization: authHeader(config.serverKey),
@@ -200,22 +250,59 @@ export async function fetchTransactionStatus(
 }
 
 /**
+ * Endpoint gateway Midtrans.
+ *
+ * `MIDTRANS_SNAP_ENDPOINT` / `MIDTRANS_API_ENDPOINT` hanya dipakai untuk
+ * pengujian lokal (mock gateway) dan **diabaikan di produksi** — supaya
+ * aplikasi yang ter-deploy tidak pernah mengirim transaksi ke host lain.
+ */
+function endpoints(config: MidtransConfig): { snap: string; api: string } {
+  const base = ENDPOINTS[config.mode];
+  const allowOverride = process.env.NODE_ENV !== "production";
+
+  return {
+    snap:
+      (allowOverride && process.env.MIDTRANS_SNAP_ENDPOINT?.trim()) ||
+      base.snap,
+    api:
+      (allowOverride && process.env.MIDTRANS_API_ENDPOINT?.trim()) || base.api,
+  };
+}
+
+/**
  * Verifikasi signature notifikasi Midtrans:
  * sha512(order_id + status_code + gross_amount + serverKey).
+ *
+ * Format notifikasi resmi Midtrans memakai field **`signature_key`** di body
+ * JSON (bukan `signature`), jadi keduanya diterima. Nilai yang dipakai harus
+ * persis sama dengan yang dikirim Midtrans — `gross_amount` ikut apa adanya
+ * (bisa "10000.00").
  */
 export function verifyMidtransSignature(
-  payload: { order_id?: string; status_code?: string; gross_amount?: string },
+  payload: {
+    order_id?: string;
+    status_code?: string;
+    gross_amount?: string;
+    signature_key?: string;
+    signature?: string;
+  },
   signature: string | null | undefined,
   serverKey: string,
 ): boolean {
-  if (!signature || !serverKey) return false;
+  const given =
+    signature ??
+    payload?.signature_key ??
+    payload?.signature ??
+    null;
+
+  if (!given || !serverKey) return false;
 
   const raw = `${payload.order_id ?? ""}${payload.status_code ?? ""}${payload.gross_amount ?? ""}${serverKey}`;
   const expected = createHash("sha512").update(raw).digest("hex");
 
   // bandingkan panjang sama dulu agar timingSafeEqual tidak melempar
-  if (expected.length !== signature.length) return false;
-  return expected === signature;
+  if (expected.length !== given.length) return false;
+  return expected === given;
 }
 
 /** Petakan status transaksi Midtrans ke status order internal. */

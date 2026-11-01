@@ -76,12 +76,6 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   "company.social.youtube": "",
   "company.social.instagram": "",
 
-  // Midtrans
-  "payment.midtrans.enabled": "false",
-  "payment.midtrans.mode": "sandbox",
-  "payment.midtrans.serverKey": "",
-  "payment.midtrans.clientKey": "",
-
   // Kontak / SMTP
   "contact.smtp.enabled": "false",
   "contact.smtp.host": "",

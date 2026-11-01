@@ -75,36 +75,6 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "company.social.instagram", label: "Tautan Instagram", type: "text", group: "Copy Landing Page" },
 
   {
-    key: "payment.midtrans.enabled",
-    label: "Aktifkan pembayaran Midtrans",
-    type: "boolean",
-    group: "Midtrans",
-    help: "Kalau mati, tombol beli akan memakai mode manual.",
-  },
-  {
-    key: "payment.midtrans.mode",
-    label: "Mode Midtrans",
-    type: "select",
-    group: "Midtrans",
-    options: ["sandbox", "production"],
-    help: "sandbox = uji coba (kredit virtual), production = uang asli.",
-  },
-  {
-    key: "payment.midtrans.serverKey",
-    label: "Server Key",
-    type: "secret",
-    group: "Midtrans",
-    help: "Rahasia — disimpan di server saja. Kosongkan untuk kembali ke nilai .env.",
-  },
-  {
-    key: "payment.midtrans.clientKey",
-    label: "Client Key",
-    type: "secret",
-    group: "Midtrans",
-    help: "Boleh tampil di browser. Kosongkan untuk kembali ke nilai .env.",
-  },
-
-  {
     key: "contact.smtp.enabled",
     label: "Aktifkan formulir kontak (SMTP)",
     type: "boolean",
@@ -174,7 +144,6 @@ export const SETTING_GROUPS = [
   "Media Sosial",
   "Footer",
   "Copy Landing Page",
-  "Midtrans",
   "Kontak / SMTP",
   "Newsletter",
   "Autentikasi",

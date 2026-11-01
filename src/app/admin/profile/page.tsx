@@ -33,19 +33,7 @@ async function AdminProfilePageContent() {
     if (raw[field.key]) values[field.key] = SECRET_MASK;
   }
 
-  // Kalau nilai di DB kosong, Midtrans memakai nilai .env — beri tahu admin.
-  const envFallback: Record<string, string> = {
-    "payment.midtrans.serverKey": process.env.MIDTRANS_SERVER_KEY?.trim() ?? "",
-    "payment.midtrans.clientKey": process.env.MIDTRANS_CLIENT_KEY?.trim() ?? "",
-  };
-
-  const fields = SETTINGS_SCHEMA.map((field) => {
-    if (!envFallback[field.key] || raw[field.key]) return field;
-    return {
-      ...field,
-      help: `${field.help ? `${field.help} ` : ""}Saat ini dipakai dari .env (${field.key === "payment.midtrans.serverKey" ? "MIDTRANS_SERVER_KEY" : "MIDTRANS_CLIENT_KEY"}).`,
-    };
-  });
+  const fields = SETTINGS_SCHEMA;
 
   return (
     <div className="space-y-6">

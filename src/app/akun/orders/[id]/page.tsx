@@ -27,6 +27,41 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Dibatalkan",
 };
 
+/** Banner hasil callback Midtrans (query ?pembayaran=…). */
+function pembayaranBanner(
+  pembayaran: string | undefined,
+  orderStatus: string,
+): React.ReactNode {
+  const lunas = orderStatus === "PAID" || orderStatus === "COMPLETED";
+
+  if (lunas) {
+    return (
+      <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+        Pembayaran berhasil diterima. Buku sudah masuk Pustaka Saya.
+      </div>
+    );
+  }
+
+  if (pembayaran === "gagal") {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        Pembayaran gagal atau dibatalkan. Silakan coba lagi dari halaman buku.
+      </div>
+    );
+  }
+
+  if (pembayaran === "menunggu") {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        Pembayaran belum terkonfirmasi. Status akan diperbarui otomatis begitu
+        Midtrans mengonfirmasi pembayaran.
+      </div>
+    );
+  }
+
+  return null;
+}
+
 function rupiah(value: unknown): string {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -48,25 +83,30 @@ function formatDate(date: Date | null): string {
 
 export default function AccountOrderDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ pembayaran?: string }>;
 }) {
   return (
     <Suspense fallback={<PageLoader />}>
-      <AccountOrderDetailContent params={params} />
+      <AccountOrderDetailContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
 async function AccountOrderDetailContent({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ pembayaran?: string }>;
 }) {
   await connection();
 
   const user = await requireUser();
   const { id } = await params;
+  const { pembayaran } = await searchParams;
 
   const order = await prisma.order.findUnique({
     where: { id },
@@ -119,6 +159,8 @@ async function AccountOrderDetailContent({
           <span className="font-semibold text-black">{rupiah(order.total)}</span>
         </div>
       </header>
+
+      {pembayaranBanner(pembayaran, order.status)}
 
       {order.status === "PENDING" ? (
         <PaymentStatusChecker orderId={order.id} initialStatus={order.status} />

@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  //_distDir bisa diganti lewat env supaya server uji (mock gateway) tidak
+  // bentrok dengan dev server utama.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   experimental: {
     agentFeedback: true,
     // Upload PDF e-book (maks 500 MB) lewat route di bawah matcher proxy.ts.

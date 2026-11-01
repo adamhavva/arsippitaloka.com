@@ -2,8 +2,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { calculatePrice } from "@/lib/pricing";
 import { canAccessBook } from "@/lib/library";
+import { siteUrl } from "@/lib/site-url";
 import {
   createSnapTransaction,
+  splitName,
   getMidtransConfig,
   isMidtransConfigured,
 } from "@/lib/midtrans";
@@ -91,7 +93,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const config = await getMidtransConfig();
+  const config = getMidtransConfig();
   if (!config.enabled) {
     return Response.json(
       { error: "Pembayaran online belum diaktifkan. Hubungi kami untuk pembelian manual." },
@@ -128,7 +130,7 @@ export async function POST(request: Request) {
     },
   });
 
-  const base = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  const base = siteUrl();
 
   // Midtrans memvalidasi jumlah item_details harus sama dengan gross_amount,
   // jadi pajak ikut dihitung sebagai item terpisah.
@@ -154,10 +156,12 @@ export async function POST(request: Request) {
     grossAmount: price.total,
     items,
     customer: {
-      firstName: session?.user?.name ?? "Pembeli",
+      ...splitName(session?.user?.name),
       email: session?.user?.email ?? undefined,
     },
-    finishUrl: `${base}/akun/orders/${order.id}`,
+    finishUrl: `${base}/api/payment/callback/finish`,
+    cancelUrl: `${base}/api/payment/callback/cancel`,
+    errorUrl: `${base}/api/payment/callback/error`,
   });
 
   if (!snap.ok) {

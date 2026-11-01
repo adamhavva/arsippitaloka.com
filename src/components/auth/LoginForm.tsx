@@ -85,7 +85,7 @@ export default function LoginForm() {
         <CheckBox label="Remember me" name="remember" defaultChecked />
         <Link
           href="/forgot-password"
-          className="text-[15px]"
+          className="inline-flex min-h-9 items-center text-[15px]"
           style={{ color: AMBER }}
         >
           Fotget password

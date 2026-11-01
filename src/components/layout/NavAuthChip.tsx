@@ -55,7 +55,7 @@ export default function NavAuthChip({
       href={href}
       title={user.email}
       aria-label={`Akun: ${user.email}`}
-      className="absolute z-10 flex items-center gap-2 rounded-full bg-maroon px-3 text-sm font-medium text-white shadow-md transition hover:bg-maroon-dark"
+      className="absolute z-10 hidden items-center gap-2 rounded-full bg-maroon px-3 text-sm font-medium text-white shadow-md transition hover:bg-maroon-dark sm:flex"
       style={style}
     >
       <UserRound size={15} className="shrink-0" />

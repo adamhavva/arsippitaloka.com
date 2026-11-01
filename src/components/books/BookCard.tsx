@@ -33,7 +33,7 @@ export default function BookCard({ book }: { book: BookCardData }) {
   const href = `/buku/${book.tabSlug || BOOK_TAB_SLUG}/${book.slug}`;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-neutral-100 bg-white">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white">
       <div className="relative flex h-44 items-end bg-[#3d2b2e] p-3">
         {book.coverUrl ? (
           <Image
@@ -66,7 +66,7 @@ export default function BookCard({ book }: { book: BookCardData }) {
           </span>
         </div>
       </div>
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-black">
             <Link href={href} className="hover:underline">
@@ -84,24 +84,41 @@ export default function BookCard({ book }: { book: BookCardData }) {
             SU
           </span>
         </div>
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-auto flex items-center justify-between gap-2 pt-4">
           <span className="text-sm font-semibold text-black">
             {book.isFree ? "Gratis" : formatIdr(book.priceUsd)}
           </span>
           <Link
             href={href}
-            className="rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white"
+            className="flex h-9 items-center rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white"
           >
             Lihat Detail
           </Link>
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        {/* Baris aksi: tinggi tombol seragam (h-9), lebar penuh, dan
+            menempel di dasar kartu supaya sejajar antar-kartu. */}
+        <div className="mt-2 flex items-stretch gap-2">
           {book.isFree ? (
-            <FreeDownloadButton bookId={book.id} compact />
+            <FreeDownloadButton
+              bookId={book.id}
+              compact
+              wrapperClassName="min-w-0 flex-1"
+              className="w-full"
+            />
           ) : (
             <>
-              <AddToCartButton bookId={book.id} />
-              <BuyButton bookId={book.id} label="Beli" compact />
+              <AddToCartButton
+                bookId={book.id}
+                wrapperClassName="min-w-0 flex-1"
+                className="w-full"
+              />
+              <BuyButton
+                bookId={book.id}
+                label="Beli"
+                compact
+                wrapperClassName="min-w-0 flex-1"
+                className="w-full"
+              />
             </>
           )}
         </div>

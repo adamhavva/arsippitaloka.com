@@ -37,15 +37,19 @@ export default function SettingsImageField({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-4">
-        <span className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
+        <span className="relative flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50">
           {preview ? (
+            // `fill` dipakai (bukan width/height) supaya ukuran gambar sama
+            // persis dengan kotak pratinjau — kalau memakai width/height,
+            // Next.js mengeluh "width or height modified, but not the other"
+            // karena border kotak membuat lebar efektifnya 94px, bukan 96px.
             <Image
               src={preview}
               alt="Pratinjau"
-              width={96}
-              height={64}
+              fill
+              sizes="96px"
               unoptimized={isDataUrl(preview)}
-              className="h-16 w-24 object-contain"
+              className="object-contain"
             />
           ) : (
             <ImageIcon size={22} className="text-neutral-400" />

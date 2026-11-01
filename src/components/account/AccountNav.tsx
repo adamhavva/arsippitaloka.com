@@ -29,7 +29,7 @@ export default function AccountNav({
           </p>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-2 self-end">
+        <nav className="-mx-1 flex w-full items-center gap-2 overflow-x-auto px-1 pb-1 sm:w-auto sm:flex-wrap sm:overflow-x-visible sm:pb-0">
           {MENU.map((item) => {
             const active =
               item.href === "/akun"
@@ -39,7 +39,7 @@ export default function AccountNav({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-95 sm:px-4 sm:py-1.5 sm:text-sm ${
+                className={`flex min-h-10 shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-medium transition active:scale-95 sm:px-4 sm:py-1.5 sm:text-sm ${
                   active
                     ? "bg-maroon-dark text-white"
                     : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
@@ -51,14 +51,14 @@ export default function AccountNav({
           })}
           <Link
             href="/"
-            className="rounded-full border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-700"
+            className="flex min-h-10 shrink-0 items-center rounded-full border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-700"
           >
             Beranda
           </Link>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="rounded-full border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-700"
+            className="flex min-h-10 shrink-0 items-center rounded-full border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-700"
           >
             Keluar
           </button>

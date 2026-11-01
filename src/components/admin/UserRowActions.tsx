@@ -82,7 +82,7 @@ export default function UserRowActions({ userId, name, role, isActive }: Props) 
             if (!confirm(`Hapus user ${name}?`)) return;
             run(() => deleteUser(userId));
           }}
-          className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
+          className="inline-flex min-h-8 items-center rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600"
         >
           Hapus
         </button>

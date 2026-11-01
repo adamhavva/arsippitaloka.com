@@ -253,7 +253,7 @@ async function AdminEntityPageContent({
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
+      <header className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="font-heading text-2xl font-bold text-black">{def.label}</h1>
           <p className="text-sm text-neutral-500">
@@ -282,7 +282,7 @@ async function AdminEntityPageContent({
           defaultValue={q ?? ""}
           placeholder={`Cari ${def.label.toLowerCase()}…`}
           aria-label={`Cari ${def.label.toLowerCase()}`}
-          className="rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          className="min-h-10 w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm sm:w-64"
         />
         <button
           type="submit"

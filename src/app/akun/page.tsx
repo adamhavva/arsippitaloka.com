@@ -147,7 +147,7 @@ async function AccountLibraryPageContent({
             href={`/akun?filter=${item.key}${
               q ? `&q=${encodeURIComponent(q)}` : ""
             }`}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium active:scale-95 sm:px-4 sm:py-1.5 sm:text-sm ${
+            className={`flex min-h-9 items-center rounded-full px-3 py-1.5 text-xs font-medium active:scale-95 sm:min-h-10 sm:px-4 sm:py-1.5 sm:text-sm ${
               filter === item.key
                 ? "bg-maroon-dark text-white"
                 : "bg-white text-neutral-700 hover:bg-neutral-200"
@@ -420,26 +420,28 @@ function LibraryCard({ entry }: { entry: LibraryEntry }) {
           )}
         </div>
 
-        <div className="mt-auto flex flex-wrap gap-2 pt-4">
+        <div className="mt-auto flex flex-wrap items-stretch gap-2 pt-4">
           {entry.canAccess && entry.hasFile ? (
             <a
               href={`/api/read/${book.id}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white"
+              className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-maroon-dark px-4 text-xs font-medium text-white"
             >
-              <BookOpen size={14} /> Baca
+              <BookOpen size={14} className="shrink-0" /> Baca
             </a>
           ) : null}
 
           {entry.canDownload ? (
             <a
               href={`/api/download/${book.id}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-4 py-1.5 text-xs font-medium text-neutral-700"
+              className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-neutral-300 px-4 text-xs font-medium text-neutral-700"
             >
-              <Download size={14} /> Unduh
+              <Download size={14} className="shrink-0" /> Unduh
               {book.fileSize ? (
-                <span className="text-neutral-400">{formatBytes(book.fileSize)}</span>
+                <span className="truncate text-neutral-400">
+                  {formatBytes(book.fileSize)}
+                </span>
               ) : null}
             </a>
           ) : null}

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import DocumentationDetailView from "@/components/docs/DocumentationDetailView";
 import PageLoader from "@/components/PageLoader";
 import Footer from "@/components/home/Footer";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata = {
   title: "Dokumentasi — Arsip Pitaloka",
@@ -20,6 +21,7 @@ export default function DocumentationDetailPage({
 }) {
   return (
     <>
+      <SiteHeader />
       <Suspense fallback={<PageLoader minHeight="60vh" />}>
         <DocumentationDetailContent params={params} />
       </Suspense>

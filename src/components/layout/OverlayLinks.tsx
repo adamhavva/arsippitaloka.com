@@ -9,6 +9,12 @@ export type Zone = {
   y: number;
   w: number;
   h: number;
+  /**
+   * Diisi `true` kalau zona ini bagian dari navbar hasil render PDF. Di layar
+   * kecil navbar digantikan header HTML (lihat `SiteHeader`), dan teksnya di
+   * gambar terlalu kecil untuk jadi target tap — jadi zonanya disembunyikan.
+   */
+  hiddenOnMobile?: boolean;
 };
 
 /**
@@ -42,7 +48,7 @@ export default function OverlayLinks({
           href={z.href}
           aria-label={z.label}
           title={z.label}
-          className="absolute block"
+          className={`absolute block${z.hiddenOnMobile ? " hidden sm:block" : ""}`}
           style={{
             left: `${((z.x - originX) / originWidth) * 100}%`,
             top: `${((z.y - originY) / originHeight) * 100}%`,

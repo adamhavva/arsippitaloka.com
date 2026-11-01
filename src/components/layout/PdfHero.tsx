@@ -25,6 +25,7 @@ export default function PdfHero({
   zones = [],
   priority = false,
   className = "",
+  mobileCropPt = 0,
 }: {
   src: string;
   alt: string;
@@ -36,8 +37,20 @@ export default function PdfHero({
   zones?: Zone[];
   priority?: boolean;
   className?: string;
+  /**
+   * Tinggi band navbar (dalam pt kanvas PDF) yang dipotong dari gambar pada
+   * layar kecil (< 640px). Navbar tercetak di dalam render PDF, jadi di HP
+   * teksnya tidak terbaca — memotong band ini memberi ruang untuk konten.
+   * Di layar ≥ 640px gambar tetap utuh.
+   */
+  mobileCropPt?: number;
 }) {
   const originHeight = heightPx / PX_PER_PT;
+
+  // Band navbar yang dipotong pada layar kecil (dihitung dalam px gambar).
+  const cropPx = Math.max(0, mobileCropPt) * PX_PER_PT;
+  const croppedHeightPx = Math.max(1, heightPx - cropPx);
+  const shiftPercent = cropPx > 0 ? -(cropPx / heightPx) * 100 : 0;
 
   // Chip akun menimpa "Sign In / Join Us" saat login. Posisinya dihitung dari
   // zona navbar supaya ikut benar di tiap potongan PDF (originY/tinggi beda).
@@ -66,28 +79,42 @@ export default function PdfHero({
     : null;
 
   return (
-    <section className={`relative w-full ${className}`}>
-      <Image
-        src={src}
-        alt={alt}
-        width={widthPx}
-        height={heightPx}
-        priority={priority}
-        sizes="100vw"
-        className="h-auto w-full"
-      />
-      {zones.length > 0 ? (
-        <div className="absolute inset-0">
-          <OverlayLinks
-            zones={zones}
-            originY={originY}
-            originWidth={1920}
-            originHeight={originHeight}
-          />
-          {authChipStyle ? <NavAuthChip style={authChipStyle} /> : null}
-          {cartStyle ? <CartNavButton style={cartStyle} /> : null}
-        </div>
-      ) : null}
+    <section
+      className={`pdf-hero relative w-full ${className}`}
+      style={
+        {
+          "--pdf-hero-w": String(widthPx),
+          "--pdf-hero-h": String(heightPx),
+          "--pdf-hero-h-cropped": String(croppedHeightPx),
+          "--pdf-hero-shift": `${shiftPercent}%`,
+        } as React.CSSProperties
+      }
+    >
+      {/* `pdf-hero-inner` digeser ke atas sebesar band navbar pada layar
+          kecil; di layar besar shift-nya nol (lihat globals.css). */}
+      <div className="pdf-hero-inner relative">
+        <Image
+          src={src}
+          alt={alt}
+          width={widthPx}
+          height={heightPx}
+          priority={priority}
+          sizes="100vw"
+          className="block h-auto w-full"
+        />
+        {zones.length > 0 ? (
+          <div className="absolute inset-0">
+            <OverlayLinks
+              zones={zones}
+              originY={originY}
+              originWidth={1920}
+              originHeight={originHeight}
+            />
+            {authChipStyle ? <NavAuthChip style={authChipStyle} /> : null}
+            {cartStyle ? <CartNavButton style={cartStyle} /> : null}
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }

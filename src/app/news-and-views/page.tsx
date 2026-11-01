@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import PdfHero from "@/components/layout/PdfHero";
 import SearchBar from "@/components/search/SearchBar";
-import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
+import { SPLIT_NAVBAR_CROP_PT, SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
 import YoutubeBand from "@/components/news/YoutubeBand";
 import ViralForJustice from "@/components/home/ViralForJustice";
 import DocumentationSection from "@/components/home/DocumentationSection";
 import Footer from "@/components/home/Footer";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata: Metadata = {
   title: "News & Views — Pitaloka",
@@ -35,6 +36,7 @@ export default function NewsAndViewsPage({
 }) {
   return (
     <>
+      <SiteHeader />
       <PdfHero
         src="/images/news-hero.jpg"
         alt="News & Views Pitaloka — What's Trending, What's True."
@@ -42,6 +44,7 @@ export default function NewsAndViewsPage({
         originY={0}
         zones={SPLIT_NAV_ZONES}
         priority
+        mobileCropPt={SPLIT_NAVBAR_CROP_PT}
       />
 
       {/* Pencarian global — navbar PDF tidak punya kotak search, jadi

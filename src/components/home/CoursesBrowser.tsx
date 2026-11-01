@@ -65,7 +65,7 @@ function DocCard({ doc }: { doc: DocItemData }) {
   return (
     <Link
       href={`/dokumentasi/${doc.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white transition hover:border-neutral-300"
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white transition hover:border-neutral-300"
     >
       <div className="relative flex h-40 items-center justify-center bg-[#3d2b2e]">
         {doc.photoUrl ? (
@@ -93,7 +93,7 @@ function DocCard({ doc }: { doc: DocItemData }) {
         <h3 className="mt-1 line-clamp-2 font-semibold text-black group-hover:underline">
           {doc.title}
         </h3>
-        <span className="mt-auto pt-3 text-xs font-medium text-maroon">
+        <span className="mt-auto flex h-9 items-center justify-center rounded-full border border-neutral-300 px-4 text-xs font-medium text-neutral-700">
           Lihat dokumentasi
         </span>
       </div>
@@ -206,7 +206,7 @@ export default function CoursesBrowser({
               return (
                 <div
                   key={post.id}
-                  className="overflow-hidden rounded-xl border border-neutral-100 bg-white p-3"
+                  className="flex h-full flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white p-3"
                 >
                   <SocialEmbedPlayer
                     platform={post.platform}

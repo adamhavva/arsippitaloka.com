@@ -201,7 +201,7 @@ export default function FilterSidebar({
         <button
           type="button"
           onClick={applyPrice}
-          className="mt-2 w-full rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-maroon"
+          className="mt-2 flex min-h-9 w-full items-center justify-center rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-maroon"
         >
           Terapkan
         </button>
@@ -219,7 +219,7 @@ export default function FilterSidebar({
               <li key={value}>
                 <Link
                   href={href({ rating: active ? undefined : String(value) })}
-                  className={`flex items-center gap-1.5 rounded px-1 py-0.5 transition ${
+                  className={`flex min-h-9 items-center gap-1.5 rounded px-1 py-1 transition ${
                     active ? "font-medium text-maroon" : "text-neutral-600 hover:text-maroon"
                   }`}
                 >
@@ -249,7 +249,7 @@ export default function FilterSidebar({
           onClick={() =>
             router.push(href({ gratis: activeGratis ? undefined : "1" }))
           }
-          className="flex w-full items-center gap-2 text-left text-neutral-700"
+          className="flex min-h-9 w-full items-center gap-2 text-left text-neutral-700"
         >
           <span
             className={`flex h-4 w-4 items-center justify-center rounded border ${
@@ -307,7 +307,7 @@ function FacetLink({
   return (
     <Link
       href={href}
-      className={`flex items-center justify-between gap-2 rounded px-1.5 py-1 transition ${
+      className={`flex min-h-9 items-center justify-between gap-2 rounded px-1.5 py-1 transition ${
         active
           ? "bg-maroon/10 font-semibold text-maroon"
           : "text-neutral-600 hover:bg-neutral-100 hover:text-maroon"

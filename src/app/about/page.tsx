@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Footer from "@/components/home/Footer";
 import AboutCta from "@/components/about/AboutCta";
 import AboutStats from "@/components/about/AboutStats";
 import PdfHero from "@/components/layout/PdfHero";
 import type { Zone } from "@/components/layout/OverlayLinks";
-import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
+import { SPLIT_NAVBAR_CROP_PT, SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata: Metadata = {
   title: "About — Arsip Pitaloka",
@@ -32,6 +34,7 @@ const MENU_ZONES: Zone[] = [
     y: 236,
     w: 271,
     h: 38,
+    hiddenOnMobile: true,
   },
   {
     label: "Biografi Rieke Diah Pitaloka",
@@ -40,6 +43,7 @@ const MENU_ZONES: Zone[] = [
     y: 298,
     w: 303,
     h: 37,
+    hiddenOnMobile: true,
   },
   {
     label: "Media For Justice",
@@ -48,6 +52,7 @@ const MENU_ZONES: Zone[] = [
     y: 354,
     w: 195,
     h: 37,
+    hiddenOnMobile: true,
   },
   {
     label: "Bersatu Kita Bisa",
@@ -56,6 +61,7 @@ const MENU_ZONES: Zone[] = [
     y: 414,
     w: 188,
     h: 37,
+    hiddenOnMobile: true,
   },
 ];
 
@@ -67,11 +73,13 @@ const KNOW_US_MORE_ZONE: Zone = {
   y: 2422.1,
   w: 255.9,
   h: 54.8,
+  hiddenOnMobile: true,
 };
 
 export default function AboutPage() {
   return (
     <div className="flex flex-1 flex-col">
+      <SiteHeader />
       <PdfHero
         src="/images/about-hero.jpg"
         alt="Arsip, Dokumentasi & E-Book by PITALOKA"
@@ -79,7 +87,21 @@ export default function AboutPage() {
         originY={0}
         zones={[...SPLIT_NAV_ZONES, ...MENU_ZONES]}
         priority
+        mobileCropPt={SPLIT_NAVBAR_CROP_PT}
       />
+      {/* Menu di dalam gambar hero terlalu kecil untuk jadi target tap di layar
+          kecil, jadi tautan yang sama ditampilkan lagi sebagai chip HTML. */}
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap gap-2 px-4 pt-4 sm:hidden">
+        {MENU_ZONES.map((zone) => (
+          <Link
+            key={zone.label}
+            href={zone.href}
+            className="flex min-h-10 items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-800"
+          >
+            {zone.label}
+          </Link>
+        ))}
+      </div>
       {/* Band statistik + profil + CTA di bawah mengikuti koordinat PDF
           (band 1464–1628 pt, profil 1871 pt, CTA 2868,5 pt), jadi tidak ada
           elemen HTML tambahan di antara hero dan band. Pencarian global
@@ -92,6 +114,16 @@ export default function AboutPage() {
         originY={1871}
         zones={[KNOW_US_MORE_ZONE]}
       />
+      {/* Tombol "Know Us More" di dalam gambar terlalu kecil untuk ditap di
+          layar kecil — ditampilkan lagi sebagai tombol HTML. */}
+      <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:hidden">
+        <Link
+          href={KNOW_US_MORE_ZONE.href}
+          className="flex min-h-11 w-full items-center justify-center rounded-full bg-maroon-dark px-6 py-3 text-sm font-semibold text-white"
+        >
+          Know Us More
+        </Link>
+      </div>
       {/* Jarak putih di PDF: profil berakhir di 2727,8 pt, CTA mulai 2868,5 pt. */}
       <div className="h-10 md:h-[4rem]" aria-hidden />
       <AboutCta />

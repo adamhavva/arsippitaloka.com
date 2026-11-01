@@ -42,7 +42,7 @@ export default async function Footer() {
             <input
               type="email"
               placeholder={settings["footer.subscribe.placeholder"]}
-              className="flex-1 bg-transparent px-4 text-sm text-black outline-none placeholder:text-neutral-400"
+              className="min-w-0 flex-1 bg-transparent px-4 py-2 text-sm text-black outline-none placeholder:text-neutral-400"
             />
             <button className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white sm:px-5">
               {settings["footer.subscribe.button"]}
@@ -77,11 +77,11 @@ export default async function Footer() {
                 l.toLowerCase().replace(/[^a-z0-9]/g, ""),
               );
               return slug ? (
-                <Link key={l} href={`/buku/${slug}`} className="hover:text-white">
+                <Link key={l} href={`/buku/${slug}`} className="flex min-h-9 items-center hover:text-white">
                   {l}
                 </Link>
               ) : (
-                <span key={l}>{l}</span>
+                <span key={l} className="flex min-h-9 items-center">{l}</span>
               );
             })}
           </div>

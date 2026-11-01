@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AuthShell from "@/components/auth/AuthShell";
+import SiteHeader from "@/components/layout/SiteHeader";
 import {
   Field,
   Heading,
@@ -12,33 +13,36 @@ export const metadata = { title: "Forget password — Pitaloka" };
 
 export default function ForgotPasswordPage() {
   return (
-    <AuthShell
-      image="/images/auth-forgot.jpg"
-      alt="Gunung dan persawahan"
-      imagePercent={53.2}
-      contentLeft={95}
-      contentRight={99.1}
-      contentTop={362.9}
-    >
-      <LogoMark ring />
+    <>
+      <SiteHeader />
+      <AuthShell
+        image="/images/auth-forgot.jpg"
+        alt="Gunung dan persawahan"
+        imagePercent={53.2}
+        contentLeft={95}
+        contentRight={99.1}
+        contentTop={362.9}
+      >
+        <LogoMark ring />
 
-      <div className="mt-[25px]">
-        <Heading>Forget password</Heading>
-      </div>
-      <div className="mt-[17px]">
-        <SubText>Enter the email address associated with an account.</SubText>
-      </div>
-
-      <form className="mt-[28px]">
-        <Field type="email" placeholder="Email address" />
-        <div className="mt-[20px]">
-          <SubmitButton>Reset&nbsp; password</SubmitButton>
+        <div className="mt-[25px]">
+          <Heading>Forget password</Heading>
         </div>
-      </form>
+        <div className="mt-[17px]">
+          <SubText>Enter the email address associated with an account.</SubText>
+        </div>
 
-      <p className="mt-[20px] text-center text-[15px] font-medium text-[#202124]">
-        <Link href="/login">&larr; Back to login</Link>
-      </p>
-    </AuthShell>
+        <form className="mt-[28px]">
+          <Field type="email" placeholder="Email address" />
+          <div className="mt-[20px]">
+            <SubmitButton>Reset&nbsp; password</SubmitButton>
+          </div>
+        </form>
+
+        <p className="mt-[20px] text-center text-[15px] font-medium text-[#202124]">
+          <Link href="/login">&larr; Back to login</Link>
+        </p>
+      </AuthShell>
+    </>
   );
 }

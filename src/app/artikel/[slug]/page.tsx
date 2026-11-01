@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import ArticleDetailView from "@/components/articles/ArticleDetailView";
 import PageLoader from "@/components/PageLoader";
 import Footer from "@/components/home/Footer";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata = {
   title: "Artikel — Arsip Pitaloka",
@@ -20,6 +21,7 @@ export default function ArticleDetailPage({
 }) {
   return (
     <>
+      <SiteHeader />
       <Suspense fallback={<PageLoader minHeight="60vh" />}>
         <ArticleDetailContent params={params} />
       </Suspense>

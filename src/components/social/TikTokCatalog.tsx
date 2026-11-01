@@ -97,12 +97,12 @@ export default async function TikTokCatalog({
                       {post.caption}
                     </p>
                   ) : null}
-                  <div className="mt-auto pt-1">
+                  <div className="mt-auto pt-3">
                     <Link
                       href={`https://www.tiktok.com/@i/video/${post.videoId}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-full bg-maroon-dark px-3 py-1.5 text-xs font-medium text-white hover:bg-maroon"
+                      className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-maroon-dark px-3 text-xs font-medium text-white hover:bg-maroon"
                     >
                       <ExternalLink size={13} /> Lihat di TikTok
                     </Link>

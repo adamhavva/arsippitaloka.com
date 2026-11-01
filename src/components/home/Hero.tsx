@@ -18,57 +18,59 @@ const navZones = [
   { label: "Join Us", href: "/register", left: "84.7%", width: "3.6%" },
 ];
 
-/** Tautan navigasi utama — tampil hanya pada layar kecil sebagai baris tombol di bawah gambar hero. */
-const MOBILE_NAV_LINKS = [
-  { label: "Buku", href: "/buku" },
-  { label: "About", href: "/about" },
-  { label: "News", href: "/news-and-views" },
-  { label: "Keranjang", href: "/keranjang" },
-  { label: "Login", href: "/login" },
-  { label: "Register", href: "/register" },
-];
+/**
+ * Dimensi gambar hero (px) & band navbar yang dipotong pada layar kecil.
+ *
+ * `hero-full.jpg` = 4000 × 2836 px (kanvas PDF 1920 × 1361 pt). Navbar
+ * tercetak di dalam gambar (label + logo "PITALOKA" berakhir di y ≈ 265 px),
+ * jadi di layar kecil teksnya tidak terbaca dan hanya jadi coretan. Band
+ * tersebut dipotong (290 px) khusus di bawah 640px; di layar ≥ 640px gambar
+ * tetap utuh persis seperti desain PDF.
+ */
+const HERO_WIDTH = 4000;
+const HERO_HEIGHT = 2836;
+const HERO_CROP = 290;
 
 export default function Hero() {
   return (
-    <section className="relative w-full">
-      <Image
-        src="/images/hero-full.jpg"
-        alt="Pitaloka — Get Access to Hundred Books Available"
-        width={4000}
-        height={2836}
-        priority
-        sizes="100vw"
-        className="h-auto w-full"
-      />
-      {/* Overlay interaktif transparan di atas desain PDF (hanya desktop). */}
-      <div className="absolute inset-0 sm:block hidden">
-        {navZones.map((z) => (
-          <Link
-            key={z.label}
-            href={z.href}
-            aria-label={z.label}
-            className="absolute block"
-            style={{ top: "4%", left: z.left, width: z.width, height: "4%" }}
-          />
-        ))}
-        {/* Saat login: pill email menimpa "Sign In / Join Us". */}
-        <NavAuthChip style={{ top: "4%", right: "11.7%", height: "4%" }} />
-        {/* Zona tautan + badge keranjang. */}
-        <CartNavButton style={{ top: "4%", left: "89.3%", width: "2.4%", height: "4%" }} />
-        <HeroSearch />
-      </div>
-
-      {/* Navigasi mobile — baris tombol horizontal di bawah gambar hero. */}
-      <div className="sm:hidden sticky top-0 z-20 flex items-center gap-x-2 overflow-x-auto rounded-t-lg bg-white/95 px-4 py-2 backdrop-blur">
-        {MOBILE_NAV_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="whitespace-nowrap rounded-full bg-maroon-dark px-4 py-1.5 text-xs font-medium text-white transition hover:bg-maroon-dark/80"
-          >
-            {link.label}
-          </Link>
-        ))}
+    <section
+      className="pdf-hero relative w-full"
+      style={
+        {
+          "--pdf-hero-w": String(HERO_WIDTH),
+          "--pdf-hero-h": String(HERO_HEIGHT),
+          "--pdf-hero-h-cropped": String(HERO_HEIGHT - HERO_CROP),
+          "--pdf-hero-shift": `${-(HERO_CROP / HERO_HEIGHT) * 100}%`,
+        } as React.CSSProperties
+      }
+    >
+      <div className="pdf-hero-inner relative">
+        <Image
+          src="/images/hero-full.jpg"
+          alt="Pitaloka — Get Access to Hundred Books Available"
+          width={HERO_WIDTH}
+          height={HERO_HEIGHT}
+          priority
+          sizes="100vw"
+          className="block h-auto w-full"
+        />
+        {/* Overlay interaktif transparan di atas desain PDF (hanya desktop). */}
+        <div className="absolute inset-0 sm:block hidden">
+          {navZones.map((z) => (
+            <Link
+              key={z.label}
+              href={z.href}
+              aria-label={z.label}
+              className="absolute block"
+              style={{ top: "4%", left: z.left, width: z.width, height: "4%" }}
+            />
+          ))}
+          {/* Saat login: pill email menimpa "Sign In / Join Us". */}
+          <NavAuthChip style={{ top: "4%", right: "11.7%", height: "4%" }} />
+          {/* Zona tautan + badge keranjang. */}
+          <CartNavButton style={{ top: "4%", left: "89.3%", width: "2.4%", height: "4%" }} />
+          <HeroSearch />
+        </div>
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import { getSmtpConfig } from "@/lib/smtp";
 import ContactForm from "@/components/contact/ContactForm";
 import Footer from "@/components/home/Footer";
 import PageLoader from "@/components/PageLoader";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Kontak — Arsip Pitaloka",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
+      <SiteHeader />
       <Suspense fallback={<PageLoader minHeight="60vh" />}>
         <ContactPageContent />
       </Suspense>

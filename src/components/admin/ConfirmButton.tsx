@@ -30,7 +30,7 @@ export default function ConfirmButton({
             else router.refresh();
           });
         }}
-        className="rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 disabled:opacity-50"
+        className="inline-flex min-h-8 items-center rounded-full border border-red-200 px-3 py-1 text-xs font-medium text-red-600 disabled:opacity-50"
       >
         {pending ? "…" : label}
       </button>

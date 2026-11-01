@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import CariContent from "./cari-content";
 import Footer from "@/components/home/Footer";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 /**
  * `/cari?q=<kata kunci>` — hasil pencarian global.
@@ -16,6 +17,7 @@ export default function CariPage({
 }) {
   return (
     <>
+      <SiteHeader />
       <main className="flex min-h-screen flex-col">
         <Suspense fallback={<CariSkeleton />}>
           <CariContent searchParams={searchParams} />

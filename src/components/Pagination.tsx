@@ -74,7 +74,7 @@ export default function Pagination({
                 }),
               )
             }
-            className="rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-800 focus:border-maroon sm:text-sm"
+            className="min-h-9 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-800 focus:border-maroon sm:min-h-10 sm:text-sm"
           >
             {PER_PAGE_OPTIONS.map((option) => (
               <option key={option} value={option}>

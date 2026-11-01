@@ -7,6 +7,7 @@ import type { SocialPostData } from "@/components/social/types";
 import Pagination from "@/components/Pagination";
 import { clampPage, parsePage, parsePerPage } from "@/lib/pagination";
 import PageLoader from "@/components/PageLoader";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata: Metadata = { title: "Media Sosial — Arsip Pitaloka" };
 
@@ -70,11 +71,15 @@ export default function SosmedPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+    <>
+      <SiteHeader />
+
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
       <h1 className="mb-6 font-heading text-2xl font-bold text-black sm:mb-8 sm:text-3xl">Media Sosial</h1>
       <Suspense fallback={<PageLoader />}>
         <SosmedList searchParams={searchParams} />
       </Suspense>
     </div>
+    </>
   );
 }

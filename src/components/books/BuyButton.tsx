@@ -10,18 +10,25 @@ import { Loader2 } from "lucide-react";
  *
  * `loginUrl` opsional: kalau tidak diberikan (mis. dari kartu buku), tujuan
  * login dihitung saat diklik dari URL halaman sekarang. `compact` memberi
- * ukuran kecil agar pas di kartu.
+ * ukuran kecil agar pas di kartu. `className` dipakai kartu untuk mengatur
+ * lebar tombol (mis. `w-full`).
  */
 export default function BuyButton({
   bookId,
   loginUrl,
   label = "Beli Sekarang",
   compact = false,
+  className = "",
+  wrapperClassName = "",
 }: {
   bookId: string;
   loginUrl?: string;
   label?: string;
   compact?: boolean;
+  /** Kelas tambahan untuk tombolnya. */
+  className?: string;
+  /** Kelas tambahan untuk pembungkus tombol (dipakai kartu untuk mengatur lebar). */
+  wrapperClassName?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -65,22 +72,22 @@ export default function BuyButton({
   }
 
   return (
-    <div>
+    <div className={`min-w-0 ${wrapperClassName}`}>
       <button
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className={`inline-flex items-center gap-1.5 rounded-full bg-maroon-dark font-medium text-white transition hover:bg-maroon disabled:opacity-60 ${
-          compact ? "px-3 py-1.5 text-xs" : "gap-2 px-5 py-2 text-sm"
-        }`}
+        className={`inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full bg-maroon-dark font-medium text-white transition hover:bg-maroon disabled:opacity-60 ${
+          compact ? "px-3 text-xs" : "gap-2 px-5 py-2 text-sm"
+        } ${className}`}
       >
         {loading ? (
           <Loader2 size={compact ? 14 : 16} className="animate-spin" />
         ) : null}
-        {loading ? "Memproses…" : label}
+        <span className="truncate">{loading ? "Memproses…" : label}</span>
       </button>
       {error ? (
-        <p className="mt-2 text-xs text-red-600">{error}</p>
+        <p className="mt-1 text-[11px] leading-tight text-red-600">{error}</p>
       ) : null}
     </div>
   );

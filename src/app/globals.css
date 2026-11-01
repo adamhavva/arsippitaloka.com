@@ -18,8 +18,70 @@
   --font-sans: var(--font-inter);
 }
 
+/* Offset vertikal panel autentikasi (lihat `AuthShell`). Koordinat PDF
+   dipakai di desktop; di layar kecil jaraknya dipangkas agar form tidak
+   terdorong jauh ke bawah. */
+.auth-content-offset {
+  margin-top: min(var(--auth-content-top), 4vh);
+}
+
+@media (min-width: 1024px) {
+  .auth-content-offset {
+    margin-top: min(var(--auth-content-top), 32vh);
+  }
+}
+
+/*
+ * Frame gambar yang dipotong pada layar kecil (dipakai section CTA "About").
+ * Berbeda dari `.pdf-hero`, pemotongannya di bagian BAWAH gambar — bagian
+ * form email (yang terlalu kecil untuk diisi di HP) diganti form HTML.
+ */
+.media-frame {
+  overflow: hidden;
+  aspect-ratio: var(--frame-w) / var(--frame-h-sm);
+}
+
+@media (min-width: 640px) {
+  .media-frame {
+    aspect-ratio: var(--frame-w) / var(--frame-h);
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+/*
+ * Hero hasil render PDF.
+ *
+ * Navbar ikut tercetak di dalam gambar (render PDF), jadi di layar kecil teksnya
+ * tidak terbaca dan hanya jadi coretan kecil. Karena itu band navbar dipotong
+ * hanya di bawah 640px lewat `--pdf-hero-crop`; di layar ≥ 640px gambar tetap
+ * utuh persis seperti desain PDF.
+ *
+ * Nilai variabel dihitung di server (lihat `PdfHero`):
+ *   --pdf-hero-w          lebar gambar (px)
+ *   --pdf-hero-h          tinggi gambar (px)
+ *   --pdf-hero-h-cropped  tinggi gambar setelah band navbar dipotong (px)
+ *   --pdf-hero-shift      pergeseran gambar ke atas (persen tinggi gambar)
+ */
+.pdf-hero {
+  overflow: hidden;
+  aspect-ratio: var(--pdf-hero-w) / var(--pdf-hero-h-cropped);
+}
+
+.pdf-hero-inner {
+  transform: translateY(var(--pdf-hero-shift));
+}
+
+@media (min-width: 640px) {
+  .pdf-hero {
+    aspect-ratio: var(--pdf-hero-w) / var(--pdf-hero-h);
+  }
+
+  .pdf-hero-inner {
+    transform: none;
+  }
 }

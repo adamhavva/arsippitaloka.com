@@ -135,7 +135,7 @@ function EngagementCard({
   bookTabSlug: string | null;
 }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white">
       <div className="relative mx-auto w-full max-w-[420px] p-4">
         <SocialEmbedPlayer
           platform={post.platform}
@@ -168,7 +168,9 @@ function EngagementCard({
           </p>
         ) : null}
 
-        <div className="mt-auto flex flex-wrap gap-2 pt-1">
+        {/* Baris aksi: semua tombol tinggi sama (h-9) dan "Detail" selalu
+            menempel di kanan, sehingga kartu social terlihat rata. */}
+        <div className="mt-auto flex flex-wrap items-center justify-end gap-2 pt-3">
           {post.book ? (
             <Link
               href={
@@ -176,32 +178,35 @@ function EngagementCard({
                   ? `/buku/${bookTabSlug}/${post.book.slug}`
                   : `/buku/${post.book.slug}`
               }
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+              className="inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-neutral-300 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
             >
-              <Library size={13} /> Lihat buku
+              <Library size={13} className="shrink-0" />
+              <span className="truncate">Lihat buku</span>
             </Link>
           ) : null}
           {post.documentation ? (
             <Link
               href="/news-and-views"
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+              className="inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-neutral-300 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
             >
-              <FileText size={13} /> Lihat dokumentasi
+              <FileText size={13} className="shrink-0" />
+              <span className="truncate">Lihat dokumentasi</span>
             </Link>
           ) : null}
           {post.article ? (
             <Link
               href={`/artikel/${post.article.slug}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+              className="inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border border-neutral-300 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
             >
-              <PanelsTopLeft size={13} /> {post.article.title}
+              <PanelsTopLeft size={13} className="shrink-0" />
+              <span className="truncate">{post.article.title}</span>
             </Link>
           ) : null}
           <Link
             href={`/sosmed/${post.id}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-maroon-dark px-3 py-1.5 text-xs font-medium text-white hover:bg-maroon"
+            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-maroon-dark px-3 text-xs font-medium text-white hover:bg-maroon"
           >
-            <ExternalLink size={13} /> Detail
+            <ExternalLink size={13} className="shrink-0" /> Detail
           </Link>
         </div>
       </div>

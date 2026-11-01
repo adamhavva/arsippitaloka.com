@@ -132,7 +132,7 @@ export default function SearchBar({
           autoFocus={autoFocus}
           onChange={(event) => setValue(event.target.value)}
           placeholder={placeholder}
-          className={`min-w-0 flex-1 bg-transparent ${sizes.pad} ${sizes.input} text-neutral-900 outline-none placeholder:text-neutral-400 ${inputClassName}`}
+          className={`h-full min-w-0 flex-1 bg-transparent ${sizes.pad} ${sizes.input} text-neutral-900 outline-none placeholder:text-neutral-400 ${inputClassName}`}
         />
         <button
           type="submit"

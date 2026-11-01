@@ -164,7 +164,7 @@ function ToolbarButton({
       aria-pressed={active}
       aria-label={label}
       title={label}
-      className="rounded-md p-1.5 text-neutral-600 hover:bg-neutral-100 aria-pressed:bg-maroon/10 aria-pressed:text-maroon-dark"
+      className="flex h-8 w-8 items-center justify-center rounded-md p-2 text-neutral-600 hover:bg-neutral-100 aria-pressed:bg-maroon/10 aria-pressed:text-maroon-dark"
     >
       {children}
     </button>

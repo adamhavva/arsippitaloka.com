@@ -10,6 +10,7 @@ import { getMidtransConfig } from "@/lib/midtrans";
 import Footer from "@/components/home/Footer";
 import RemoveFromCartButton from "@/components/cart/RemoveFromCartButton";
 import CartCheckoutButton from "@/components/cart/CartCheckoutButton";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 export const metadata = {
   title: "Keranjang — Arsip Pitaloka",
@@ -26,6 +27,7 @@ function formatIdr(n: number): string {
 export default function CartPage() {
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50">
+      <SiteHeader />
       <Suspense
         fallback={
           <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 lg:py-10">

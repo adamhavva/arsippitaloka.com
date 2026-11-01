@@ -43,18 +43,24 @@ export default function EntityTable({
   const listFields = fields.filter((f) => f.list);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white">
-      <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="border-b border-neutral-200 bg-neutral-50 text-[11px] uppercase tracking-wide text-neutral-500 sm:text-xs">
-          <tr>
-            {listFields.map((f) => (
-              <th key={f.name} className="px-3 py-3 font-medium sm:px-4 sm:py-3">
-                {f.label}
-              </th>
-            ))}
-            <th className="px-3 py-3 font-medium sm:px-4 sm:py-3">Aksi</th>
-          </tr>
-        </thead>
+    <div>
+      {/* Di layar kecil tabel lebih lebar dari layar → digeser horizontal.
+          Petunjuk ini supaya pengguna tahu kolomnya ada di sebelah kanan. */}
+      <p className="mb-2 text-xs text-neutral-500 sm:hidden">
+        Geser tabel ke samping untuk melihat semua kolom.
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white">
+        <table className="w-full min-w-[640px] text-left text-sm">
+          <thead className="border-b border-neutral-200 bg-neutral-50 text-[11px] uppercase tracking-wide text-neutral-500 sm:text-xs">
+            <tr>
+              {listFields.map((f) => (
+                <th key={f.name} className="px-3 py-3 font-medium sm:px-4 sm:py-3">
+                  {f.label}
+                </th>
+              ))}
+              <th className="px-3 py-3 font-medium sm:px-4 sm:py-3">Aksi</th>
+            </tr>
+          </thead>
         <tbody>
           {rows.length === 0 ? (
             <tr>
@@ -90,6 +96,7 @@ export default function EntityTable({
           )}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

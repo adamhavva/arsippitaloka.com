@@ -95,18 +95,39 @@ export default function ProductCard({ book }: { book: MarketplaceBook }) {
 
         <div className="mt-auto pt-2">
           <p className="text-base font-bold text-maroon">
-            {formatIdr(book.priceUsd)}
+            {book.isFree ? "Gratis" : formatIdr(book.priceUsd)}
           </p>
           <p className="text-[11px] text-neutral-400">
             {book.language} · {book.pages} halaman
           </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          {/* Baris aksi: tinggi tombol seragam (h-9) dan selalu menempel di
+              dasar kartu, sehingga tombol antar-kartu pada satu baris grid
+              sejajar. Buku gratis memakai satu tombol penuh; buku berbayar
+              memakai ikon keranjang (label "Keranjang" tidak muat di kartu
+              2 kolom) + tombol "Beli". */}
+          <div className="mt-2 flex items-stretch gap-1.5">
             {book.isFree ? (
-              <FreeDownloadButton bookId={book.id} compact />
+              <FreeDownloadButton
+                bookId={book.id}
+                compact
+                wrapperClassName="min-w-0 flex-1"
+                className="w-full"
+              />
             ) : (
               <>
-                <AddToCartButton bookId={book.id} />
-                <BuyButton bookId={book.id} label="Beli" compact />
+                <AddToCartButton
+                  bookId={book.id}
+                  iconOnly
+                  wrapperClassName="shrink-0"
+                  className="w-9"
+                />
+                <BuyButton
+                  bookId={book.id}
+                  label="Beli"
+                  compact
+                  wrapperClassName="min-w-0 flex-1"
+                  className="w-full"
+                />
               </>
             )}
           </div>

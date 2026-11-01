@@ -137,7 +137,7 @@ export default async function CariContent({
                     <Link
                       key={category.slug}
                       href={`/buku/kategori/${category.slug}`}
-                      className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
+                      className="flex min-h-9 items-center rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-95 sm:min-h-10 sm:px-4 sm:py-2 sm:text-sm"
                     >
                       {category.name}
                     </Link>
@@ -156,7 +156,7 @@ export default async function CariContent({
                     <Link
                       key={tab.slug}
                       href={`/buku/${tab.slug}`}
-                      className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-95 sm:px-4 sm:py-2 sm:text-sm"
+                      className="flex min-h-9 items-center rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 transition hover:bg-neutral-50 active:scale-95 sm:min-h-10 sm:px-4 sm:py-2 sm:text-sm"
                     >
                       {tab.label}
                     </Link>

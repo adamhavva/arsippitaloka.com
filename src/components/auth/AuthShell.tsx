@@ -54,7 +54,12 @@ export default function AuthShell({
       >
         {topSlot}
         <div className="w-full max-w-md mx-auto sm:max-w-xl lg:max-w-none lg:max-w-[704px]">
-          <div style={{ marginTop: `min(${contentTop}px, 32vh)` }}>
+          {/* Offset vertikal mengikuti koordinat PDF di desktop; di mobile
+             koordinat itu terlalu jauh ke bawah, jadi dipakai jarak kecil saja. */}
+          <div
+            className="auth-content-offset"
+            style={{ "--auth-content-top": `${contentTop}px` } as React.CSSProperties}
+          >
             {children}
           </div>
         </div>

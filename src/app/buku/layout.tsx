@@ -1,6 +1,7 @@
 import PdfHero from "@/components/layout/PdfHero";
-import { SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
+import { SPLIT_NAVBAR_CROP_PT, SPLIT_NAV_ZONES } from "@/components/layout/split-nav";
 import Footer from "@/components/home/Footer";
+import SiteHeader from "@/components/layout/SiteHeader";
 
 /**
  * Layout area katalog `/buku/**`.
@@ -17,6 +18,7 @@ import Footer from "@/components/home/Footer";
 export default function BukuLayout({ children }: LayoutProps<"/buku">) {
   return (
     <>
+      <SiteHeader />
       <PdfHero
         src="/images/books-hero.jpg"
         alt="Katalog E-Books Pitaloka"
@@ -25,6 +27,7 @@ export default function BukuLayout({ children }: LayoutProps<"/buku">) {
         originY={0}
         zones={SPLIT_NAV_ZONES}
         priority
+        mobileCropPt={SPLIT_NAVBAR_CROP_PT}
       />
       {children}
       <Footer />

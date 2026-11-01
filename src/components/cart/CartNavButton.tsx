@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ShoppingCart } from "lucide-react";
 
 /**
  * Zona tautan transparan + badge jumlah yang menimpa ikon tas belanja yang
@@ -15,11 +16,16 @@ import Link from "next/link";
  *
  * Posisi diberikan lewat `style` (top/left/width/height persen) karena tiap
  * halaman memakai kanvas gambar yang berbeda.
+ *
+ * `variant="button"` dipakai untuk header mobile: tombol biasa (bukan
+ * overlay) dengan ikon tas belanja.
  */
 export default function CartNavButton({
   style,
+  variant = "overlay",
 }: {
   style?: React.CSSProperties;
+  variant?: "overlay" | "button";
 }) {
   const [count, setCount] = useState<number | null>(null);
 
@@ -47,18 +53,34 @@ export default function CartNavButton({
     };
   }, []);
 
+  const badge =
+    count && count > 0 ? (
+      <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-maroon px-1 text-[10px] font-semibold leading-none text-white shadow">
+        {count > 99 ? "99+" : count}
+      </span>
+    ) : null;
+
+  if (variant === "button") {
+    return (
+      <Link
+        href="/keranjang"
+        aria-label={count ? `Keranjang (${count})` : "Keranjang"}
+        className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 transition hover:bg-neutral-100"
+      >
+        <ShoppingCart size={20} />
+        {badge}
+      </Link>
+    );
+  }
+
   return (
     <Link
       href="/keranjang"
       aria-label={count ? `Keranjang (${count})` : "Keranjang"}
-      className="absolute z-10 block"
+      className="absolute z-10 hidden sm:block"
       style={style}
     >
-      {count && count > 0 ? (
-        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-maroon px-1 text-[10px] font-semibold leading-none text-white shadow">
-          {count > 99 ? "99+" : count}
-        </span>
-      ) : null}
+      {badge}
     </Link>
   );
 }

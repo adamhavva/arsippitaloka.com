@@ -20,7 +20,7 @@ export default function ArticleCard({ article }: { article: ArticleCardData }) {
   const href = `/artikel/${article.slug}`;
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:border-maroon/40 hover:shadow-sm">
+    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:border-maroon/40 hover:shadow-sm">
       <Link
         href={href}
         className="relative block aspect-[16/9] overflow-hidden bg-neutral-100"
@@ -63,7 +63,7 @@ export default function ArticleCard({ article }: { article: ArticleCardData }) {
 
         <Link
           href={href}
-          className="mt-auto pt-3 text-sm font-medium text-maroon hover:underline"
+          className="mt-auto flex h-9 items-center justify-center rounded-full border border-neutral-300 px-4 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 hover:text-maroon active:scale-95"
         >
           Baca selengkapnya →
         </Link>

@@ -48,11 +48,11 @@ export default function SortBar({
               })}
               title={option.label}
               aria-current={active ? "true" : undefined}
-              className={
+              className={`flex min-h-9 items-center ${
                 active
                   ? "font-semibold text-maroon underline decoration-maroon/40 underline-offset-4"
                   : "text-neutral-500 hover:text-maroon"
-              }
+              }`}
             >
               {SHORT_LABELS[option.value] ?? option.label}
             </Link>

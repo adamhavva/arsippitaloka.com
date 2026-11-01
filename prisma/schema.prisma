@@ -40,8 +40,60 @@ model User {
   lastLoginAt    DateTime?
   orders         Order[]
   cartItems      CartItem[]
+  resetTokens    PasswordResetToken[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+/// Pelanggan newsletter (e-mail yang mau menerima kabar terbaru).
+///
+/// Sumber langganan:
+/// "register" (langganan saat membuat akun), "footer" (form subscribe di
+/// footer), "newsletter" (halaman langganan), "manual" (ditambah admin).
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  source         String    @default("footer")
+  isActive       Boolean   @default(true)
+  unsubscribedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([isActive])
+}
+
+/// Catatan pengiriman newsletter — dipakai admin untuk melihat riwayat.
+model NewsletterCampaign {
+  id         String   @id @default(cuid())
+  subject    String
+  /// "content" (konten baru tayang) | "manual" (pengumuman dari admin)
+  kind       String   @default("content")
+  url        String?
+  recipients Int      @default(0)
+  sentAt     DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([sentAt])
+}
+
+/// Token OTP untuk reset password.
+///
+/// Kode OTP (6 angka) TIDAK disimpan apa adanya — yang disimpan hash-nya,
+/// supaya bocornya isi tabel tidak langsung berarti kode yang bisa dipakai.
+/// Berlaku 5 menit (aturasi dari pengaturan `auth.otp.expiryMinutes`).
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Order {

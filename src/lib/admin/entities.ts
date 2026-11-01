@@ -435,5 +435,6 @@ export const ADMIN_MENU: AdminMenuItem[] = [
     ],
   },
   { href: "/admin/users", label: "User", icon: "Users" },
+  { href: "/admin/newsletter", label: "Newsletter", icon: "Mail" },
   { href: "/admin/profile", label: "Profil Perusahaan", icon: "Settings" },
 ];

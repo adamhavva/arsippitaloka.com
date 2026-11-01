@@ -31,9 +31,10 @@ export default function TabCatalogPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <TabCatalogContent params={params} searchParams={searchParams} />
-    </Suspense>
+    <>      <Suspense fallback={<PageLoader />}>
+        <TabCatalogContent params={params} searchParams={searchParams} />
+      </Suspense>
+    </>
   );
 }
 

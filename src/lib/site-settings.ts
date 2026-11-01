@@ -15,7 +15,8 @@ export type SettingField = {
     | "secret"
     | "select"
     | "richtext"
-    | "image";
+    | "image"
+    | "number";
   group: string;
   help?: string;
   options?: string[];
@@ -116,6 +117,50 @@ export const SETTINGS_SCHEMA: SettingField[] = [
   { key: "contact.smtp.pass", label: "SMTP Password", type: "secret", group: "Kontak / SMTP", help: "Rahasia — disimpan di server saja." },
   { key: "contact.smtp.from", label: "Email pengirim (From)", type: "text", group: "Kontak / SMTP", help: "Kosongkan untuk memakai SMTP User." },
   { key: "contact.smtp.to", label: "Email tujuan (Inbox)", type: "text", group: "Kontak / SMTP", help: "Kosongkan untuk memakai Email perusahaan." },
+  {
+    key: "contact.smtp.servername",
+    label: "Nama domain sertifikat TLS",
+    type: "text",
+    group: "Kontak / SMTP",
+    help: "Wajib kalau SMTP Host diisi alamat IP — sertifikat dicek terhadap domain ini (mis. mail.arsipitaloka.id).",
+  },
+
+  {
+    key: "newsletter.enabled",
+    label: "Aktifkan newsletter",
+    type: "boolean",
+    group: "Newsletter",
+    help: "Kalau mati, form subscribe dan pengiriman kabarnya berhenti.",
+  },
+  {
+    key: "newsletter.fromName",
+    label: "Nama pengirim",
+    type: "text",
+    group: "Newsletter",
+    help: "Nama yang tampil di kotak masuk penerima.",
+  },
+  {
+    key: "newsletter.sendWelcome",
+    label: "Kirim email sambutan",
+    type: "boolean",
+    group: "Newsletter",
+    help: "Dikirim sekali saat pelanggan baru berlangganan.",
+  },
+
+  {
+    key: "auth.otp.expiryMinutes",
+    label: "Masa berlaku OTP (menit)",
+    type: "number",
+    group: "Autentikasi",
+    help: "Kode OTP reset password berhenti berlaku setelah jumlah ini.",
+  },
+  {
+    key: "auth.otp.maxAttempts",
+    label: "Batas percobaan OTP",
+    type: "number",
+    group: "Autentikasi",
+    help: "Kalau kode salah sebanyak ini, pengguna harus meminta kode baru.",
+  },
 
   { key: "tax.enabled", label: "Aktifkan pajak", type: "boolean", group: "Pajak" },
   { key: "tax.type", label: "Jenis pajak", type: "text", group: "Pajak", help: "percentage atau fixed" },
@@ -131,8 +176,28 @@ export const SETTING_GROUPS = [
   "Copy Landing Page",
   "Midtrans",
   "Kontak / SMTP",
+  "Newsletter",
+  "Autentikasi",
   "Pajak",
 ];
+
+/**
+ * Baca semua pengaturan situs tanpa cache.
+ *
+ * Dipakai oleh `getSettings()` (versi cache) dan oleh skrip Node yang
+ * berjalan di luar runtime Next — di sana `cacheTag()` tidak boleh dipanggil.
+ */
+export async function readSettings(): Promise<Record<string, string>> {
+  const rows = await prisma.siteSetting.findMany();
+  const merged: Record<string, string> = { ...DEFAULT_SETTINGS };
+
+  for (const row of rows) {
+    const value = row.value?.trim() ? row.value : DEFAULT_SETTINGS[row.key] ?? "";
+    merged[row.key] = value;
+  }
+
+  return merged;
+}
 
 /**
  * Baca semua pengaturan situs. Di-cache supaya landing page tidak query
@@ -143,13 +208,16 @@ export async function getSettings(): Promise<Record<string, string>> {
   "use cache";
   cacheTag("content");
 
-  const rows = await prisma.siteSetting.findMany();
-  const merged: Record<string, string> = { ...DEFAULT_SETTINGS };
+  return readSettings();
+}
 
-  for (const row of rows) {
-    const value = row.value?.trim() ? row.value : DEFAULT_SETTINGS[row.key] ?? "";
-    merged[row.key] = value;
+/**
+ * Pembacaan pengaturan yang aman dipakai di mana saja: di dalam runtime Next
+ * memakai versi cache, di luar itu (skrip Node) membaca langsung dari DB.
+ */
+export async function getSettingsSafe(): Promise<Record<string, string>> {
+  if (process.env.NEXT_RUNTIME) {
+    return getSettings();
   }
-
-  return merged;
+  return readSettings();
 }

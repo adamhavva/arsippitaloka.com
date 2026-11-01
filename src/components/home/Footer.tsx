@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cacheTag } from "next/cache";
 import SearchBar from "@/components/search/SearchBar";
+import NewsletterForm from "@/components/home/NewsletterForm";
 import { getSettings } from "@/lib/site-settings";
 import { getSiteTabs } from "@/lib/site-tabs";
 import { isDataUrl } from "@/lib/file-to-data-url";
@@ -38,19 +39,11 @@ export default async function Footer() {
             unoptimized={isDataUrl(settings["company.logoUrl"])}
             className="h-8 w-auto sm:h-9"
           />
-          <div className="flex overflow-hidden rounded-full bg-white p-1.5">
-            <input
-              type="email"
-              placeholder={settings["footer.subscribe.placeholder"]}
-              className="min-w-0 flex-1 bg-transparent px-4 py-2 text-sm text-black outline-none placeholder:text-neutral-400"
-            />
-            <button className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white sm:px-5">
-              {settings["footer.subscribe.button"]}
-            </button>
-          </div>
-          <p className="text-xs text-white/60 sm:text-sm max-w-xs">
-            {settings["footer.subscribe.text"]}
-          </p>
+          <NewsletterForm
+            placeholder={settings["footer.subscribe.placeholder"]}
+            buttonLabel={settings["footer.subscribe.button"]}
+            consentText={settings["footer.subscribe.text"]}
+          />
 
           {/* Pencarian global — submit diarahkan ke /cari?q=… */}
           <div className="w-full max-w-sm">

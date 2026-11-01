@@ -23,9 +23,12 @@ import { ShoppingCart } from "lucide-react";
 export default function CartNavButton({
   style,
   variant = "overlay",
+  className = "",
 }: {
   style?: React.CSSProperties;
   variant?: "overlay" | "button";
+  /** Kelas tambahan untuk varian `button` (ikon di navbar HTML). */
+  className?: string;
 }) {
   const [count, setCount] = useState<number | null>(null);
 
@@ -65,7 +68,7 @@ export default function CartNavButton({
       <Link
         href="/keranjang"
         aria-label={count ? `Keranjang (${count})` : "Keranjang"}
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-700 transition hover:bg-neutral-100"
+        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-neutral-100 ${className}`}
       >
         <ShoppingCart size={20} />
         {badge}

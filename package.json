@@ -17,6 +17,11 @@
     "test:pagination": "npx tsx scripts/test-pagination.mts",
     "db:fixture-buyer": "npx tsx scripts/buyer-library-fixture.ts",
     "db:check:midtrans": "npx tsx scripts/check-midtrans-settings.ts",
+    "db:check:smtp": "npx tsx scripts/check-smtp-settings.ts",
+    "smtp:probe": "node scripts/smtp-probe.mjs",
+    "db:backfill:newsletter": "npx tsx scripts/backfill-newsletter.ts",
+    "test:newsletter": "npx tsx scripts/newsletter-smoke.ts",
+    "test:otp": "npx tsx scripts/otp-flow-test.ts",
     "test:midtrans": "npx tsx scripts/midtrans-smoke.ts"
   },
   "dependencies": {

@@ -92,7 +92,7 @@ export default function SettingsForm({
                       <SecretInput name={field.key} defaultValue={value} />
                     ) : (
                       <input
-                        type="text"
+                        type={field.type === "number" ? "number" : "text"}
                         name={field.key}
                         defaultValue={value}
                         className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-maroon focus:outline-none"

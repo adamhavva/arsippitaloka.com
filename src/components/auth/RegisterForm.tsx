@@ -20,6 +20,7 @@ export default function RegisterForm() {
     const password = String(form.get("password") ?? "");
     const confirm = String(form.get("confirmPassword") ?? "");
     const accepted = form.get("terms") === "on";
+    const newsletter = form.get("newsletter") === "on";
 
     if (password.length < 8) {
       setError("Password minimal 8 karakter.");
@@ -39,7 +40,7 @@ export default function RegisterForm() {
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, newsletter }),
     });
 
     if (!response.ok) {
@@ -109,6 +110,14 @@ export default function RegisterForm() {
         <CheckBox
           label="I agree to all Terms & conditions and the privacy policy."
           name="terms"
+        />
+      </div>
+
+      <div className="mt-[16px]">
+        <CheckBox
+          label="Subscribe to Pitaloka newsletter for new books, news &amp; documentation."
+          name="newsletter"
+          defaultChecked
         />
       </div>
 

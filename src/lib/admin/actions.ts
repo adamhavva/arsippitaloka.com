@@ -10,6 +10,10 @@ import { slugify } from "@/lib/slug";
 import { parseTikTok } from "@/lib/tiktok";
 import { checkTikTokVideo } from "@/lib/tiktok-oembed";
 import { parseSocialRef, resolveThumbnailUrl } from "@/lib/social";
+import {
+  buildContentBroadcast,
+  broadcastToSubscribers,
+} from "@/lib/newsletter";
 import type { ActionState } from "./action-state";
 
 /**
@@ -237,11 +241,22 @@ export async function saveEntity(
   // Kolom wajib di DB tapi boleh dikosongkan di form → default 0.
   if (def.key === "book" && data.priceUsd === undefined) data.priceUsd = 0;
 
+  // Data sebelum disimpan — dipakai untuk menentukan apa yang berubah
+  // (mis. konten yang baru pertama kali tayang).
+  const before = id
+    ? ((await delegate.findUnique({ where: { id } })) as Record<string, unknown> | null)
+    : null;
+
+  let saved: Record<string, unknown> | null = null;
+
   try {
     if (id) {
-      await delegate.update({ where: { id }, data });
+      saved = (await delegate.update({ where: { id }, data })) as Record<
+        string,
+        unknown
+      >;
     } else {
-      await delegate.create({ data });
+      saved = (await delegate.create({ data })) as Record<string, unknown>;
     }
   } catch (error: any) {
     if (error?.code === "P2002") {
@@ -265,10 +280,86 @@ export async function saveEntity(
   revalidatePath("/akun");
   updateTag("content");
 
+  // Newsletter: kabari pelanggan lewat email begitu konten baru tayang atau
+  // isinya berubah. Kegagalan kirim tidak menggagalkan penyimpanan konten.
+  const newsletterNote = await maybeBroadcastNewsletter(
+    def.key,
+    before,
+    saved,
+  );
+
   return {
     ok: true,
-    message: `${def.label} berhasil disimpan.${tiktokWarning}`,
+    message: `${def.label} berhasil disimpan.${tiktokWarning}${newsletterNote}`,
   };
+}
+
+/**
+ * Kirim pengumuman newsletter untuk konten yang baru dibuat / berubah.
+ *
+ * Kirim kalau:
+ * - konten baru dibuat dan langsung tayang, atau
+ * - konten yang tadinya belum tayang sekarang tayang, atau
+ * - judul/ringkasan/isi konten berubah (buku, berita, dokumentasi).
+ */
+async function maybeBroadcastNewsletter(
+  key: string,
+  before: Record<string, unknown> | null,
+  saved: Record<string, unknown> | null,
+): Promise<string> {
+  if (!saved) return "";
+  if (!["book", "article", "documentation"].includes(key)) return "";
+
+  const record = saved as unknown as {
+    title?: string;
+    slug?: string;
+    excerpt?: string | null;
+    lead?: string | null;
+    description?: string | null;
+    coverUrl?: string | null;
+    photoUrl?: string | null;
+    published?: boolean;
+    type?: string | null;
+  };
+
+  if (!record.title || !record.slug) return "";
+  if (record.published === false) return "";
+
+  const previous = (before ?? {}) as Partial<typeof record>;
+
+  const changed =
+    !before ||
+    previous.title !== record.title ||
+    (previous.excerpt ?? null) !== (record.excerpt ?? null) ||
+    (previous.lead ?? null) !== (record.lead ?? null) ||
+    (previous.description ?? null) !== (record.description ?? null) ||
+    previous.published !== record.published;
+
+  if (!changed) return "";
+
+  const input = buildContentBroadcast(key, {
+    title: record.title,
+    slug: record.slug,
+    excerpt: record.excerpt ?? null,
+    lead: record.lead ?? null,
+    description: record.description ?? null,
+    coverUrl: record.coverUrl ?? null,
+    photoUrl: record.photoUrl ?? null,
+    published: record.published,
+    type: record.type ?? null,
+  });
+
+  if (!input) return "";
+
+  try {
+    const result = await broadcastToSubscribers(input);
+    if (!result.ok) return "";
+    if (result.total === 0) return "";
+    return ` Newsletter: ${result.message}`;
+  } catch (error) {
+    console.error("Gagal mengirim newsletter", error);
+    return "";
+  }
 }
 
 /**

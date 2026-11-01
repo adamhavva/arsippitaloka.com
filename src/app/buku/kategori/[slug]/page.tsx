@@ -34,9 +34,10 @@ export default function CategoryCatalogPage({
   searchParams: Promise<{ page?: string; per?: string }>;
 }) {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <CategoryCatalogContent params={params} searchParams={searchParams} />
-    </Suspense>
+    <>      <Suspense fallback={<PageLoader />}>
+        <CategoryCatalogContent params={params} searchParams={searchParams} />
+      </Suspense>
+    </>
   );
 }
 

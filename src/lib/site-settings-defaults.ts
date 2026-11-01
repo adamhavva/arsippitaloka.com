@@ -90,6 +90,17 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   "contact.smtp.pass": "",
   "contact.smtp.from": "",
   "contact.smtp.to": "",
+  "contact.smtp.servername": "",
+
+  // Newsletter (kabar baru ke pelanggan yang berlangganan)
+  "newsletter.enabled": "true",
+  "newsletter.fromName": "Arsip Pitaloka",
+  "newsletter.sendWelcome": "true",
+
+  // Autentikasi
+  // Masa berlaku OTP reset password (menit).
+  "auth.otp.expiryMinutes": "5",
+  "auth.otp.maxAttempts": "5",
 
   // Pajak
   "tax.enabled": "false",

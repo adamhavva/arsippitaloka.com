@@ -1,11 +1,11 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Star, BookOpen, Download } from "lucide-react";
 import { auth } from "@/auth";
 import { canAccessBook } from "@/lib/library";
 import { getSettings } from "@/lib/site-settings";
 import { getMidtransConfig, isMidtransConfigured } from "@/lib/midtrans";
 import BuyButton from "@/components/books/BuyButton";
+import FreeDownloadButton from "@/components/books/FreeDownloadButton";
 import { getBookRelations } from "@/lib/relations";
 import RelatedSocialMedia from "@/components/relations/RelatedSocialMedia";
 import ShareButtons from "@/components/books/ShareButtons";
@@ -76,23 +76,9 @@ export default async function BookDetailView({
   const sumCls = "cursor-pointer py-3 text-sm font-semibold text-black";
 
   return (
-    <div className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 md:py-10">
+    <div className="mx-auto min-h-screen max-w-3xl px-4 py-8 sm:px-6 md:py-10">
 
-      <div className="mt-6 grid gap-6 md:grid-cols-[2fr_3fr]">
-        <div className="w-full max-w-sm mx-auto md:max-w-none">
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-[#3d2b2e]">
-            {book.coverUrl ? (
-              <Image
-                src={book.coverUrl}
-                alt={book.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 40vw"
-                className="object-cover"
-              />
-            ) : null}
-          </div>
-        </div>
-
+      <div className="mt-6">
         <div>
           <div className="flex items-center gap-2 overflow-x-auto text-xs text-neutral-500 sm:text-sm">
           <Link href="/buku" className="shrink-0 hover:underline">
@@ -152,6 +138,8 @@ export default async function BookDetailView({
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {sudahPunya && book.fileUrl ? (
+              /* Buku sudah dimiliki (dibeli) ATAU buku gratis yang sudah
+                 diklaim & punya file → tombol Baca + Unduh, bukan "Beli". */
               <>
                 <a
                   href={`/api/read/${book.id}`}
@@ -176,13 +164,27 @@ export default async function BookDetailView({
                   Lihat di Pustaka Saya →
                 </Link>
               </>
+            ) : book.isFree ? (
+              /* Buku gratis (belum login / belum punya file) → tombol Download:
+                 klaim lewat /api/checkout lalu buka file. Bukan "Beli Sekarang". */
+              <div className="w-full space-y-2">
+                <FreeDownloadButton
+                  bookId={book.id}
+                  label="Download"
+                  wrapperClassName="w-full"
+                  className="w-full"
+                />
+                <p className="text-xs text-neutral-500">
+                  Gratis — setelah diklaim buku tersimpan di Pustaka Saya.
+                </p>
+              </div>
             ) : userId ? (
               midtransAktif ? (
                 <div className="w-full space-y-2">
                   <BuyButton
                     bookId={book.id}
                     loginUrl={`/login?callbackUrl=${bookPath}`}
-                    label={book.isFree ? "Ambil Gratis" : "Beli Sekarang"}
+                    label="Beli Sekarang"
                   />
                   <p className="text-xs text-neutral-500">
                     Pembayaran aman lewat Midtrans{" "}

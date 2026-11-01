@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { normalizeEmail, isValidEmail } from "@/lib/email";
+import { subscribeToNewsletter } from "@/lib/newsletter";
 
 /**
  * Registrasi — NextAuth tidak menyediakan provider "register",
@@ -9,7 +10,13 @@ import { normalizeEmail, isValidEmail } from "@/lib/email";
  * signIn("credentials", ...) untuk masuk.
  */
 export async function POST(req: Request) {
-  let body: { name?: string; email?: string; password?: string };
+  let body: {
+    name?: string;
+    email?: string;
+    password?: string;
+    /** Ikut berlangganan newsletter (default: ya). */
+    newsletter?: boolean;
+  };
   try {
     body = await req.json();
   } catch {
@@ -66,6 +73,20 @@ export async function POST(req: Request) {
       );
     }
     throw error;
+  }
+
+  // Langganan newsletter: ikutkan email baru ke daftar penerima kabarnya.
+  // Kegagalan di sini tidak boleh menggagalkan pendaftaran.
+  if (body.newsletter !== false) {
+    try {
+      await subscribeToNewsletter({
+        email,
+        name,
+        source: "register",
+      });
+    } catch (error) {
+      console.error("Gagal|langganan newsletter saat register", error);
+    }
   }
 
   return NextResponse.json({ ok: true });

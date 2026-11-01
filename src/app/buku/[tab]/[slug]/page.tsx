@@ -23,9 +23,13 @@ export default function BookDetailPage({
   params: Promise<{ tab: string; slug: string }>;
 }) {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <BookDetailContent params={params} />
-    </Suspense>
+    <>
+      {/* Halaman detail tidak memakai gambar hero — navbarnya HTML
+          (lihat `src/app/buku/layout.tsx`). */}
+      <Suspense fallback={<PageLoader />}>
+        <BookDetailContent params={params} />
+      </Suspense>
+    </>
   );
 }
 

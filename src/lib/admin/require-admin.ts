@@ -10,6 +10,21 @@ export type AdminUser = {
 };
 
 /**
+ * Hasil pemeriksaan akses area admin.
+ *
+ * - `admin`     → user ada di DB dan role-nya ADMIN.
+ * - `anonymous` → tidak ada sesi sama sekali.
+ * - `forbidden` → sesi ada, user ada, tapi role-nya bukan ADMIN.
+ * - `stale`     → sesi ada tapi user-nya sudah tidak ada di DB (mis. DB
+ *                 di-reset). JWT masih valid, jadi harus diminta login ulang.
+ */
+export type AdminAccess =
+  | { status: "admin"; admin: AdminUser }
+  | { status: "anonymous" }
+  | { status: "forbidden" }
+  | { status: "stale" };
+
+/**
  * Guard admin — lapisan kedua.
  *
  * `proxy.ts` menolak cepat berdasarkan isi JWT, tapi JWT session bisa basi
@@ -19,23 +34,38 @@ export type AdminUser = {
  * CATATAN: `auth()` membaca cookie, jadi fungsi ini **tidak boleh** dipanggil
  * dari dalam `"use cache"`. Panggil di luar cache boundary.
  */
-export async function requireAdmin(): Promise<AdminUser | null> {
+export async function resolveAdminAccess(): Promise<AdminAccess> {
   const session = await auth();
   const id = session?.user?.id;
-  if (!id) return null;
+  if (!id) return { status: "anonymous" };
 
   const user = await prisma.user.findUnique({
     where: { id },
     select: { id: true, name: true, email: true, image: true, role: true },
   });
 
-  if (user?.role !== "ADMIN") return null;
+  // Sesi menunjuk user yang sudah tidak ada (DB di-reset, user dihapus).
+  if (!user) return { status: "stale" };
+
+  if (user.role !== "ADMIN") return { status: "forbidden" };
 
   return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    image: user.image ?? null,
-    role: "ADMIN",
+    status: "admin",
+    admin: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image ?? null,
+      role: "ADMIN",
+    },
   };
+}
+
+/**
+ * Versi ringkas `resolveAdminAccess()` untuk tempat yang hanya butuh
+ * "boleh atau tidak" (seluruh halaman admin memakai ini).
+ */
+export async function requireAdmin(): Promise<AdminUser | null> {
+  const access = await resolveAdminAccess();
+  return access.status === "admin" ? access.admin : null;
 }

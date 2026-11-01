@@ -8,6 +8,17 @@ export const metadata = {
 };
 
 /**
+ * Sama seperti area admin: guard di dalam boundary ini melempar `redirect()`
+ * saat sesi tidak valid, dan lemparan itu dibaca Next.js sebagai "error" saat
+ * validasi "instant" (eksperimental) → muncul di console dev:
+ *   Route "/akun": Could not validate `instant` because the target segment
+ *   was prevented from rendering.
+ * Area pembeli juga sepenuhnya dinamis (butuh cookie), jadi validasinya
+ * tidak perlu dijalankan.
+ */
+export const instant = { unstable_disableValidation: true };
+
+/**
  * Sama seperti area admin: data dinamis (session) harus di dalam <Suspense>
  * supaya route tetap bisa di-prerender dengan cacheComponents.
  */

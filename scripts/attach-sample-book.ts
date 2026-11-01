@@ -1,5 +1,5 @@
 /**
- * Pasang file e-book contoh ke buku seed (seed-book-0) supaya fitur
+ * Pasang file e-book contoh ke buku seed (Panduan Arsip Digital) supaya fitur
  * unduh/baca di area pembeli bisa dicoba tanpa upload manual.
  *
  * File-nya: storage/private/2026/11/contoh-ebook.pdf (di luar public/, jadi
@@ -19,7 +19,7 @@ async function main() {
 
   const size = statSync(FILE).size;
   const book = await prisma.book.update({
-    where: { id: "seed-book-0" },
+    where: { id: "seed-book-panduan-arsip" },
     data: { fileUrl: "/files/2026/11/contoh-ebook.pdf", isDownloadable: true, fileSize: size },
     select: { id: true, title: true, fileUrl: true, fileSize: true },
   });

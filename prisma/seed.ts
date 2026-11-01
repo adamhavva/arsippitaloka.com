@@ -3,178 +3,358 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client";
 import { hashPassword } from "../src/lib/password";
 import { DEFAULT_SETTINGS } from "../src/lib/site-settings-defaults";
+import { CATEGORIES, BOOKS } from "./seed-content";
+import { ARTICLES } from "./seed-articles";
+import { YOUTUBE_VIDEOS, TIKTOK_VIDEOS } from "./seed-media";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
 
-const categories = [
-  { name: "E-Book", slug: "e-book", icon: "BookOpen", highlight: false, order: 1 },
-  { name: "Penulis", slug: "penulis", icon: "User", highlight: false, order: 2 },
-  { name: "Biografi", slug: "biografi", icon: "Monitor", highlight: false, order: 3 },
-  { name: "Blog", slug: "blog", icon: "Building2", highlight: false, order: 4 },
-  { name: "Social Media", slug: "social-media", icon: "Wifi", highlight: false, order: 5 },
-  { name: "#ViralForJustice", slug: "viral-for-justice", icon: "Flame", highlight: true, order: 6 },
-];
+/**
+ * Seed Arsip Pitaloka dengan konten NYATA.
+ *
+ * Isi database:
+ * - 6 kategori
+ * - 6 buku (5 karya nyata Rieke Diah Pitaloka + 1 panduan gratis)
+ * - 17 artikel (12 berita + 3 blog + 2 UMKM)
+ * - 12 video YouTube + 14 video TikTok (video publik yang sungguhan ada)
+ * - 12/baris TiktokPost untuk section #ViralForJustice
+ * - 4 entri dokumentasi
+ * - 5 user (1 admin + 4 pembeli) beserta order contoh
+ *
+ * Semua prosesnya idempotent (upsert dengan id deterministik), jadi seed
+ * bisa dijalankan berulang kali tanpa menggandakan data.
+ */
 
-const books = [
-  { id: "seed-book-0", slug: "bung-karno-aku-arek-suroboyo", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: "/images/book-cover-bungkarno.jpg", pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 0 },
-  { id: "seed-book-1", slug: "bung-karno-aku-arek-suroboyo-2", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 1 },
-  { id: "seed-book-2", slug: "bung-karno-aku-arek-suroboyo-3", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 2 },
-  { id: "seed-book-3", slug: "bung-karno-aku-arek-suroboyo-4", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: "/images/book-cover-bungkarno.jpg", pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 3 },
-  { id: "seed-book-4", slug: "bung-karno-aku-arek-suroboyo-5", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 4 },
-  { id: "seed-book-5", slug: "bung-karno-aku-arek-suroboyo-6", title: "Bung Karno Aku Arek Suroboyo", author: "Purnawan Barsundro", coverUrl: null, pages: 289, readCount: 100, rating: "4.5", priceUsd: "150000", isNew: true, order: 5 },
-  // Buku GRATIS — di kartu tampil tombol "Download" (bukan Beli/keranjang).
-  { id: "seed-book-free", slug: "panduan-arsip-digital-gratis", title: "Panduan Arsip Digital (Gratis)", author: "Tim Pitaloka", coverUrl: "/images/seed/ebook-gratis.jpg", pages: 24, readCount: 320, rating: "4.8", priceUsd: "0", isFree: true, isDownloadable: true, isNew: true, order: 6 },
-];
+/** Password akun seed pembeli. Admin memakai ADMIN_PASSWORD dari .env. */
+const SEED_USER_PASSWORD = process.env.SEED_USER_PASSWORD ?? "Pitaloka2026!";
 
-/** Artikel (Berita Terkini / Blog / UMKM) — bukan produk, bebas baca. */
-const articles = [
+/** Dokumentasi untuk gerakan #ViralForJustice. */
+const DOCUMENTATIONS = [
   {
-    id: "seed-art-berita-1",
-    slug: "pitaloka-dorong-transparansi-publik",
-    title: "Pitaloka Dorong Transparansi Informasi Publik",
-    type: "berita-terkini",
-    excerpt: "Gerakan arsip digital menuntut keterbukaan data demi keadilan.",
-    coverUrl: "/images/seed/berita-1.jpg",
-    order: 0,
+    slug: "kampanye-sahkan-ruu-perampasan-aset",
+    title: "Kampanye #SahkanRUUPerampasanAset",
+    lead:
+      "Paripurna DPR RI 27 Agustus 2026 menegaskan momentum penyelesaian RUU Perampasan Aset. 15 Desember 2026 harus jadi titik balik.",
+    photoUrl: "/images/seed/berita-6.jpg",
+    eventDate: "2026-08-27",
+    checklist: [
+      "Sahkan RUU Perampasan Aset",
+      "RUU yang kuat merampas, kuat melindungi",
+      "#ViralForJustice",
+    ],
   },
   {
-    id: "seed-art-berita-2",
-    slug: "diskusi-ruu-perlindungan-data",
-    title: "Diskusi Publik: RUU Perlindungan Data Pribadi",
-    type: "berita-terkini",
-    excerpt: "Catatan dari forum diskusi lintas komunitas sipil.",
-    coverUrl: "/images/seed/berita-2.jpg",
-    order: 1,
+    slug: "kampanye-jaminan-sosial-untuk-rakyat",
+    title: "Kampanye #JaminanSosialUntukRakyat",
+    lead:
+      "UU No. 24 Tahun 2011 tentang BPJS disahkan pada Paripurna DPR RI 2011. Rieke Diah Pitaloka dikenal sebagai inisiator UU BPJS.",
+    photoUrl: "/images/seed/berita-12.jpg",
+    eventDate: "2025-10-27",
+    checklist: [
+      "Jaminan sosial untuk rakyat",
+      "Tolak kenaikan iuran BPJS",
+      "#ViralForJustice",
+    ],
   },
   {
-    id: "seed-art-berita-3",
-    slug: "kolaborasi-literasi-digital-daerah",
-    title: "Kolaborasi Literasi Digital hingga ke Daerah",
-    type: "berita-terkini",
-    excerpt: "Program bersama komunitas untuk memperluas akses pengetahuan.",
-    coverUrl: "/images/seed/berita-3.jpg",
-    order: 2,
+    slug: "kampanye-stop-kekerasan-terhadap-perempuan-dan-anak",
+    title: "Kampanye #StopKekerasanTerhadapPerempuandanAnak",
+    lead:
+      "Penegakan hukum harus berpihak pada korban, tanpa memberi celah bagi pelaku untuk lolos.\n",
+    photoUrl: "/images/seed/berita-8.jpg",
+    eventDate: "2026-06-27",
+    checklist: [
+      "Stop kekerasan terhadap perempuan dan anak",
+      "Sanksi optimal",
+      "#ViralForJustice",
+    ],
   },
   {
-    id: "seed-art-blog-1",
-    slug: "cara-merawat-arsip-keluarga",
-    title: "Cara Merawat Arsip Keluarga agar Awet",
-    type: "blog",
-    excerpt: "Tips sederhana mendigitalkan dan menyimpan dokumen keluarga.",
-    coverUrl: "/images/seed/blog-1.jpg",
-    order: 0,
-  },
-  {
-    id: "seed-art-blog-2",
-    slug: "mengapa-arsip-itu-penting",
-    title: "Mengapa Arsip Itu Penting untuk Demokrasi",
-    type: "blog",
-    excerpt: "Arsip adalah ingatan kolektif — menjaga akuntabilitas publik.",
-    coverUrl: "/images/seed/blog-2.jpg",
-    order: 1,
-  },
-  {
-    id: "seed-art-umkm-1",
-    slug: "umkm-naik-kelas-lewat-digitalisasi",
-    title: "UMKM Naik Kelas Lewat Digitalisasi",
-    type: "umkm",
-    excerpt: "Kisah pelaku usaha kecil yang berkembang dengan arsip digital.",
-    coverUrl: "/images/seed/umkm-1.jpg",
-    order: 0,
-  },
-  {
-    id: "seed-art-umkm-2",
-    slug: "strategi-pemasaran-umkm-lokal",
-    title: "Strategi Pemasaran untuk UMKM Lokal",
-    type: "umkm",
-    excerpt: "Langkah praktis memasarkan produk UMKM ke pasar yang lebih luas.",
-    coverUrl: "/images/seed/umkm-2.jpg",
-    order: 1,
+    slug: "kampanye-save-dana-pensiun-pns-tni-polri",
+    title: "Kampanye #SaveDanaPensiunPNS",
+    lead:
+      "Rencana pengalihan pembayaran pensiun PNS, TNI, dan Polri oleh Dirjen Perbendaharaan Kemenkeu menjadi perhatian di Komisi XI DPR RI.",
+    photoUrl: "/images/seed/berita-9.jpg",
+    eventDate: "2025-02-07",
+    checklist: [
+      "Save Dana Pensiun PNS",
+      "Save Dana Pensiun TNI dan Polri",
+      "#ViralForJustice",
+    ],
   },
 ];
 
-const ARTICLE_BODY =
-  "<h2>Ringkasan</h2><p>Ini adalah artikel contoh untuk mengisi kanal konten Arsip Pitaloka. Isi sebenarnya bisa Anda ubah dari menu admin.</p><h3>Poin penting</h3><ul><li>Konten bebas baca, tanpa harga.</li><li>Mendukung heading, daftar, dan gambar.</li><li>Dikelola lewat editor seperti Microsoft Word.</li></ul><p>Terima kasih sudah membaca.</p>";
-
-const settings: Record<string, string> = {
-  ...DEFAULT_SETTINGS,
-  // Nilai ini sama dengan default; ditulis eksplisit agar mudah diubah.
-  "company.copyright": "@2026 Pitaloka. All Rights Reserved.",
+/** User seed — 1 admin (dari .env) + 4 pembeli. */
+type SeedUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "CUSTOMER";
 };
 
-// Tidak ada seed untuk TiktokPost: id video harus milik Pitaloka dan tidak
-// bisa dikarang. Admin menambahkan lewat /admin/tiktok (tempel share link),
-// lalu mencentang "Tayang" supaya videonya tampil di beranda.
+const USERS: SeedUser[] = [
+  {
+    id: "seed-user-rizky",
+    name: "Rizky Pratama",
+    email: "rizky.pratama@example.com",
+    role: "CUSTOMER",
+  },
+  {
+    id: "seed-user-siti",
+    name: "Siti Aminah",
+    email: "siti.aminah@example.com",
+    role: "CUSTOMER",
+  },
+  {
+    id: "seed-user-budi",
+    name: "Budi Santoso",
+    email: "budi.santoso@example.com",
+    role: "CUSTOMER",
+  },
+  {
+    id: "seed-user-dewi",
+    name: "Dewi Lestari",
+    email: "dewi.lestari@example.com",
+    role: "CUSTOMER",
+  },
+];
+
+/** Order contoh — supaya Pustaka Saya pembeli langsung terisi. */
+const ORDERS = [
+  {
+    id: "seed-order-rizky-1",
+    userId: "seed-user-rizky",
+    status: "PAID" as const,
+    deliveryMethod: "DOWNLOAD" as const,
+    bookIds: ["seed-book-renungan-kloset", "seed-book-ups"],
+  },
+  {
+    id: "seed-order-siti-1",
+    userId: "seed-user-siti",
+    status: "SHIPPED" as const,
+    deliveryMethod: "DOWNLOAD" as const,
+    bookIds: ["seed-book-kekerasan-negara"],
+  },
+  {
+    id: "seed-order-budi-1",
+    userId: "seed-user-budi",
+    status: "PENDING" as const,
+    deliveryMethod: "DOWNLOAD" as const,
+    bookIds: ["seed-book-banalitas-kekerasan"],
+  },
+  {
+    id: "seed-order-dewi-1",
+    userId: "seed-user-dewi",
+    status: "PAID" as const,
+    deliveryMethod: "DOWNLOAD" as const,
+    bookIds: ["seed-book-sumpah-saripah", "seed-book-panduan-arsip"],
+  },
+];
 
 async function main() {
-  for (const c of categories) {
-    await prisma.category.upsert({ where: { slug: c.slug }, update: c, create: c });
+  /* ---------------------------- Kategori ---------------------------- */
+  for (const c of CATEGORIES) {
+    await prisma.category.upsert({
+      where: { slug: c.slug },
+      update: c,
+      create: c,
+    });
   }
+  console.log(`Kategori: ${CATEGORIES.length}`);
 
-  // Buku seed ikut diberi kategori, kalau kategorinya belum diisi manual di
-  // admin. Tanpa ini, filter /buku/kategori/e-book tidak menampilkan apa pun.
+  /* ------------------------------ Buku ----------------------------- */
   const ebookCategory = await prisma.category.findUnique({
     where: { slug: "e-book" },
   });
   if (!ebookCategory) throw new Error("Category e-book tidak ditemukan");
 
-  // Upsert per buku — JANGAN deleteMany, karena OrderItem.book pakai onDelete: Restrict
-  for (const b of books) {
+  for (const b of BOOKS) {
     const { id, ...rest } = b;
     const current = await prisma.book.findUnique({
       where: { id },
       select: { categoryId: true },
     });
     const categoryId = current?.categoryId ?? ebookCategory.id;
-
     await prisma.book.upsert({
       where: { id },
-      update: { ...rest, categoryId, language: "Indonesia" },
-      create: { id, ...rest, categoryId, language: "Indonesia" },
+      update: { ...rest, categoryId, language: rest.language ?? "Indonesia" },
+      create: { id, ...rest, categoryId, language: rest.language ?? "Indonesia" },
     });
   }
+  console.log(`Buku: ${BOOKS.length}`);
 
-  // Artikel (berita/blog/umkm) — upsert idempoten dengan id deterministik.
-  for (const a of articles) {
+  /* ---------------------------- Artikel ---------------------------- */
+  for (const a of ARTICLES) {
     const { id, ...rest } = a;
-    const data = {
-      ...rest,
-      body: ARTICLE_BODY,
-      published: true,
-      publishedAt: new Date("2026-08-01"),
-    };
     await prisma.article.upsert({
       where: { id },
-      update: data,
-      create: { id, ...data },
+      update: { ...rest, published: true, publishedAt: new Date(rest.publishedAt) },
+      create: {
+        id,
+        ...rest,
+        published: true,
+        publishedAt: new Date(rest.publishedAt),
+      },
     });
   }
+  console.log(`Artikel: ${ARTICLES.length}`);
 
-  await prisma.documentation.deleteMany();
-  await prisma.documentation.create({
-    data: {
-      slug: "demo-ruu-perampasan-aset-demi-indonesia-maju",
-      title: "Demo RUU Perampasan Aset Demi Indonesia Maju",
-      lead: "Turun langsung ke gedung DPR/MPR RI Untuk Menemui para Demonstrasi. Jakarta, 27 Agustus 2026",
-      photoUrl: "/images/doc-demo-photo.jpg",
-      eventDate: new Date("2026-08-27"),
-      checklist: [
-        "Viral For Justice",
-        "Indonesia Bebas Korupsi",
-        "Sejahterakan Rakyat Indonesia",
-        "Bersatu Kita Bisa",
-      ],
-      published: true,
-    },
-  });
-
-  for (const [key, value] of Object.entries(settings)) {
-    await prisma.siteSetting.upsert({ where: { key }, update: {}, create: { key, value } });
+  /* --------------------- Media sosial (YouTube/TikTok) -------------- */
+  const media = [...YOUTUBE_VIDEOS, ...TIKTOK_VIDEOS];
+  for (const m of media) {
+    const { id, ...rest } = m;
+    await prisma.socialMedia.upsert({
+      where: { id },
+      update: { ...rest, published: true },
+      create: { id, ...rest, published: true },
+    });
   }
+  console.log(`SocialMedia: ${media.length}`);
 
+  /* --------------------------- TiktokPost -------------------------- */
+  // Baris TiktokPost dipakai section #ViralForJustice di beranda dan
+  // katalog /buku/kategori/viral-for-justice.
+  for (const t of TIKTOK_VIDEOS) {
+    await prisma.tiktokPost.upsert({
+      where: { videoId: t.videoId },
+      update: {
+        embedUrl: t.embedUrl,
+        title: t.title,
+        caption: t.caption,
+        author: t.author,
+        published: true,
+        order: t.order,
+      },
+      create: {
+        videoId: t.videoId,
+        embedUrl: t.embedUrl,
+        title: t.title,
+        caption: t.caption,
+        author: t.author,
+        published: true,
+        order: t.order,
+      },
+    });
+  }
+  console.log(`TiktokPost: ${TIKTOK_VIDEOS.length}`);
 
+  /* -------------------------- Dokumentasi --------------------------- */
+  for (const d of DOCUMENTATIONS) {
+    await prisma.documentation.upsert({
+      where: { slug: d.slug },
+      update: {
+        title: d.title,
+        lead: d.lead,
+        photoUrl: d.photoUrl,
+        eventDate: new Date(d.eventDate),
+        checklist: d.checklist,
+        published: true,
+      },
+      create: {
+        slug: d.slug,
+        title: d.title,
+        lead: d.lead,
+        photoUrl: d.photoUrl,
+        eventDate: new Date(d.eventDate),
+        checklist: d.checklist,
+        published: true,
+      },
+    });
+  }
+  console.log(`Documentation: ${DOCUMENTATIONS.length}`);
+
+  /* ------------------------------ User ----------------------------- */
+  const customerHash = await hashPassword(SEED_USER_PASSWORD);
+  for (const u of USERS) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: {
+        name: u.name,
+        role: u.role,
+        isActive: true,
+        failedAttempts: 0,
+        lockedUntil: null,
+        passwordHash: customerHash,
+      },
+      create: {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        isActive: true,
+        emailVerified: new Date(),
+        passwordHash: customerHash,
+      },
+    });
+  }
+  console.log(`User pembeli: ${USERS.length} (password: ${SEED_USER_PASSWORD})`);
+
+  /* ----------------------------- Order ----------------------------- */
+  const rate = 16000;
+  for (const o of ORDERS) {
+    const items = [];
+    let subtotal = 0;
+    for (const bookId of o.bookIds) {
+      const book = await prisma.book.findUnique({
+        where: { id: bookId },
+        select: { id: true, title: true, priceUsd: true },
+      });
+      if (!book) continue;
+      subtotal += Number(book.priceUsd);
+      items.push({
+        bookId: book.id,
+        title: book.title,
+        priceUsd: book.priceUsd,
+        qty: 1,
+      });
+    }
+    const tax = Math.round(subtotal * 0.11);
+    await prisma.order.upsert({
+      where: { id: o.id },
+      update: {
+        status: o.status,
+        deliveryMethod: o.deliveryMethod,
+        subtotal,
+        taxType: "PERCENTAGE",
+        taxAmount: tax,
+        total: subtotal + tax,
+        usdToIdrRate: rate,
+        paymentProvider: o.status === "PAID" || o.status === "SHIPPED" ? "manual" : null,
+        paymentMethod: o.status === "PAID" || o.status === "SHIPPED" ? "QRIS" : null,
+        paidAt: o.status === "PAID" || o.status === "SHIPPED" ? new Date() : null,
+      },
+      create: {
+        id: o.id,
+        userId: o.userId,
+        status: o.status,
+        deliveryMethod: o.deliveryMethod,
+        subtotal,
+        taxType: "PERCENTAGE",
+        taxAmount: tax,
+        total: subtotal + tax,
+        usdToIdrRate: rate,
+        paymentProvider: o.status === "PAID" || o.status === "SHIPPED" ? "manual" : null,
+        paymentMethod: o.status === "PAID" || o.status === "SHIPPED" ? "QRIS" : null,
+        paidAt: o.status === "PAID" || o.status === "SHIPPED" ? new Date() : null,
+        items: { create: items },
+      },
+    });
+  }
+  console.log(`Order: ${ORDERS.length}`);
+
+  /* ---------------------------- Pengaturan -------------------------- */
+  for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
+    await prisma.siteSetting.upsert({
+      where: { key },
+      update: {},
+      create: { key, value },
+    });
+  }
+  console.log(`SiteSetting: ${Object.keys(DEFAULT_SETTINGS).length}`);
+
+  /* ------------------------------ Admin ---------------------------- */
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (adminEmail && adminPassword) {
@@ -194,7 +374,9 @@ async function main() {
         emailVerified: new Date(),
       },
     });
-    console.log(`Admin dibuat: ${adminEmail}`);
+    console.log(`Admin: ${adminEmail}`);
+  } else {
+    console.warn("ADMIN_EMAIL/ADMIN_PASSWORD belum di .env — admin tidak dibuat.");
   }
 
   console.log("Seed selesai");

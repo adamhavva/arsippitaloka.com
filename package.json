@@ -8,6 +8,7 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:reset": "npx tsx scripts/reset-db.ts",
     "db:seed:admin": "npx tsx prisma/seed-admin.ts",
     "db:tag-categories": "npx tsx scripts/tag-book-categories.ts",
     "db:fixture:social": "npx tsx scripts/social-fixture.ts",
